@@ -1,6 +1,6 @@
 
 /**
-* @name routes/users/users.js
+* @name routes/trends/trends.js
 * @author Jaydipsinh Vaghela <jaydip.vaghela@gmail.com>
 *
 * @version 0.0.0
@@ -20,7 +20,7 @@
 
   /* GET API for ALL records from collection. */
   router.get('/', function(req, res, next) {
-    db['users'].find({}).toArray(function(err, data) {
+    db['philosophies'].find({}).toArray(function(err, data) {
       if(err){
           logger.log(err);
           res.status(501).send({"success":false, "message":err});
@@ -31,7 +31,7 @@
 
   /* GET API for selected record from collection. */
   router.get('/:id', function(req, res, next) {
-    db['users'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, data) {
+    db['philosophies'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, data) {
       if(err){
           logger.log(err);
           res.status(501).send({"success":false, "message":err});
@@ -40,12 +40,24 @@
     });
   });
 
+  /* POST API for insert record in collection. */
+  router.post('/', validate(schema), function(req, res, next) {
+    var post = req.body;
+    post["CreatedDate"] = new Date();
+    db['philosophies'].insert(post, function(err, d) {
+      if(err){
+          logger.log(err);
+          res.status(501).send({"success":false, "message":err});
+      }
+      res.status(201).send({"success":true, "message":d.insertedIds});
+    });
+  });
 
   /* PATCH API for update entity values. */
   router.patch('/:id', validate(softSchema) ,function(req, res, next) {
     var patch = req.body;
     patch["UpdatedDate"] = new Date();
-    db['users'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, data) {
+    db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, data) {
       if(err){
         logger.log(err);
         res.status(501).send({"success":false, "message":err});

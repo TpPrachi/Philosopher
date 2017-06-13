@@ -30,6 +30,7 @@
     "jwt-simple": "^0.5.1",
     "kerberos": "0.0.17",
     "lodash": "^4.0.0",
+    "logger": "0.0.1",
     "lz-string": "^1.4.4",
     "moment": "^2.13.0",
     "mongodb": "^2.0.53",

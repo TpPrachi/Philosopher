@@ -10,10 +10,12 @@ var _configure = function(app) {
   var sample = require('./sample');
   var trends = require('./trends');
   var users = require('./users');
+  var philosophies = require('./philosophies');
 
   app.use('/sample', sample);
   app.use('/trends', trends);
   app.use('/users', users);
+  app.use('/philosophies', philosophies);
 };
 
 module.exports = {
