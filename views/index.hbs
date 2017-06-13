@@ -1,0 +1,41 @@
+<h1>{{title}}</h1>
+<p>Welcome to {{title}}</p>
+
+
+
+
+<!--
+//Uncomment this line to enable websockets!!
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+
+    jQuery.ajax({
+        'type': 'POST',
+        'url': '/oauth/token',
+        'contentType': 'application/x-www-form-urlencoded',
+        'data': 'grant_type=password&client_id=toto&client_secret=sec&username=omtalsania7@gmail.com&password=cool-password',
+	'success': function(data){
+
+            /* This method is used to avoid sending token in connection string */
+            var socket = io();
+
+            //If something goes wrong
+            socket.on('error',function(data){
+               console.log(data);
+            });
+
+            //If user gets authenticated, handle here.
+            socket.on('authenticated', function () {
+                console.log('Its alive!');
+             });
+
+             //Send token once socket ready to connect
+             socket.on('connect',function(){
+                socket.emit('authenticate', {token: data.access_token});
+             });
+
+            }
+    });
+
+</script> -->

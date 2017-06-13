@@ -1,0 +1,4 @@
+{
+  "secret": "MagicOfMgicForLife",
+  "database": "mongodb://localhost/node-rest-auth"
+}
