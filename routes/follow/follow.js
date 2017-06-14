@@ -22,18 +22,27 @@
   /* POST API for insert record in collection. */
   router.post('/', function(req, res, next) {
     var post = req.body;
+    // convert user id with mongo ObjectID
+    if(!_.isUndefined(post.followingUser)) {
+      post['followingUser'] = db.ObjectID(post['followingUser']);
+    }
+    if(!_.isUndefined(post.followedUser)) {
+      post['followedUser'] = db.ObjectID(post['followedUser']);
+    }
+
     post["CreatedDate"] = new Date();
     db['follow'].insert(post, function(err, d) {
       if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-
+      // Prepare object for add data in notification table
       var prepareObject = {};
-      prepareObject["notifyTo"] = db.ObjectID(post['followedTo']);
-      prepareObject["notifyBy"] = db.ObjectID(post['following']);
+      prepareObject["notifyTo"] = post['followedUser'];
+      prepareObject["notifyBy"] = post['followingUser'];
       prepareObject["notifyType"] = "follow";
 
+      // send data 
       notify.addNotification(prepareObject).then(function(data){
         res.status(201).send({"success":true, "message":data});
       }, function(err) {
