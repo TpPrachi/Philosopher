@@ -21,7 +21,7 @@
   /* GET API for ALL records from collection. */
   router.get('/', function(req, res, next) {
     db['trends'].find({}).toArray(function(err, data) {
-      if(err){
+      if(err) {
           logger.log(err);
           res.status(501).send({"success":false, "message":err});
       }
