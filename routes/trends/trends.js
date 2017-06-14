@@ -14,7 +14,6 @@
   var validate = require('../../lib/validator');
   var schema = require('./schema');
   var softSchema = require('./softSchema');
-  var Joi = require('joi');
   var logger = require('../../lib/logger')
   var _ = require('lodash');
 
@@ -22,8 +21,8 @@
   router.get('/', function(req, res, next) {
     db['trends'].find({}).toArray(function(err, data) {
       if(err) {
-          logger.log(err);
-          res.status(501).send({"success":false, "message":err});
+        logger.log(err);
+        res.status(501).send({"success":false, "message":err});
       }
       res.status(200).json(data);
     });
@@ -33,8 +32,8 @@
   router.get('/:id', function(req, res, next) {
     db['trends'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, data) {
       if(err){
-          logger.log(err);
-          res.status(501).send({"success":false, "message":err});
+        logger.log(err);
+        res.status(501).send({"success":false, "message":err});
       }
       res.status(200).json(data);
     });
@@ -46,8 +45,8 @@
     post["CreatedDate"] = new Date();
     db['trends'].insert(post, function(err, d) {
       if(err){
-          logger.log(err);
-          res.status(501).send({"success":false, "message":err});
+        logger.log(err);
+        res.status(501).send({"success":false, "message":err});
       }
       res.status(201).send({"success":true, "message":d.insertedIds});
     });
@@ -64,9 +63,7 @@
       }
       res.status(200).send({"success":true, "message":data.value});
     });
-
   });
-
 
   module.exports = router;
 

@@ -10,7 +10,6 @@
   var express = require('express');
   var router = express.Router();
   var db = require('../../lib/db');
-  var q= require('q');
   var logger = require('../../lib/logger');
   var notify = require('../../lib/notification');
 
@@ -36,13 +35,14 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
+
       // Prepare object for add data in notification table
       var prepareObject = {};
       prepareObject["notifyTo"] = post['followedUser'];
       prepareObject["notifyBy"] = post['followingUser'];
       prepareObject["notifyType"] = "follow";
 
-      // send data 
+      // send data
       notify.addNotification(prepareObject).then(function(data){
         res.status(201).send({"success":true, "message":data});
       }, function(err) {
