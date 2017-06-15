@@ -57,3 +57,12 @@
 {"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T06:53:50.903Z"}
 {"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T06:53:56.455Z"}
 {"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T06:54:57.310Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:10:17.745Z"}
+{"level":"error","message":"Route not found :: /profiles/images/TP.png","timestamp":"2017-06-15T07:10:30.151Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:10:48.299Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:11:08.008Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:11:10.622Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:12:05.046Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:12:14.392Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:12:25.073Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:12:27.030Z"}

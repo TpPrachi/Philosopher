@@ -65,7 +65,7 @@ routes.configure(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  logger.error("Erro route not found...");
+  logger.error("Not Found. Accessing route - " + req.path);
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
@@ -86,6 +86,7 @@ if (app.get('env') === 'development') {
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
+  logger.error("Error found - " + err.message);
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,
