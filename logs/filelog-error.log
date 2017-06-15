@@ -42,3 +42,18 @@
 {"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-14T18:21:01.259Z"}
 {"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-14T18:21:28.713Z"}
 {"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-14T18:22:08.564Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T06:43:56.667Z"}
+{"level":"error","message":"No token provided.","timestamp":"2017-06-15T06:44:24.099Z"}
+{"level":"error","message":"No token provided.","timestamp":"2017-06-15T06:44:24.133Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T06:46:30.734Z"}
+{"level":"error","message":"Erro route not found...","timestamp":"2017-06-15T06:46:33.715Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T06:50:15.094Z"}
+{"level":"error","message":"No token provided.","timestamp":"2017-06-15T06:50:29.397Z"}
+{"level":"error","message":"No token provided.","timestamp":"2017-06-15T06:50:57.424Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T06:52:29.234Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T06:52:31.987Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T06:53:37.461Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T06:53:43.039Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T06:53:50.903Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T06:53:56.455Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T06:54:57.310Z"}
