@@ -18,6 +18,29 @@
   var logger = require('../../lib/logger')
   var _ = require('lodash');
 
+
+  // Create API for like, dislike, objections and comment update
+  // Create single api which return count of all 4 points - may be not needed
+  // Create api for getting list of all users who like (all 4) philosophies with username,user profile pic display link, user id
+  // How to manage multilevel commnets and there info to display users information
+
+
+  /* GET API for ALL records from collection. */
+  router.post('/comment', function(req, res, next) {
+    var post = req.body;
+    post['pId'] = db.ObjectID(post['pId']);
+    post['createDate'] = new Date();
+
+    db['comments'].insert(post, function(err, d) {
+      if(err){
+          logger.error(err);
+          res.status(501).send({"success":false, "message":err});
+      }
+      res.status(201).send({"success":true, "message":d.insertedIds});
+    });
+  });
+
+
   /* GET API for ALL records from collection. */
   router.get('/', function(req, res, next) {
     db['philosophies'].find({}).toArray(function(err, data) {
