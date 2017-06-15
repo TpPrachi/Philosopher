@@ -94,28 +94,70 @@
 
   });
 
-  router.patch('/:id/like' ,function(req, res, next) {
+  router.patch('/:id/:operation' ,function(req, res, next) {
     var patch = {};
-    // "like":{"count" : 1,"info":[{"_id":"593d28542ac0b627d117c792","date":"11-11-2017"}]}
-    var patchDate = req.body;
-    patchDate["date"] = new Date();
-    db['philosophies'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, data) {
+
+    //var getOnePhilosophy = db['philosophies'].findOne({_id: db.ObjectID(req.params.id)},{like:1});
+
+    //Single or multiple call with select query?
+
+    db['philosophies'].find({_id: db.ObjectID(req.params.id)},{like:1, objections:1, dislike:1}).toArray(function(err, data) {
       if(err){
-        logger.log(err);
+        logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      if (patchDate.like && patchDate.userId) {
-        data[0].like.count = data[0].like.count + patchDate.like;
-        data[0].like.info.push({
-          _id : patchDate.userId,
-          date : patchDate.date
-        });
-        patch = {
-          like:{
-            count : data[0].like.count,
-            info : data[0].like.info
+
+      if (req.params.operation == 1) {
+        //Like
+        var getUser = _.find(data[0].like.info, {_id:req.body.userId});
+        if (!getUser && req.body.userId) {
+          data[0].like.info.push({
+            _id : req.body.userId,
+            date : new Date()
+          });
+          patch = {
+            like:{
+              count : data[0].like.count + 1,
+              info : data[0].like.info
+            }
           }
         }
+      }else if (req.params.operation == 2) {
+        //Dislike
+        var getUser = _.find(data[0].dislike.info, {_id:req.body.userId});
+        if (!getUser && req.body.userId) {
+          data[0].dislike.info.push({
+            _id : req.body.userId,
+            date : new Date()
+          });
+          patch = {
+            dislike:{
+              count : data[0].dislike.count + 1,
+              info : data[0].dislike.info
+            }
+          }
+        }
+      }else if (req.params.operation == 3) {
+        //objections
+        var getUser = _.find(data[0].objections.info, {_id:req.body.userId});
+        if (!getUser && req.body.userId) {
+          data[0].objections.info.push({
+            _id : req.body.userId,
+            date : new Date()
+          });
+          patch = {
+            objections:{
+              count : data[0].objections.count + 1,
+              info : data[0].objections.info
+            }
+          }
+        }
+      }else {
+        logger.error('Something Wrong !!!');
+        res.status(501).send({"success":false, "message":'Something Wrong !!!'});
+      }
+
+      if (Object.keys(patch).length > 0) {
         db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, updatedData) {
           if(err){
             logger.error(err);
@@ -123,6 +165,9 @@
           }
           res.status(200).send({"success":true, "message":updatedData.value});
         });
+      }else {
+        logger.error('Something Wrong !!!');
+        res.status(501).send({"success":false, "message":'Something Wrong !!!'});
       }
     });
   });
