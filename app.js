@@ -10,9 +10,6 @@ var passport = require('passport');
 var db = require('./lib/db');
 var logger = require('./lib/logger');
 
-logger.info('Logger test with INFO.');
-logger.error('Logger test with ERROR.');
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');

@@ -66,3 +66,5 @@
 {"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:12:14.392Z"}
 {"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:12:25.073Z"}
 {"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:12:27.030Z"}
+{"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:13:03.762Z"}
+{"level":"error","message":"Not Found. Accessing route - /profiles/images/TP.png","timestamp":"2017-06-15T07:13:07.075Z"}
