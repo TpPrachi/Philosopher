@@ -9,12 +9,14 @@
 var _configure = function(app) {
   var sample = require('./sample');
   var trends = require('./trends');
+  var follow = require('./follow');
   var users = require('./users');
   var philosophies = require('./philosophies');
 
   app.use('/sample', sample);
   app.use('/trends', trends);
   app.use('/users', users);
+  app.use('/follow', follow);
   app.use('/philosophies', philosophies);
 };
 

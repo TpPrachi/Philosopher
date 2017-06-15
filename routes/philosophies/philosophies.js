@@ -24,7 +24,7 @@
   // Create api for getting list of all users who like (all 4) philosophies with username,user profile pic display link, user id
   // How to manage multilevel commnets and there info to display users information
 
-
+  // implement here for all possibilities with comment and likes 
   /* GET API for ALL records from collection. */
   router.post('/comment', function(req, res, next) {
     var post = req.body;

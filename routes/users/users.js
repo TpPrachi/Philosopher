@@ -17,7 +17,7 @@
   var Joi = require('joi');
   var logger = require('../../lib/logger')
   var _ = require('lodash');
-
+  var retrct = ["password","tempPassword"]
   /* GET API for ALL records from collection. */
   router.get('/', function(req, res, next) {
     db['users'].find({}).toArray(function(err, data) {
@@ -36,6 +36,12 @@
           logger.error(err);
           res.status(501).send({"success":false, "message":err});
       }
+
+      // code for retract password fields that does not need to send to client
+      _.forEach(retrct, function(value) {
+        delete data[0][value];
+      });
+
       res.status(200).json(data);
     });
   });

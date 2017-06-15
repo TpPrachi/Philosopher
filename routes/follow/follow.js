@@ -15,7 +15,13 @@
 
   /* GET API for ALL records from collection. */
   router.get('/', function(req, res, next) {
-
+    db['follow'].find({}).toArray(function(err, data) {
+      if(err) {
+        logger.log(err);
+        res.status(501).send({"success":false, "message":err});
+      }
+      res.status(200).json(data);
+    });
   });
 
   /* POST API for insert record in collection. */

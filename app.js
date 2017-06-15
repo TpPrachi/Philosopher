@@ -10,8 +10,8 @@ var db = require('./lib/db');
 var logger = require('./lib/logger');
 
 // view engine setup - currently we does not require view engine so we are not add in our express builder
-//app.set('views', path.join(__dirname, 'views'));
-//app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
