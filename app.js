@@ -1,7 +1,6 @@
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
-//var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var app = express();
@@ -10,24 +9,24 @@ var passport = require('passport');
 var db = require('./lib/db');
 var logger = require('./lib/logger');
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
+// view engine setup - currently we does not require view engine so we are not add in our express builder
+//app.set('views', path.join(__dirname, 'views'));
+//app.set('view engine', 'hbs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-//app.use(logger('dev'));
 app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({limit:'100mb', extended: true }));
 app.use(cookieParser());
 
+// initialize passport for authentication and route security
 app.use(passport.initialize());
-
 require('./lib/oauth')(passport);
 
 // configure only authorization routes for bypass authentication (login && signup)
 app.use('/', require('./lib/oauth/authorization'));
 
+// get jwt token from store collection based on authorization headers
 app.use('/', function(req, res, next) {
   if(req.headers.authorization) {
     db['tokenmapped'].findOne({uuid:req.headers.authorization}, function(err, user) {

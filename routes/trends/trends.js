@@ -3,7 +3,7 @@
 * @name routes/trends/trends.js
 * @author Jaydipsinh Vaghela <jaydip.vaghela@gmail.com>
 *
-* @version 0.0.0
+* @version 0.0.1
 */
 
 (function(){
@@ -31,7 +31,7 @@
   /* GET API for selected record from collection. */
   router.get('/:id', function(req, res, next) {
     db['trends'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, data) {
-      if(err){
+      if(err) {
         logger.log(err);
         res.status(501).send({"success":false, "message":err});
       }
@@ -44,7 +44,7 @@
     var post = req.body;
     post["CreatedDate"] = new Date();
     db['trends'].insert(post, function(err, d) {
-      if(err){
+      if(err) {
         logger.log(err);
         res.status(501).send({"success":false, "message":err});
       }
@@ -57,7 +57,7 @@
     var patch = req.body;
     patch["UpdatedDate"] = new Date();
     db['trends'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, data) {
-      if(err){
+      if(err) {
         logger.log(err);
         res.status(501).send({"success":false, "message":err});
       }

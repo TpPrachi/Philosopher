@@ -22,7 +22,7 @@
   router.get('/', function(req, res, next) {
     db['users'].find({}).toArray(function(err, data) {
       if(err){
-          logger.log(err);
+          logger.error(err);
           res.status(501).send({"success":false, "message":err});
       }
       res.status(200).json(data);
@@ -33,7 +33,7 @@
   router.get('/:id', function(req, res, next) {
     db['users'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, data) {
       if(err){
-          logger.log(err);
+          logger.error(err);
           res.status(501).send({"success":false, "message":err});
       }
       res.status(200).json(data);
@@ -47,7 +47,7 @@
     patch["UpdatedDate"] = new Date();
     db['users'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, data) {
       if(err){
-        logger.log(err);
+        logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
       res.status(200).send({"success":true, "message":data.value});
