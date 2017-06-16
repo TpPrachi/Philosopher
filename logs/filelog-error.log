@@ -68,3 +68,13 @@
 {"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:12:27.030Z"}
 {"level":"error","message":"Logger test with ERROR.","timestamp":"2017-06-15T07:13:03.762Z"}
 {"level":"error","message":"Not Found. Accessing route - /profiles/images/TP.png","timestamp":"2017-06-15T07:13:07.075Z"}
+{"level":"error","message":"Error found - No default engine was specified and no extension was provided.","timestamp":"2017-06-15T18:43:28.346Z"}
+{"level":"error","message":"Not Found. Accessing route - /users","timestamp":"2017-06-16T04:13:42.326Z"}
+{"level":"error","message":"Error found - No default engine was specified and no extension was provided.","timestamp":"2017-06-16T04:13:42.330Z"}
+{"level":"error","message":"Not Found. Accessing route - /users","timestamp":"2017-06-16T04:15:07.069Z"}
+{"level":"error","message":"Error found - No default engine was specified and no extension was provided.","timestamp":"2017-06-16T04:15:07.070Z"}
+{"level":"error","message":"Not Found. Accessing route - /users","timestamp":"2017-06-16T04:15:36.179Z"}
+{"level":"error","message":"Error found - No default engine was specified and no extension was provided.","timestamp":"2017-06-16T04:15:36.180Z"}
+{"level":"error","message":"Not Found. Accessing route - /users","timestamp":"2017-06-16T04:15:58.167Z"}
+{"level":"error","message":"Error found - No default engine was specified and no extension was provided.","timestamp":"2017-06-16T04:15:58.168Z"}
+{"level":"error","message":"Error found - No default engine was specified and no extension was provided.","timestamp":"2017-06-16T04:31:27.429Z"}

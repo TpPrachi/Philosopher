@@ -24,6 +24,10 @@
   // Create api for getting list of all users who like (all 4) philosophies with username,user profile pic display link, user id
   // How to manage multilevel commnets and there info to display users information
 
+  router.post('/like',function(req, res, next) {
+
+  });
+
 
   /* GET API for ALL records from collection. */
   router.post('/comment', function(req, res, next) {
@@ -56,7 +60,7 @@
   router.get('/:id', function(req, res, next) {
     db['philosophies'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, data) {
       if(err){
-          logger.log(err);
+          logger.error(err);
           res.status(501).send({"success":false, "message":err});
       }
       res.status(200).json(data);
@@ -69,7 +73,7 @@
     post["CreatedDate"] = new Date();
     db['philosophies'].insert(post, function(err, d) {
       if(err){
-          logger.log(err);
+          logger.error(err);
           res.status(501).send({"success":false, "message":err});
       }
       res.status(201).send({"success":true, "message":d.insertedIds});
@@ -82,12 +86,45 @@
     patch["UpdatedDate"] = new Date();
     db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, data) {
       if(err){
-        logger.log(err);
+        logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
       res.status(200).send({"success":true, "message":data.value});
     });
 
+  });
+
+  router.patch('/:id/like' ,function(req, res, next) {
+    var patch = {};
+    // "like":{"count" : 1,"info":[{"_id":"593d28542ac0b627d117c792","date":"11-11-2017"}]}
+    var patchDate = req.body;
+    patchDate["date"] = new Date();
+    db['philosophies'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, data) {
+      if(err){
+        logger.log(err);
+        res.status(501).send({"success":false, "message":err});
+      }
+      if (patchDate.like && patchDate.userId) {
+        data[0].like.count = data[0].like.count + patchDate.like;
+        data[0].like.info.push({
+          _id : patchDate.userId,
+          date : patchDate.date
+        });
+        patch = {
+          like:{
+            count : data[0].like.count,
+            info : data[0].like.info
+          }
+        }
+        db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, updatedData) {
+          if(err){
+            logger.error(err);
+            res.status(501).send({"success":false, "message":err});
+          }
+          res.status(200).send({"success":true, "message":updatedData.value});
+        });
+      }
+    });
   });
 
 

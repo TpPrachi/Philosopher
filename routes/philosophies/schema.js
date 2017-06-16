@@ -10,17 +10,44 @@ var object = types.object.bind(types);
 
 
 var schema = {
+  userId: rId.label('User Id'),
   philosophy: rExtraLargeString.label('Philosophy'),
   philosophyType: rString.label('Philosophy Type'),
-  trends: array(object({
-  _id: rId.label('Trend Id'),
-  trendName : rString.label('Trend Name'),
-  trendType : rString.label('Trend Type'),
-  totalCountOfTrend : rNumber.label('Total Count of Trend'),
-  isDeleted : bool.label('Is Deleted')
-  })).required().label('Questions array of object')
-  // pic reference array
-  // Video reference array
+  // trends: array().label('Questions array of object')
+  like:object({
+    count: rNumber.label('Like Count'),
+    info: array(object({
+      _id: rId.label('Id'),
+      date: date.label('Date')
+    }).label('Like Info'))
+  }).label('Like Details'),
+  dislike:object({
+    count: rNumber.label('Dislike Count'),
+    info: array(object({
+      _id: rId.label('Id'),
+      date: date.label('Date')
+    }).label('Dislike Info'))
+  }).label('Dislike Details'),
+  objections:object({
+    count: rNumber.label('Objection Count'),
+    info: array(object({
+      _id: rId.label('Id'),
+      date: date.label('Date')
+    }).label('Objectios Info'))
+  }).label('Objectios Details'),
+  commentCount: rNumber.label('Comment Count'),
+  isDeleted: bool.label('Is Deleted')
 }
 
 module.exports = schema;
+
+
+// comments
+//
+// comment
+// commentBy
+// philosophyId
+// isDeleted
+// llike
+// dislike
+// objections
