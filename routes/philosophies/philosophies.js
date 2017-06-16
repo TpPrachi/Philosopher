@@ -97,13 +97,19 @@
   router.patch('/:id/:operation' ,function(req, res, next) {
     var patch = {};
     //Single or multiple call with select query?
-    var select = {
-      like:!_.isUndefined(req.params.operation) && req.params.operation == 1 ? 1 : 0,
-      dislike:!_.isUndefined(req.params.operation) && req.params.operation == 2 ? 1 : 0,
-      objections:!_.isUndefined(req.params.operation) && req.params.operation == 3 ? 1 : 0
+    var select = {};
+
+    if(!_.isUndefined(req.params.operation) && req.params.operation == 1 ){
+      select['like'] = 1;
+    } else if(!_.isUndefined(req.params.operation) && req.params.operation == 2){
+      select['dislike'] = 1;
+    } else if(!_.isUndefined(req.params.operation) && req.params.operation == 3){
+      select['objections'] = 1;
     }
 
+    logger.info("select :: " + JSON.stringify(select));
     db['philosophies'].findOne({_id: db.ObjectID(req.params.id)}, select, function(err, data) {
+      logger.info("data" + JSON.stringify(data));
       if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
