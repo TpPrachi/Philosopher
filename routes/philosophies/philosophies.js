@@ -68,7 +68,7 @@
   });
 
   /* POST API for insert record in collection. */
-  router.post('/', validate(schema), function(req, res, next) {
+  router.post('/', function(req, res, next) {
     var post = req.body;
     post["CreatedDate"] = new Date();
     db['philosophies'].insert(post, function(err, d) {
@@ -107,7 +107,6 @@
       select['objections'] = 1;
     }
 
-    logger.info("select :: " + JSON.stringify(select));
     db['philosophies'].findOne({_id: db.ObjectID(req.params.id)}, select, function(err, data) {
       logger.info("data" + JSON.stringify(data));
       if(err) {
@@ -120,7 +119,7 @@
         var getUser = _.find(data.like.info, {_id:req.body.userId});
         if (!getUser && req.body.userId) {
           data.like.info.push({
-            _id : req.body.userId,
+            _id : req.body.UID,
             date : new Date()
           });
           patch = {
@@ -135,7 +134,7 @@
         var getUser = _.find(data.dislike.info, {_id:req.body.userId});
         if (!getUser && req.body.userId) {
           data.dislike.info.push({
-            _id : req.body.userId,
+            _id : req.body.UID,
             date : new Date()
           });
           patch = {
@@ -150,7 +149,7 @@
         var getUser = _.find(data.objections.info, {_id:req.body.userId});
         if (!getUser && req.body.userId) {
           data.objections.info.push({
-            _id : req.body.userId,
+            _id : req.body.UID,
             date : new Date()
           });
           patch = {

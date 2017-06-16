@@ -5,12 +5,13 @@ var rNumber =  types.rNumber;
 var date = types.date;
 var bool = types.bool;
 var rId = types.rId;
+var id = types.id;
 var rExtraLargeString = types.rExtraLargeString;
 var object = types.object.bind(types);
 
 
 var schema = {
-  userId: rId.label('User Id'),
+  userId: id.label('User Id'),
   philosophy: rExtraLargeString.label('Philosophy'),
   philosophyType: rString.label('Philosophy Type'),
   // trends: array().label('Questions array of object')

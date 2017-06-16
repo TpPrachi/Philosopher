@@ -10,8 +10,8 @@ var db = require('./lib/db');
 var logger = require('./lib/logger');
 
 // view engine setup - currently we does not require view engine so we are not add in our express builder
-//app.set('views', path.join(__dirname, 'views'));
-//app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -36,7 +36,7 @@ app.use('/', function(req, res, next) {
       }
       if(user) {
         req.headers.authorization = user.token;
-        req.body.userId = user._id;
+        req.body.UID = user._id;
       } else {
         logger.error('Invalid token provided.');
         return res.status(403).send({success: false, message: 'Invalid token provided.'});
