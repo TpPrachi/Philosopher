@@ -96,65 +96,67 @@
 
   router.patch('/:id/:operation' ,function(req, res, next) {
     var patch = {};
-
-    //var getOnePhilosophy = db['philosophies'].findOne({_id: db.ObjectID(req.params.id)},{like:1});
-
     //Single or multiple call with select query?
+    var select = {
+      like:!_.isUndefined(req.params.operation) && req.params.operation == 1 ? 1 : 0,
+      dislike:!_.isUndefined(req.params.operation) && req.params.operation == 2 ? 1 : 0,
+      objections:!_.isUndefined(req.params.operation) && req.params.operation == 3 ? 1 : 0
+    }
 
-    db['philosophies'].find({_id: db.ObjectID(req.params.id)},{like:1, objections:1, dislike:1}).toArray(function(err, data) {
-      if(err){
+    db['philosophies'].findOne({_id: db.ObjectID(req.params.id)}, select, function(err, data) {
+      if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
 
       if (req.params.operation == 1) {
         //Like
-        var getUser = _.find(data[0].like.info, {_id:req.body.userId});
+        var getUser = _.find(data.like.info, {_id:req.body.userId});
         if (!getUser && req.body.userId) {
-          data[0].like.info.push({
+          data.like.info.push({
             _id : req.body.userId,
             date : new Date()
           });
           patch = {
             like:{
-              count : data[0].like.count + 1,
-              info : data[0].like.info
+              count : data.like.count + 1,
+              info : data.like.info
             }
           }
         }
-      }else if (req.params.operation == 2) {
+      } else if (req.params.operation == 2) {
         //Dislike
-        var getUser = _.find(data[0].dislike.info, {_id:req.body.userId});
+        var getUser = _.find(data.dislike.info, {_id:req.body.userId});
         if (!getUser && req.body.userId) {
-          data[0].dislike.info.push({
+          data.dislike.info.push({
             _id : req.body.userId,
             date : new Date()
           });
           patch = {
             dislike:{
-              count : data[0].dislike.count + 1,
-              info : data[0].dislike.info
+              count : data.dislike.count + 1,
+              info : data.dislike.info
             }
           }
         }
-      }else if (req.params.operation == 3) {
+      } else if (req.params.operation == 3) {
         //objections
-        var getUser = _.find(data[0].objections.info, {_id:req.body.userId});
+        var getUser = _.find(data.objections.info, {_id:req.body.userId});
         if (!getUser && req.body.userId) {
-          data[0].objections.info.push({
+          data.objections.info.push({
             _id : req.body.userId,
             date : new Date()
           });
           patch = {
-            objections:{
-              count : data[0].objections.count + 1,
-              info : data[0].objections.info
+            objections: {
+              count : data.objections.count + 1,
+              info : data.objections.info
             }
           }
         }
-      }else {
-        logger.error('Something Wrong !!!');
-        res.status(501).send({"success":false, "message":'Something Wrong !!!'});
+      } else {
+        logger.error('Operation does not match');
+        res.status(501).send({"success":false, "message":'Operation does not match'});
       }
 
       if (Object.keys(patch).length > 0) {
@@ -165,7 +167,7 @@
           }
           res.status(200).send({"success":true, "message":updatedData.value});
         });
-      }else {
+      } else {
         logger.error('Something Wrong !!!');
         res.status(501).send({"success":false, "message":'Something Wrong !!!'});
       }
