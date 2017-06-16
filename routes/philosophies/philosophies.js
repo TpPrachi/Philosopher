@@ -123,10 +123,13 @@
             date : new Date()
           });
 
-          //data.like.count = data.like.count + 1; -- add this line
+          // Need to improve
+          // data.like.count = data.like.count + 1; -- add this line
           // and direct udpate data instaed of patch in update query
           // I think that's working fine, We does not require to create object of patch = {}
           // using this we get better response for post api
+          // May be {$set: patch} aa portion ma koi change aavse k aene proper data update karva mate object aapvu padse to aee  joiee lejo
+          
           patch = {
             like:{
               count : data.like.count + 1,
