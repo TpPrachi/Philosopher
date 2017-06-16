@@ -122,6 +122,11 @@
             _id : req.body.UID,
             date : new Date()
           });
+
+          //data.like.count = data.like.count + 1; -- add this line
+          // and direct udpate data instaed of patch in update query
+          // I think that's working fine, We does not require to create object of patch = {}
+          // using this we get better response for post api
           patch = {
             like:{
               count : data.like.count + 1,
