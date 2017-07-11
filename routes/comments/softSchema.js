@@ -1,54 +1,47 @@
 var types = require('../../lib/validator/types');
+var string = types.string;
 var rString =  types.rString;
-var array = types.array;
 var rNumber =  types.rNumber;
+var number = types.number;
+var id = types.id;
+var array = types.array;
 var date = types.date;
 var bool = types.bool;
 var rId = types.rId;
-var id = types.id;
 var rExtraLargeString = types.rExtraLargeString;
+var extraLargeString = types.extraLargeString;
 var object = types.object.bind(types);
 
 
 var schema = {
-  userId: id.label('User Id'),
-  philosophy: rExtraLargeString.label('Philosophy'),
-  philosophyType: rString.label('Philosophy Type'),
+  philosophy: extraLargeString.label('Philosophy'),
+  philosophyType: string.label('Philosophy Type'),
   // trends: array().label('Questions array of object')
   like:object({
-    count: rNumber.label('Like Count').default(0),
+    count: number.label('Like Count'),
     info: array(object({
-      _id: rId.label('Id'),
+      _id: id.label('User Id'),
       date: date.label('Date')
     }).label('Like Info'))
   }).label('Like Details'),
   dislike:object({
-    count: rNumber.label('Dislike Count').default(0),
+    count: number.label('Dislike Count'),
     info: array(object({
-      _id: rId.label('Id'),
+      _id: id.label('Id'),
       date: date.label('Date')
     }).label('Dislike Info'))
   }).label('Dislike Details'),
   objections:object({
-    count: rNumber.label('Objection Count').default(0),
+    count: number.label('Objection Count'),
     info: array(object({
-      _id: rId.label('Id'),
+      _id: id.label('Id'),
       date: date.label('Date')
     }).label('Objectios Info'))
   }).label('Objectios Details'),
-  commentCount: rNumber.label('Comment Count').default(0),
+  commentCount: number.label('Comment Count'),
   isDeleted: bool.label('Is Deleted')
 }
 
 module.exports = schema;
 
-
-// comments
-//
-// comment
-// commentBy
-// philosophyId
-// isDeleted
-// llike
-// dislike
-// objections
+module.exports = schema;
