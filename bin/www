@@ -36,12 +36,17 @@ server.on('listening', onListening);
 // Loading socket.io
 var io = socket.listen(server);
 // When a client connects, we note it in the console
-console.log('Testing...');
+
+
+
 io.sockets.on('connection', function (socket) {
+  console.log('Socket is Ready...');
     console.log('A client is connected!');
-    socket.emit('message', { message: 'welcome to the chat' });
-    socket.on('send', function (data) {
-        io.sockets.emit('message', data);
+    //socket.emit('message', { message: 'welcome to the chat' });
+    socket.emit('init', { message: 'welcome to the chat' });
+    socket.on('message', function (msg) {
+        console.log('Message Received: ', msg);
+        socket.broadcast.emit('message', msg);
     });
 });
 
