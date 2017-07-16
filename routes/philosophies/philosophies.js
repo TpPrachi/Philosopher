@@ -14,8 +14,10 @@
   var validate = require('../../lib/validator');
   var schema = require('./schema');
   var softSchema = require('./softSchema');
-  var logger = require('../../lib/logger')
+  var logger = require('../../lib/logger');
   var _ = require('lodash');
+  var query = require('../../lib/query');
+  var projections = require("../../lib/projections/philosophies");
 
 
   // Create single api which return count of all 4 points - may be not needed
@@ -23,8 +25,8 @@
   // How to manage multilevel commnets and there info to display users information
 
   /* GET API for ALL records from collection. */
-  router.get('/', function(req, res, next) {
-    db['philosophies'].find({}).toArray(function(err, philosophies) {
+  router.get('/', query.filter, function(req, res, next) {
+    db['philosophies'].find(req.filter, req.options.select || projections || {}, req.options).toArray(function(err, philosophies) {
       if(err) {
         logger.log(err);
         res.status(501).send({"success":false, "message":err});
@@ -103,58 +105,98 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-
-      if (req.params.operation == 1) { // For Like
-        //var getUser = _.find(philosophy.like.info, {_id:req.body.UID});
-        if (req.params.flag == 'true') {
-          philosophy.like.count = philosophy.like.count + 1;
-          philosophy.like.info.push({
-            _id : req.body.UID,
-            date : new Date()
-          });
-        } else {
-          var removeIds = _.remove(philosophy.like.info, {_id:req.body.UID});
-          philosophy.like.count = philosophy.like.count - removeIds.length;
-          philosophy.like.count = philosophy.like.count >= 0 ? philosophy.like.count : 0;
-        }
-      } else if (req.params.operation == 2) { // For Dislike
-        //var getUser = _.find(philosophy.dislike.info, {_id:req.body.UID});
-        if (req.params.flag == 'true') {
-          philosophy.dislike.count = philosophy.dislike.count + 1;
-          philosophy.dislike.info.push({
-            _id : req.body.UID,
-            date : new Date()
-          });
-        } else {
-          var removeIds = _.remove(philosophy.dislike.info, {_id:req.body.UID});
-          philosophy.dislike.count = philosophy.dislike.count - removeIds.length;
-          philosophy.dislike.count = philosophy.dislike.count >= 0 ? philosophy.dislike.count : 0;
-        }
-      } else if (req.params.operation == 3) { // For Objections
-        //var getUser = _.find(philosophy.objections.info, {_id:req.body.UID});
-        if (req.params.flag == 'true') {
-          philosophy.objections.count = philosophy.objections.count + 1;
-          philosophy.objections.info.push({
-            _id : req.body.UID,
-            date : new Date()
-          });
-        } else {
-          var removeIds = _.remove(philosophy.objections.info, {_id:req.body.UID});
-          philosophy.objections.count = philosophy.objections.count - removeIds.length;
-          philosophy.objections.count = philosophy.objections.count >= 0 ? philosophy.objections.count : 0;
-        }
+      if(_.isNull(philosophy)) {
+        res.status(501).send({"success":false, "message": "Please provide valid data for perform operation."});
       } else {
-        logger.error('Operation does not match');
-        res.status(501).send({"success":false, "message":'Operation does not match'});
+        if (req.params.operation == 1) { // For Like
+          if (req.params.flag == 'true') {
+            philosophy.like.count = philosophy.like.count + 1;
+            philosophy.like.info.push({
+              _id : req.body.UID,
+              date : new Date()
+            });
+          } else if (req.params.flag == 'false') {
+            var removeIds = _.remove(philosophy.like.info, {_id:req.body.UID});
+            philosophy.like.count = philosophy.like.count - removeIds.length >= 0 ? philosophy.like.count - removeIds.length : 0;
+          }
+        } else if (req.params.operation == 2) { // For Dislike
+          if (req.params.flag == 'true') {
+            philosophy.dislike.count = philosophy.dislike.count + 1;
+            philosophy.dislike.info.push({
+              _id : req.body.UID,
+              date : new Date()
+            });
+          } else {
+            var removeIds = _.remove(philosophy.dislike.info, {_id:req.body.UID});
+            philosophy.dislike.count = philosophy.dislike.count - removeIds.length >= 0 ? philosophy.dislike.count - removeIds.length : 0;
+          }
+        } else if (req.params.operation == 3) { // For Objections
+          if (req.params.flag == 'true') {
+            philosophy.objections.count = philosophy.objections.count + 1;
+            philosophy.objections.info.push({
+              _id : req.body.UID,
+              date : new Date()
+            });
+          } else {
+            var removeIds = _.remove(philosophy.objections.info, {_id:req.body.UID});
+            philosophy.objections.count = philosophy.objections.count - removeIds.length >= 0 ? philosophy.objections.count - removeIds.length : 0;
+          }
+        } else {
+          logger.error('Operation does not match');
+          res.status(501).send({"success":false, "message":'Operation does not match'});
+        }
+
+        db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: philosophy}, {returnOriginal: false}, function(err, updatedPhilosophy) {
+          if(err) {
+            logger.error(err);
+            res.status(501).send({"success":false, "message":err});
+          }
+          res.status(200).send({"success":true, "message":"Success"});
+        });
       }
 
-      db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: philosophy}, {returnOriginal: false}, function(err, updatedPhilosophy) {
-        if(err) {
-          logger.error(err);
-          res.status(501).send({"success":false, "message":err});
+    });
+  });
+
+  router.get('/:id/:operation/' ,function(req, res, next) {
+
+    var select = {};
+    // build select cluase for selected fields to send to response
+    if(!_.isUndefined(req.params.operation) && req.params.operation == 1 ){
+      select['like'] = 1;
+    } else if(!_.isUndefined(req.params.operation) && req.params.operation == 2){
+      select['dislike'] = 1;
+    } else if(!_.isUndefined(req.params.operation) && req.params.operation == 3){
+      select['objections'] = 1;
+    } else {
+      res.status(501).send({"success":false, "message": "Please provide valid data for information."});
+    }
+    select["users._id"] = 1;
+    select["users.fullname"] = 1;
+
+    // Build aggregate object for get users details based on operations with information
+    var aggregate = [{
+        "$match": { _id: db.ObjectID(req.params.id)}
+      },{
+        "$unwind": (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")))
+      },{
+        $lookup:{
+           from: "usersmapped",
+           localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
+           foreignField: "userId",
+           as: "users"
         }
-        res.status(200).send({"success":true, "message":updatedPhilosophy.value});
-      });
+      },{
+        $project: select
+      }
+    ];
+    //
+    db['philosophies'].aggregate(aggregate, function(err, information) {
+      if(err) {
+        logger.error(err);
+        res.status(501).send({"success":false, "message":err});
+      }
+      res.status(201).json(information);
     });
   });
 

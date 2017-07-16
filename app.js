@@ -19,14 +19,10 @@ app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({limit:'100mb', extended: true }));
 app.use(cookieParser());
 
-//by akashdeep.s@productivet.com
 app.use(function (req, res, next) {
-
-    
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Methods", "GET, POST, HEAD, OPTIONS, PUT, DELETE, PATCH");
-    //akashdeep.s - QC3-4428 - added role-schema-update to bypass at patch
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization,X-Authorization , If-Modified-Since, Cache-Control, Pragma, client-offset, x-content-type-options,x-frame-options,role-schema-update,If-Match,client-tz");
     next();
 });
@@ -75,9 +71,7 @@ routes.configure(app);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   logger.error("Not Found. Accessing route - " + req.path);
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+  res.status(404).send({"success": false, "message":"Not Found. Accessing route - " + req.path});
 });
 
 // development error handler
