@@ -1,4 +1,4 @@
 {
   "secret": "MagicOfMgicForLife",
-  "database": "mongodb://localhost:27017/phil"
+  "database": "mongodb://localhost:27017/philosophers"
 }

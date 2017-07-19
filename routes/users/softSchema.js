@@ -10,7 +10,7 @@ var bool = types.bool;
 var rId = types.rId;
 
 var schema = {
-  username: string.label('User Name').regex(/^[a-zA-Z0-9)\(._]+$/g),
+  username: string.label('User Name'),
   firstname: string.label('First Name'),
   lastname: string.label('Last Name'),
   email: string.label('Email').email(),
@@ -22,6 +22,7 @@ var schema = {
   langauge : string.label('Langauge'),
   isDeleted : bool.label('Is Deleted'),
   isEmailVerified : bool.label('Is Email Verified')
+  // .regex(/^[a-zA-Z0-9)\(._]+$/g),
   // password : ,
   // profilePicture : ,
   // profilePictureName : ,

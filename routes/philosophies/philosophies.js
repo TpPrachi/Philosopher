@@ -47,7 +47,7 @@
   });
 
   /* POST API for insert record in collection. */
-  router.post('/', function(req, res, next) {
+  router.post('/', validate(schema) , function(req, res, next) {
     var post = req.body;
     req.body["CreatedDate"] = new Date();
     req.body["UpdatedDate"] = new Date();

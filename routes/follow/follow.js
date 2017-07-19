@@ -12,6 +12,9 @@
   var db = require('../../lib/db');
   var logger = require('../../lib/logger');
   var notify = require('../../lib/notification');
+  var validate = require('../../lib/validator');
+  var schema = require('./schema');
+  var softSchema = require('./softSchema');
 
   /* GET API for ALL records from collection. */
   router.get('/', function(req, res, next) {
@@ -19,17 +22,21 @@
   });
 
   /* POST API for insert record in collection. */
-  router.post('/', function(req, res, next) {
+
+  //validate(schema) , No need to validate schema because we are passing data after calling post
+
+  router.post('/:id/:status', function(req, res, next) { // Need to validate schema
     var post = req.body;
     // convert user id with mongo ObjectID
+
     if(!_.isUndefined(post.followingUser)) {
-      post['followingUser'] = db.ObjectID(post['followingUser']);
+      post['followingUser'] = db.ObjectID(req.body.UID); // Need to convert into ObjectID
     }
     if(!_.isUndefined(post.followedUser)) {
       post['followedUser'] = db.ObjectID(post['followedUser']);
     }
 
-    post["CreatedDate"] = new Date();
+    post["createdDate"] = new Date();
     db['follow'].insert(post, function(err, d) {
       if(err) {
         logger.error(err);

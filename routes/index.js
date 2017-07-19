@@ -12,8 +12,10 @@ var _configure = function(app) {
   var users = require('./users');
   var philosophies = require('./philosophies');
   var comments = require('./comments');
+  var follow = require('./follow');
 
   app.use('/sample', sample);
+  app.use('/follow', follow);
   app.use('/trends', trends);
   app.use('/users', users);
   app.use('/philosophies', philosophies);
