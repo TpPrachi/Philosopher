@@ -15,6 +15,7 @@
   var validate = require('../../lib/validator');
   var schema = require('./schema');
   var softSchema = require('./softSchema');
+    var _ = require('lodash');
 
   /* GET API for ALL records from collection. */
   router.get('/', function(req, res, next) {
@@ -23,18 +24,20 @@
 
   /* POST API for insert record in collection. */
 
-  //validate(schema) , No need to validate schema because we are passing data after calling post
+  //validate(schema) , No need to validate schema because we are passing data after calling post - Prachi
 
   router.post('/:id/:status', function(req, res, next) { // Need to validate schema
-    var post = req.body;
+    var post = {};
     // convert user id with mongo ObjectID
 
-    if(!_.isUndefined(post.followingUser)) {
+    //if(!_.isUndefined(post.followingUser)) {
       post['followingUser'] = db.ObjectID(req.body.UID); // Need to convert into ObjectID
-    }
-    if(!_.isUndefined(post.followedUser)) {
-      post['followedUser'] = db.ObjectID(post['followedUser']);
-    }
+    //}
+  //  if(!_.isUndefined(post.followedUser)) {
+      post['followedUser'] = db.ObjectID(req.params.id);
+  //  }
+
+    console.log(post);
 
     post["createdDate"] = new Date();
     db['follow'].insert(post, function(err, d) {
@@ -45,8 +48,8 @@
 
       // Prepare object for add data in notification table
       var prepareObject = {};
-      prepareObject["notifyTo"] = post['followedUser'];
-      prepareObject["notifyBy"] = post['followingUser'];
+      prepareObject["notifyTo"] = post['followingUser'];
+      prepareObject["notifyBy"] = post['followedUser'];
       prepareObject["notifyType"] = "follow";
 
       // send data

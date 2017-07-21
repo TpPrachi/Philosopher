@@ -22,7 +22,7 @@
   router.get('/', query.filter, function(req, res, next) {
     var allUsers = [];
     //req.filter, req.options.select || projections || {}, req.options -- error
-    db['users'].find().toArray(function(err, data) {
+    db['users'].find(req.filter, req.options.select || {}, req.options).toArray(function(err, data) {
       // Remove password fields from return object
       _.forEach(data, function(user) {
         user = _.omit(user,'password','tempPassword');

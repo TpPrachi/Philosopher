@@ -131,6 +131,7 @@
     });
   });
 
+  // New route for get with paging and sorting
   module.exports = router;
 
 })();
