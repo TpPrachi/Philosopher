@@ -15,3 +15,11 @@
 {"level":"error","message":"Not Found. Accessing route - /follow/596f96fe0c79300e6b864f43/follow","timestamp":"2017-07-19T17:53:53.639Z"}
 {"level":"error","message":"Not Found. Accessing route - /follow/596f96fe0c79300e6b864f43","timestamp":"2017-07-19T17:54:18.834Z"}
 {"level":"error","message":"Not Found. Accessing route - /follow","timestamp":"2017-07-19T17:55:01.195Z"}
+{"level":"error","message":"Information that provided by you is not proper for notification.","timestamp":"2017-07-21T12:44:34.060Z"}
+{"level":"error","message":"Information that provided by you is not proper for notification.","timestamp":"2017-07-21T12:45:05.288Z"}
+{"level":"error","message":"Information that provided by you is not proper for notification.","timestamp":"2017-07-21T12:47:40.116Z"}
+{"level":"error","message":"Information that provided by you is not proper for notification.","timestamp":"2017-07-21T12:48:45.454Z"}
+{"level":"error","message":"Not Found. Accessing route - /follow//true","timestamp":"2017-07-21T12:55:19.730Z"}
+{"level":"error","message":"Email Id is already used","timestamp":"2017-07-22T20:02:58.578Z"}
+{"level":"error","message":"No token provided.","timestamp":"2017-07-22T20:09:00.800Z"}
+{"level":"error","message":"Not Found. Accessing route - /users","timestamp":"2017-07-22T20:09:15.410Z"}

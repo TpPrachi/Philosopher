@@ -21,31 +21,23 @@
   /* GET API for ALL records from collection. */
   router.get('/', query.filter, function(req, res, next) {
     var allUsers = [];
-    //req.filter, req.options.select || projections || {}, req.options -- error
-    db['users'].find().toArray(function(err, data) {
+    db['users'].find(req.filter, req.options.select || {password:0,tempPassword:0}, req.options).toArray(function(err, users) {
       if(err){
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      // Remove password fields from return object
-      _.forEach(data, function(user) {
-        user = _.omit(user,'password','tempPassword');
-        allUsers.push(user);
-      });
-      res.status(200).json(allUsers);
+      res.status(200).json(users);
     });
   });
 
   /* GET API for selected record from collection. */
   router.get('/:id', function(req, res, next) {
-    db['users'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, data) {
-      // Remove password fields from return object
-        data[0] = _.omit(data[0],'password','tempPassword');
+    db['users'].find({_id: db.ObjectID(req.params.id)},{password:0,tempPassword:0}).toArray(function(err, users) {
       if(err){
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).json(data);
+      res.status(200).json(users);
     });
   });
 
@@ -58,10 +50,10 @@
     var checkValidityForFullname = true;
     var checkValidityForEmail = true;
 
-    db['users'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, data) {
+    db['users'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, users) {
 
-      if (data && data[0] && data[0].fullname) {
-        if (patch && patch.fullname && patch.fullname ===  data[0].fullname) {
+      if (users && users[0] && users[0].fullname) {
+        if (patch && patch.fullname && patch.fullname ===  users[0].fullname) {
           checkValidityForFullname = false;
           res.status(501).send({"success":false, "message": "Patching the same fullname, Please provide valid data for perform operation."});
         }else {
@@ -69,8 +61,8 @@
         }
       }
 
-      if (data && data[0] && data[0].email) {
-        if (patch && patch.email && patch.email ===  data[0].email) {
+      if (users && users[0] && users[0].email) {
+        if (patch && patch.email && patch.email ===  users[0].email) {
           checkValidityForEmail = false;
           res.status(501).send({"success":false, "message": "Patching the same email, Please provide valid data for perform operation."});
         }else {
@@ -100,7 +92,7 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).json(data);
+      res.status(200).json(users);
     });
 
     // Need to change here
