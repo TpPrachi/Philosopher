@@ -30,15 +30,12 @@
     var post = {};
     //req.params.id : Whom I am going to follow (followedUser)
     //req.body.UID : Logged In user Id (followingUser)
-    db['follow'].find({}).toArray(function(err, followData) {
-      var getValidUser = _.find(followData,{'followedUser' : db.ObjectID(req.params.id)});
-      if (!getValidUser) {
-        //if(!_.isUndefined(post.followingUser)) {
-        post['followingUser'] = db.ObjectID(req.body.UID); // Need to convert into ObjectID
-        //}
-        //  if(!_.isUndefined(post.followedUser)) {
+    //25 July, 2017
+    db['follow'].find({followedUser:db.ObjectID(req.params.id),followingUser:db.ObjectID(req.body.UID)}).toArray(function(err, followData) {
+      if (followData.length == 0) {
+        post['followingUser'] = db.ObjectID(req.body.UID);
+
         post['followedUser'] = db.ObjectID(req.params.id);
-        //  }
 
         post["createdDate"] = new Date();
         db['follow'].insert(post, function(err, d) {

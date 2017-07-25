@@ -20,6 +20,7 @@
   /* GET API for ALL records from collection. */
   router.post('/:id', function(req, res, next) {
     var post = req.body;
+    //At the time of posting comment need to add philosophyId
     req.body['pId'] = db.ObjectID(req.params.id);
     req.body['userId'] = req.body.UID;
     req.body['createDate'] = new Date();
@@ -126,6 +127,54 @@
         }
         res.status(200).send({"success":true, "message":updatedcomment.value});
       });
+    });
+  });
+
+
+  //25 July, 2017
+  router.get('/:id/:operation/' ,function(req, res, next) {
+
+    var select = {};
+    // build select cluase for selected fields to send to response
+    if(!_.isUndefined(req.params.operation) && req.params.operation == 1 ){
+      select['like'] = 1;
+    } else if(!_.isUndefined(req.params.operation) && req.params.operation == 2){
+      select['dislike'] = 1;
+    } else if(!_.isUndefined(req.params.operation) && req.params.operation == 3){
+      select['objections'] = 1;
+    } else {
+      res.status(501).send({"success":false, "message": "Please provide valid data for information."});
+    }
+    select["users._id"] = 1;
+    select["users.fullname"] = 1;
+
+    // Build aggregate object for get users details based on operations with information
+    var aggregate = [{
+        "$match": { _id: db.ObjectID(req.params.id)}
+      },{
+        "$unwind": (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")))
+      },{
+        $lookup:{
+           from: "usersmapped",
+           localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
+           foreignField: "userId",
+           as: "users"
+        }
+      },{
+        $project: select
+      },{
+        $sort: {fullname : 1}
+        // $sort: 'fullname'
+        //$skip - $limit (Not able to decide) - Prachi
+      }
+    ];
+    //
+    db['comments'].aggregate(aggregate, function(err, information) {
+      if(err) {
+        logger.error(err);
+        res.status(501).send({"success":false, "message":err});
+      }
+      res.status(201).json(information);
     });
   });
 

@@ -13,6 +13,7 @@ var _configure = function(app) {
   var philosophies = require('./philosophies');
   var comments = require('./comments');
   var follow = require('./follow');
+  var reply = require('./reply');
 
   app.use('/sample', sample);
   app.use('/follow', follow);
@@ -20,6 +21,7 @@ var _configure = function(app) {
   app.use('/users', users);
   app.use('/philosophies', philosophies);
   app.use('/comments', comments);
+  app.use('/reply', reply);
 };
 
 module.exports = {

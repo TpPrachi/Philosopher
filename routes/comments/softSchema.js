@@ -14,9 +14,9 @@ var object = types.object.bind(types);
 
 
 var schema = {
-  philosophy: extraLargeString.label('Philosophy'),
-  philosophyType: string.label('Philosophy Type'),
-  // trends: array().label('Questions array of object')
+  userId: id.label('User Id'),
+  philosophyId: id.label('philosophy Id'),
+  commentId: id.label('Comment Id'),
   like:object({
     count: number.label('Like Count'),
     info: array(object({
