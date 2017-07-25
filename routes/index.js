@@ -14,7 +14,9 @@ var _configure = function(app) {
   var comments = require('./comments');
   var follow = require('./follow');
   var reply = require('./reply');
+  var upload = require('./upload');
 
+  app.use('/upload', upload);
   app.use('/sample', sample);
   app.use('/follow', follow);
   app.use('/trends', trends);
@@ -22,6 +24,7 @@ var _configure = function(app) {
   app.use('/philosophies', philosophies);
   app.use('/comments', comments);
   app.use('/reply', reply);
+
 };
 
 module.exports = {

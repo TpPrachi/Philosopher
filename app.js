@@ -8,6 +8,7 @@ var routes = require('./routes');
 var passport = require('passport');
 var db = require('./lib/db');
 var logger = require('./lib/logger');
+var busboy = require('connect-busboy');
 
 // view engine setup - currently we does not require view engine so we are not add in our express builder
 app.set('views', path.join(__dirname, 'views'));
@@ -67,6 +68,8 @@ require('./lib/authentication')(app, passport);
 
 // Configures all routes
 routes.configure(app);
+
+app.use(busboy());
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
