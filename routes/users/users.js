@@ -23,15 +23,15 @@
     var allUsers = [];
     //req.filter, req.options.select || projections || {}, req.options -- error
     db['users'].find().toArray(function(err, data) {
+      if(err){
+        logger.error(err);
+        res.status(501).send({"success":false, "message":err});
+      }
       // Remove password fields from return object
       _.forEach(data, function(user) {
         user = _.omit(user,'password','tempPassword');
         allUsers.push(user);
       });
-      if(err){
-        logger.error(err);
-        res.status(501).send({"success":false, "message":err});
-      }
       res.status(200).json(allUsers);
     });
   });

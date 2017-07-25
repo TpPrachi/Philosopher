@@ -59,6 +59,7 @@
   });
 
 
+
   router.patch('/:id/:operation/:flag' ,function(req, res, next) {
     //Single or multiple call with select query?
     var select = {};
@@ -78,7 +79,6 @@
       }
 
       if (req.params.operation == 1) { // For Like
-        //var getUser = _.find(comment.like.info, {_id:req.body.UID});
         if (req.params.flag == 'true') {
           comment.like.count = comment.like.count + 1;
           comment.like.info.push({
@@ -91,7 +91,6 @@
           comment.like.count = comment.like.count >= 0 ? comment.like.count : 0;
         }
       } else if (req.params.operation == 2) { // For Dislike
-        //var getUser = _.find(comment.dislike.info, {_id:req.body.UID});
         if (req.params.flag == 'true') {
           comment.dislike.count = comment.dislike.count + 1;
           comment.dislike.info.push({
@@ -104,7 +103,6 @@
           comment.dislike.count = comment.dislike.count >= 0 ? comment.dislike.count : 0;
         }
       } else if (req.params.operation == 3) { // For Objections
-        //var getUser = _.find(comment.objections.info, {_id:req.body.UID});
         if (req.params.flag == 'true') {
           comment.objections.count = comment.objections.count + 1;
           comment.objections.info.push({
