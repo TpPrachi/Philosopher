@@ -43,6 +43,7 @@ router.post('/', function(req, res, next) {
       .write(profilePhoto + '/' + filename);
     });
 
+
     file.pipe(fstream);
     fstream.on('close', function () {
       res.status(201).json({file: filename});
