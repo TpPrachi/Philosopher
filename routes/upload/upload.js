@@ -35,10 +35,6 @@ router.post('/', function(req, res, next) {
     //console.log(profilePhoto);
 
     var fstream = fs.createWriteStream(dir + '/' + filename);
-
-
-
-
     file.pipe(fstream);
     fstream.on('close', function () {
 
@@ -49,7 +45,7 @@ router.post('/', function(req, res, next) {
         .quality(50)
         .write(profilePhoto + '/' + filename);
       });
-      
+
       res.status(201).json({file: filename});
     });
   });
