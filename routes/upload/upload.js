@@ -22,7 +22,7 @@ router.post('/', function(req, res, next) {
     file.pipe(fstream);
 
     fstream.on('close', function () {
-      debug("Upload Finished of " + filename);
+      //debug("Upload Finished of " + filename);
       res.status(201).json({file: filename});
     });
   });
