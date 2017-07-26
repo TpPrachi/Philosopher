@@ -1,3 +1,4 @@
+(function(){
   'use strict'
 
 var express = require('express');
@@ -6,11 +7,14 @@ var fs = require('fs-extra');
 var logger = require('../../lib/logger');
 
 router.post('/', function(req, res, next) {
-  console.log('tet--------------------------------------------------------------------');
   req.pipe(req.busboy);
   req.busboy.on('file', function (fieldname, file, filename) {
+    console.log(file);
+    console.log(fieldname);
+    console.log(filename);
     logger.log("Uploading: " + filename);
     var filename = (new Date()).getTime() + '-' + filename;
+    console.log(filename);
     filename = decodeURI(filename);
     //Path where file will be uploaded
     var fstream = fs.createWriteStream(process.env.FILE_STORE + filename);
@@ -23,3 +27,7 @@ router.post('/', function(req, res, next) {
     });
   });
 });
+
+module.exports = router;
+
+})();
