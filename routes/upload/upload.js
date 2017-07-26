@@ -36,16 +36,20 @@ router.post('/', function(req, res, next) {
 
     var fstream = fs.createWriteStream(dir + '/' + filename);
 
-    Jimp.read(filename, function (err, file) {
-      if (err) throw err;
-      file.resize(256, 256)
-      .quality(50)
-      .write(profilePhoto + '/' + filename);
-    });
+
 
 
     file.pipe(fstream);
     fstream.on('close', function () {
+
+      Jimp.read(dir + '/' + filename, function (err, file) {
+        logger.log("err :: " + err)
+        if (err) throw err;
+        file.resize(256, 256)
+        .quality(50)
+        .write(profilePhoto + '/' + filename);
+      });
+      
       res.status(201).json({file: filename});
     });
   });
