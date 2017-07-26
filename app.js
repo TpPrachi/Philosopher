@@ -62,7 +62,8 @@ app.use('/', function(req, res, next) {
 
 // Route for accessing images and videos from public directive.
 // this route is secure with token validation, means if you have valid token then you can access files unser public directory
-app.use('/profile', express.static(path.join(__dirname, 'public')));
+//app.use('/profile', express.static(path.join(__dirname, 'public')));
+process.env.FILE_STORE = path.join(__dirname, (process.env.FILE_STORE || './public/images/profile'));
 
 // authenticate every request for valida token and valid authorization
 require('./lib/authentication')(app, passport);
