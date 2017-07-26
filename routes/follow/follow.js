@@ -34,10 +34,9 @@
     db['follow'].find({followedUser:db.ObjectID(req.params.id),followingUser:db.ObjectID(req.body.UID)}).toArray(function(err, followData) {
       if (followData.length == 0) {
         post['followingUser'] = db.ObjectID(req.body.UID);
-
         post['followedUser'] = db.ObjectID(req.params.id);
-
         post["createdDate"] = new Date();
+        
         db['follow'].insert(post, function(err, d) {
           if(err) {
             logger.error(err);

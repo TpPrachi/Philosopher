@@ -21,9 +21,9 @@
   router.post('/:philosophyId/:commentId', function(req, res, next) {
     var post = req.body;
     //At the time of posting reply of comment need reference of philosophyId
-    req.body['philosophyId'] = db.ObjectID(req.params.id);
+    req.body['philosophyId'] = db.ObjectID(req.params.philosophyId);
     //At the time of posting reply of comment need to add commentId
-    req.body['commentId'] = db.ObjectID(req.params.id);
+    req.body['commentId'] = db.ObjectID(req.params.commentId);
 
     req.body['userId'] = req.body.UID;
     req.body['createDate'] = new Date();

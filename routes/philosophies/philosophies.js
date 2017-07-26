@@ -18,7 +18,7 @@
   var _ = require('lodash');
   var query = require('../../lib/query');
   var projections = require("../../lib/projections/philosophies");
-
+  var util = require('./util');
 
   // Create single api which return count of all 4 points - may be not needed
   // Create api for getting list of all users who like (all 4) philosophies with username,user profile pic display link, user id
@@ -74,12 +74,11 @@
     });
   });
 
-  /* PATCH API for update entity values. */
+  /* PATCH API for update philosophy values. */
   router.patch('/:id', validate(softSchema) ,function(req, res, next) {
-    var patch = req.body;
-    patch["UpdatedDate"] = new Date();
-    db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, philosophy) {
-      if(err){
+    req.body["UpdatedDate"] = new Date();
+    db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: req.body}, {returnOriginal: false}, function(err, philosophy) {
+      if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
@@ -88,8 +87,19 @@
 
   });
 
+  // For remove philosophy as well as comment and reply associated with philosophy
+  router.delete('/:id' ,function(req, res, next) {
+    db['philosophies'].findOneAndDelete({_id : db.ObjectID(req.params.id)}, function(err, d){
+      if(err) {
+        logger.error(err);
+        res.status(501).send({"success":false, "message":err});
+      }
+      util.removeReference(req.params.id);
+      res.status(200).send({"success":true, "message":"Deleted successfully."});
+    });
+  });
+
   router.patch('/:id/:operation/:flag' ,function(req, res, next) {
-    //Single or multiple call with select query?
     var select = {};
 
     if(!_.isUndefined(req.params.operation) && req.params.operation == 1 ){

@@ -1,5 +1,5 @@
 # Logs
-logs/*.json
+logs/*
 
 # tmp
 tmp/*
@@ -7,7 +7,6 @@ tmp/*
 # typings
 typings/*
 
-*.log
 
 #VS2015
 *.njsproj
