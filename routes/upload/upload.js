@@ -16,7 +16,6 @@ router.post('/', function(req, res, next) {
     // if(ext === 'jpg' || ext === 'png' || ext === 'gif'){
     //
     // }
-
     var filename = (new Date()).getTime() + '-' + filename;
     filename = decodeURI(filename);
     //Path where file will be uploaded
@@ -25,15 +24,10 @@ router.post('/', function(req, res, next) {
     if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
     }
-
     var profilePhoto = dir + '/profilePhoto';
-
     if (!fs.existsSync(profilePhoto)){
       fs.mkdirSync(profilePhoto);
     }
-
-    //console.log(profilePhoto);
-
     var fstream = fs.createWriteStream(dir + '/' + filename);
     file.pipe(fstream);
     fstream.on('close', function () {
