@@ -65,11 +65,16 @@
       count:0,
       info:[],
     };
+
     db['philosophies'].insert(req.body, function(err, philosophy) {
       if(err){
           logger.error(err);
           res.status(501).send({"success":false, "message":err});
       }
+
+      // For finding trends in philosophy and insert into trens table as well as update count for trend.
+      util.trendMappingOnPost(req.body.philosophy, philosophy.insertedIds[0]);
+
       res.status(201).send({"success":true, "message":philosophy.insertedIds});
     });
   });
@@ -77,6 +82,10 @@
   /* PATCH API for update philosophy values. */
   router.patch('/:id', validate(softSchema) ,function(req, res, next) {
     req.body["UpdatedDate"] = new Date();
+
+    // For finding trends in philosophy and insert into trens table as well as update count for trend.
+    util.trendMappingOnPatch(req.body.philosophy, req.params.id);
+
     db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: req.body}, {returnOriginal: false}, function(err, philosophy) {
       if(err) {
         logger.error(err);

@@ -2,6 +2,7 @@ var types = require('../../lib/validator/types');
 var rString =  types.rString;
 var array = types.array;
 var rNumber =  types.rNumber;
+var number =  types.number;
 var date = types.date;
 var bool = types.bool;
 var rId = types.rId;
@@ -36,7 +37,7 @@ var schema = {
       date: date.label('Date')
     }).label('Objectios Info'))
   }).label('Objectios Details'),
-  commentCount: rNumber.label('Comment Count').default(0),
+  commentCount: number.label('Comment Count'),
   isDeleted: bool.label('Is Deleted')
 }
 
