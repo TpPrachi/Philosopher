@@ -33,7 +33,7 @@
   /* GET API for selected record from collection. */
   router.get('/:id', function(req, res, next) {
     db['users'].find({_id: db.ObjectID(req.params.id)},{password:0,tempPassword:0}).toArray(function(err, users) {
-      if(err){
+      if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }

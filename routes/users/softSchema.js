@@ -21,7 +21,8 @@ var schema = {
   location : string.label('Location'),
   langauge : string.label('Langauge'),
   isDeleted : bool.label('Is Deleted'),
-  isEmailVerified : bool.label('Is Email Verified')
+  isEmailVerified : bool.label('Is Email Verified'),
+  communityCount: number.label('community Count of User')
   // .regex(/^[a-zA-Z0-9)\(._]+$/g),
   // password : ,
   // profilePicture : ,
