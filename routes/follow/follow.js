@@ -19,12 +19,11 @@
 
   /* GET API for ALL records from collection. */
   router.get('/:id', function(req, res, next) {
-    // Build aggregate object for get users details based on operations with information
-    logger.info('Here for get following info');
+    // Build aggregate object for get users details based on following information
     var aggregate = [{
         "$match": { followingUser: db.ObjectID(req.params.id)}
       },{
-        $lookup:{
+        $lookup: {
            from: "usersmapped",
            localField: 'followedUser',
            foreignField: "userId",
@@ -32,8 +31,8 @@
         }
       },{
         $sort: {"users.fullname" : 1}
-        // $sort: 'fullname'
-        //$skip - $limit
+        //$skip
+        //$limit
       }
     ];
     //
@@ -99,19 +98,5 @@
     }
   });
 
-  /* PATCH API for update entity values. */
-  router.patch('/:id', function(req, res, next) {
-    var patch = req.body;
-    patch["UpdatedDate"] = new Date();
-    db['follow'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, d) {
-      if(err) {
-        res.status(501).send({"success":false, "message":err});
-      }
-      res.status(200).send({"success":true, "message":"Done"});
-    });
-
-  });
-
   module.exports = router;
-
 })();
