@@ -2,7 +2,8 @@
 var db = require('../../lib/db');
 var logger = require('../../lib/logger');
 var _ = require('lodash');
-// For remove philosophy reference after removing philosophy
+
+// For remove philosophy reference after removing philosophy from comment and reply
 var _removeReference = function(philosophyId) {
   db['comment'].remove({pId: db.ObjectID(philosophyId)});
   db['reply'].remove({philosophyId: db.ObjectID(philosophyId)});
@@ -10,16 +11,16 @@ var _removeReference = function(philosophyId) {
 
 var insertOrUpdateTrend = function(trend) {
   // Find with trend name if find then update count else insert new trend in trend table
-  db['trends'].find({name:trend}).toArray(function(err, trend) {
+  db['trends'].find({name:trend}).toArray(function(err, trendArr) {
     if(err) {
       logger.error("Error while finding trend in _trendMappingOnPost :: " + err);
     }
 
-    if(trend.length > 0) { // if count is greater that 1 then go for increment count;
-      trend[0].count = trend[0].count + 1;
-      db['trends'].update({_id:trend[0]._id}, trend[0]);
+    if(trendArr.length > 0) { // if count is greater that 1 then go for increment count;
+      trendArr[0].count = trendArr[0].count + 1; //
+      db['trends'].findOneAndUpdate({_id: trendArr[0]._id}, {$inc: { count: 1}});
     } else { // else insert new trend in table
-      db['trends'].insert({name:trend,count:1});
+      db['trends'].insert({name: trend, count: 1});
     }
   });
 };
@@ -54,7 +55,6 @@ var _trendMappingOnPatch = function(philosophy, philosophyId) {
       }
 
       if(!_.isUndefined(philosophyTrend.trends) && _.size(philosophyTrend.trends) > 0) {
-
         // split philosophy by # and loop through for inserting into trend table
         var trends = [];
         _.forEach(philosophy.split('#'), function(value, i) {
@@ -65,17 +65,19 @@ var _trendMappingOnPatch = function(philosophy, philosophyId) {
 
         _.forEach(_.difference(philosophyTrend.trends, trends), function(trend) {
             logger.info("Removed Trend :: " + trend);
-            // Need to decrement of count and also remove from tredns of philosophy
+            philosophyTrend.trends = _.without(philosophyTrend.trends, trend); // remove trend from philosophy
 
+            // Need to decrement of count and also remove from trends of philosophy
+            db['trends'].findOneAndUpdate({name:trend}, {$inc: { count: -1}});
         });
 
         _.forEach(_.difference(trends, philosophyTrend.trends), function(trend) {
             logger.info("New Added Trend :: " + trend);
-            // Add
+            philosophyTrend.trends.push(trend); // add new trend in philosophy
             insertOrUpdateTrend(trend);
         });
 
-
+        db['philosophies'].findOneAndUpdate({_id: db.ObjectID(philosophyId)}, {$set: {trends : philosophyTrend.trends}});
       } else {
         // Here if there is no trends in previous saved philosophy, So need to add all trends in collection
         trendMapping(philosophy, philosophyId);
