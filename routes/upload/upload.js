@@ -9,8 +9,9 @@ var Jimp = require('jimp')
 
 router.post('/', function(req, res, next) {
   req.pipe(req.busboy);
+  var arr = [];
   req.busboy.on('file', function (fieldname, file, filename) {
-    logger.log("Uploading: " + filename);
+    logger.info("Uploading: " + filename);
     // var ext = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
     //
     // if(ext === 'jpg' || ext === 'png' || ext === 'gif'){
@@ -20,7 +21,7 @@ router.post('/', function(req, res, next) {
     filename = decodeURI(filename);
     //Path where file will be uploaded
     var dir = process.env.FILE_STORE + '/' + req.body.UID ;
-
+    arr.push(filename);
     if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
     }
@@ -39,9 +40,11 @@ router.post('/', function(req, res, next) {
         .quality(50)
         .write(profilePhoto + '/' + filename);
       });
-
-      res.status(201).json({file: filename});
     });
+  });
+
+  req.busboy.on('finish', function (fieldname, file, filename) {
+    res.status(201).json({file: arr});
   });
 });
 

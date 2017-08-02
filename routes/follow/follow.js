@@ -15,10 +15,11 @@
   var validate = require('../../lib/validator');
   var schema = require('./schema');
   var softSchema = require('./softSchema');
+  var query = require('../../lib/query');
   var _ = require('lodash');
 
   /* GET API for ALL records from collection. */
-  router.get('/:id', function(req, res, next) {
+  router.get('/:id', query.filter, function(req, res, next) {
     // Build aggregate object for get users details based on following information
     var aggregate = [{
         "$match": { followingUser: db.ObjectID(req.params.id)}
@@ -31,8 +32,10 @@
         }
       },{
         $sort: {"users.fullname" : 1}
-        //$skip
-        //$limit
+      }, {
+        $skip: req.options.skip
+      }, {
+        $limit: req.options.limit
       }
     ];
     //
@@ -46,7 +49,6 @@
   });
 
   /* POST API for insert record in collection. */
-
   //validate(schema) , No need to validate schema because we are passing data after calling post - Prachi
 
   router.post('/:id/:status', function(req, res, next) {
