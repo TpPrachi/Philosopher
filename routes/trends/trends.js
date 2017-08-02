@@ -14,11 +14,12 @@
   var validate = require('../../lib/validator');
   var schema = require('./schema');
   var softSchema = require('./softSchema');
+  var query = require('../../lib/query');
   var logger = require('../../lib/logger')
   var _ = require('lodash');
 
   /* GET API for ALL records from collection. */
-  router.get('/', function(req, res, next) {
+  router.get('/', query.filter, function(req, res, next) {
     db['trends'].find({}).toArray(function(err, data) {
       if(err) {
         logger.log(err);
@@ -29,13 +30,13 @@
   });
 
   /* GET API for selected record from collection. */
-  router.get('/:id', function(req, res, next) {
-    db['trends'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, data) {
+  router.get('/:id', query.filter, function(req, res, next) {
+    db['trends'].find({_id: db.ObjectID(req.params.id)}, req.options).toArray(function(err, data) {
       if(err) {
         logger.log(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).json(data);
+      res.status(201).json({"success":true, "data": data});
     });
   });
 
