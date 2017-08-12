@@ -5,7 +5,7 @@ var _ = require('lodash');
 
 // For remove philosophy reference after removing philosophy from comment and reply
 var _removeReference = function(philosophyId) {
-  db['comment'].remove({pId: db.ObjectID(philosophyId)});
+  //db['comment'].remove({pId: db.ObjectID(philosophyId)});
   db['reply'].remove({philosophyId: db.ObjectID(philosophyId)});
 };
 

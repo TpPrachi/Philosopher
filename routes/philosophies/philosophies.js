@@ -52,26 +52,25 @@
     req.body["CreatedDate"] = new Date();
     req.body["UpdatedDate"] = new Date();
     req.body["userId"] = req.body.UID;
-    req.body["commentCount"] = 0;
+    req.body["replyCount"] = 0;
     req.body['like'] = {
       count:0,
-      info:[],
+      info:[]
     };
     req.body['dislike'] = {
       count:0,
-      info:[],
+      info:[]
     };
     req.body['objections'] = {
       count:0,
-      info:[],
+      info:[]
     };
 
     db['philosophies'].insert(req.body, function(err, philosophy) {
       if(err){
-          logger.error(err);
-          res.status(501).send({"success":false, "message":err});
+        logger.error(err);
+        res.status(501).send({"success":false, "message":err});
       }
-
       // For finding trends in philosophy and insert into trens table as well as update count for trend.
       util.trendMappingOnPost(req.body.philosophy, philosophy.insertedIds[0]);
 
@@ -199,7 +198,7 @@
       },{
         "$unwind": (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")))
       },{
-        $lookup:{
+        $lookup: {
            from: "usersmapped",
            localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
            foreignField: "userId",
