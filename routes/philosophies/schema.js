@@ -15,7 +15,9 @@ var schema = {
   userId: id.label('User Id'),
   philosophy: rExtraLargeString.label('Philosophy'),
   philosophyType: rString.label('Philosophy Type'),
-  // trends: array().label('Questions array of object')
+  //trends: array.label('Trends array'),
+  //pollQuestions: array.label('Questions of poll'),
+  //pollLength: number.label('Number of days poll active'),
   like:object({
     count: rNumber.label('Like Count').default(0),
     info: array(object({

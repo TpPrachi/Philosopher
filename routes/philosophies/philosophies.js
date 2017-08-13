@@ -103,7 +103,7 @@
         res.status(501).send({"success":false, "message":err});
       }
       util.removeReference(req.params.id);
-      res.status(200).send({"success":true, "message":"Deleted successfully."});
+      res.status(200).send({"success":true, "message":"philosophy deleted successfully."});
     });
   });
 
@@ -127,13 +127,13 @@
         res.status(501).send({"success":false, "message": "Please provide valid data for perform operation."});
       } else {
         if (req.params.operation == 1) { // For Like
-          if (req.params.flag == 'true') {
+          if (req.params.flag == 'true') { // add into like info
             philosophy.like.count = philosophy.like.count + 1;
             philosophy.like.info.push({
               _id : req.body.UID,
               date : new Date()
             });
-          } else if (req.params.flag == 'false') {
+          } else if (req.params.flag == 'false') { // remove from like info
             var removeIds = _.remove(philosophy.like.info, {_id:req.body.UID});
             philosophy.like.count = philosophy.like.count - removeIds.length >= 0 ? philosophy.like.count - removeIds.length : 0;
           }
@@ -144,18 +144,18 @@
               _id : req.body.UID,
               date : new Date()
             });
-          } else {
+          } else if (req.params.flag == 'false')  { // remove from Dislike info
             var removeIds = _.remove(philosophy.dislike.info, {_id:req.body.UID});
             philosophy.dislike.count = philosophy.dislike.count - removeIds.length >= 0 ? philosophy.dislike.count - removeIds.length : 0;
           }
         } else if (req.params.operation == 3) { // For Objections
-          if (req.params.flag == 'true') {
+          if (req.params.flag == 'true') { // add into Objections info
             philosophy.objections.count = philosophy.objections.count + 1;
             philosophy.objections.info.push({
               _id : req.body.UID,
               date : new Date()
             });
-          } else {
+          } else if (req.params.flag == 'false') { // remove from Objections info
             var removeIds = _.remove(philosophy.objections.info, {_id:req.body.UID});
             philosophy.objections.count = philosophy.objections.count - removeIds.length >= 0 ? philosophy.objections.count - removeIds.length : 0;
           }
