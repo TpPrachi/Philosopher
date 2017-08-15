@@ -66,6 +66,15 @@
       info:[]
     };
 
+    // For handling poll question and answer in different collection
+    if(req.body['philosophyType'] == 'poll') {
+      req.body["pollCount"] = 0;
+      req.body["pollAnsCount"] = {};
+      _.forEach(Object.keys(req.body['pollQuestions']), function(key) {
+        req.body["pollAnsCount"][key] = 0;
+      });
+    }
+
     db['philosophies'].insert(req.body, function(err, philosophy) {
       if(err){
         logger.error(err);
@@ -73,6 +82,24 @@
       }
       // For finding trends in philosophy and insert into trens table as well as update count for trend.
       util.trendMappingOnPost(req.body.philosophy, philosophy.insertedIds[0]);
+
+      res.status(201).send({"success":true, "message":philosophy.insertedIds});
+    });
+  });
+
+  // PATCH for add poll answer and update poll actual counter based on information
+  router.patch('/poll/:philosophyId/:answer', function(req, res, next) {
+    req.body["CreatedDate"] = new Date();
+    req.body["UpdatedDate"] = new Date();
+    req.body["userId"] = req.body.UID;
+    req.body["philosophyId"] = db.ObjectID(req.params.philosophyId);
+    req.body["pollAnswer"] = req.params.answer;
+
+    db['polls'].insert(req.body, function(err, philosophy) {
+      if(err) {
+        logger.error(err);
+        res.status(501).send({"success":false, "message":err});
+      }
 
       res.status(201).send({"success":true, "message":philosophy.insertedIds});
     });

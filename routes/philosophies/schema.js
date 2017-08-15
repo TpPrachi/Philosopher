@@ -9,15 +9,17 @@ var rId = types.rId;
 var id = types.id;
 var rExtraLargeString = types.rExtraLargeString;
 var object = types.object.bind(types);
+var any = types.any;
 
 
 var schema = {
   userId: id.label('User Id'),
   philosophy: rExtraLargeString.label('Philosophy'),
   philosophyType: rString.label('Philosophy Type'),
-  //trends: array.label('Trends array'),
-  //pollQuestions: array.label('Questions of poll'),
-  //pollLength: number.label('Number of days poll active'),
+  trends: any.label('Trends array'),
+  pollQuestions: any.label('Questions of poll'),
+  pollCount: number.label("Total number of answer given of poll"),
+  pollLength: any.label('Number of days poll active'),
   like:object({
     count: rNumber.label('Like Count').default(0),
     info: array(object({

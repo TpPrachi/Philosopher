@@ -1,4 +1,11 @@
 {
   "secret": "MagicOfMgicForLife",
-  "database": "mongodb://localhost:27017/philosophers"
+  "database": "mongodb://localhost:27017/philosophers",
+  "mail" : {
+      "user" : "jaydip.vaghela@gmail.com",
+      "pass" : "Password@123",
+      "host" : "smtp.gmail.com",
+      "port" : "587",
+      "from" : "jaydip.vaghela@gmail.com"
+  }
 }
