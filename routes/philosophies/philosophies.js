@@ -87,21 +87,41 @@
     });
   });
 
-  // PATCH for add poll answer and update poll actual counter based on information
+  // PATCH for add poll answer into polls colection and update poll counter based on answer key and philosophyId procided in request params
   router.patch('/poll/:philosophyId/:answer', function(req, res, next) {
-    req.body["CreatedDate"] = new Date();
-    req.body["UpdatedDate"] = new Date();
-    req.body["userId"] = req.body.UID;
-    req.body["philosophyId"] = db.ObjectID(req.params.philosophyId);
-    req.body["pollAnswer"] = req.params.answer;
-
-    db['polls'].insert(req.body, function(err, philosophy) {
+    // Get philosophy based on philosophyId if find than go further else return invalid philosophyId with status 501
+    db['philosophies'].findOne({'_id': db.ObjectID(req.params.philosophyId)}, {pollAnsCount: 1}, function(err, philosophy){
       if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
+      if(_.isNull(philosophy)) {
+        logger.info("Please provide valid philosophy id.");
+        res.status(501).send({"success":false, "message":"Please provide valid philosophy id."});
+      }
 
-      res.status(201).send({"success":true, "message":philosophy.insertedIds});
+      // Here for check provided answer key is present or not. If not than return invalid answer key with 501 stauts code
+      if(!_.isNull(philosophy) && _.includes(Object.keys(philosophy.pollAnsCount), req.params.answer)) {
+        req.body["CreatedDate"] = new Date();
+        req.body["UpdatedDate"] = new Date();
+        req.body["userId"] = req.body.UID;
+        req.body["philosophyId"] = db.ObjectID(req.params.philosophyId);
+        req.body["pollAnswer"] = req.params.answer;
+
+        // Here for mapping users and philosophy detail with poll mapped table
+        db['polls'].insert(req.body, function(err, poll) {
+          if(err) {
+            logger.error(err);
+            res.status(501).send({"success":false, "message":err});
+          }
+          // Here for update poll answer count as well as individual question answer count for later use
+          db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.philosophyId)}, {$inc: { 'pollCount': 1, ["pollAnsCount." + req.params.answer] : 1}});
+          res.status(201).send({"success":true, "message":poll.insertedIds});
+        });
+      } else {
+        logger.info("Please provide valid answer key.");
+        res.status(501).send({"success":false, "message":"Please provide valid answer key."});
+      }
     });
   });
 
