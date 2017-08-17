@@ -7,7 +7,7 @@ var number =  types.number;
 var date = types.date;
 var bool = types.bool;
 
-var schema = {
+var userSignUp = {
   email: rString.label('Email').email(),
   fullname : rString.label('Full Name'),
   dateOfBirth : date.label('Date Of Birth'),
@@ -22,4 +22,12 @@ var schema = {
   communityCount: number.label('community Count of User')
 };
 
-module.exports = schema;
+var userChangePassword = {
+  password: rString.label('Password'),
+  newPassword: rString.label('New Password')
+};
+
+module.exports = {
+  userSignUp : userSignUp,
+  userChangePassword : userChangePassword
+};
