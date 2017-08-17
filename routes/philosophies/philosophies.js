@@ -76,7 +76,7 @@
     }
 
     db['philosophies'].insert(req.body, function(err, philosophy) {
-      if(err){
+      if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
@@ -96,12 +96,12 @@
         res.status(501).send({"success":false, "message":err});
       }
       if(_.isNull(philosophy)) {
-        logger.info("Please provide valid philosophy id.");
+        logger.error("Please provide valid philosophy id.");
         res.status(501).send({"success":false, "message":"Please provide valid philosophy id."});
       }
 
       // Here for check provided answer key is present or not. If not than return invalid answer key with 501 stauts code
-      if(!_.isNull(philosophy) && _.includes(Object.keys(philosophy.pollAnsCount), req.params.answer)) {
+      if(_.includes(Object.keys(philosophy ? philosophy.pollAnsCount : {}), req.params.answer)) {
         req.body["CreatedDate"] = new Date();
         req.body["UpdatedDate"] = new Date();
         req.body["userId"] = req.body.UID;
@@ -115,12 +115,14 @@
             res.status(501).send({"success":false, "message":err});
           }
           // Here for update poll answer count as well as individual question answer count for later use
-          db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.philosophyId)}, {$inc: { 'pollCount': 1, ["pollAnsCount." + req.params.answer] : 1}});
+          db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.philosophyId)}, {$set: {'UpdatedDate': new Date()}, $inc: { 'pollCount': 1, ["pollAnsCount." + req.params.answer] : 1}});
           res.status(201).send({"success":true, "message":poll.insertedIds});
         });
       } else {
-        logger.info("Please provide valid answer key.");
-        res.status(501).send({"success":false, "message":"Please provide valid answer key."});
+        if(!_.isNull(philosophy)) {
+          logger.error("Please provide valid answer key.");
+          res.status(501).send({"success":false, "message":"Please provide valid answer key."});
+        }
       }
     });
   });
@@ -131,7 +133,6 @@
 
     // For finding trends in philosophy and insert into trens table as well as update count for trend.
     util.trendMappingOnPatch(req.body.philosophy, req.params.id);
-
     db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: req.body}, {returnOriginal: false}, function(err, philosophy) {
       if(err) {
         logger.error(err);
@@ -211,6 +212,7 @@
           res.status(501).send({"success":false, "message":'Operation does not match'});
         }
 
+        philosophy["UpdatedDate"] = new Date();
         db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: philosophy}, {returnOriginal: false}, function(err, updatedPhilosophy) {
           if(err) {
             logger.error(err);

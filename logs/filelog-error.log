@@ -14,3 +14,8 @@
 {"level":"error","message":"Invalid token provided.","timestamp":"2017-08-15T07:49:14.230Z"}
 {"level":"error","message":"Not Found. Accessing route - /philosophies/poll/5992a82a03ba74435cba9f82/22","timestamp":"2017-08-16T00:02:25.882Z"}
 {"level":"error","message":"No token provided.","timestamp":"2017-08-16T07:35:56.041Z"}
+{"level":"error","message":"Please provide valid answer key.","timestamp":"2017-08-17T06:28:18.015Z"}
+{"level":"error","message":"Please provide valid answer key.","timestamp":"2017-08-17T06:28:19.429Z"}
+{"level":"error","message":"Please provide valid answer key.","timestamp":"2017-08-17T06:28:20.163Z"}
+{"level":"error","message":"Please provide valid answer key.","timestamp":"2017-08-17T06:28:20.673Z"}
+{"level":"error","message":"Please provide valid answer key.","timestamp":"2017-08-17T06:28:21.264Z"}

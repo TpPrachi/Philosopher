@@ -18,7 +18,7 @@ var insertOrUpdateTrend = function(trend) {
     }
 
     if(trendArr.length > 0) { // if count is greater that 1 then go for increment count;
-      trendArr[0].count = trendArr[0].count + 1; //
+      trendArr[0].count = trendArr[0].count + 1;
       db['trends'].findOneAndUpdate({_id: trendArr[0]._id}, {$inc: { count: 1}});
     } else { // else insert new trend in table
       db['trends'].insert({name: trend, count: 1});
@@ -38,7 +38,7 @@ var trendMapping = function(philosophy, philosophyId) {
   });
 
   // update added trends in philosophy
-  db['philosophies'].findOneAndUpdate({_id:db.ObjectID(philosophyId)}, {$set :{trends : trends}});
+  db['philosophies'].findOneAndUpdate({_id:db.ObjectID(philosophyId)}, {$set :{'trends' : trends}});
 };
 
 // For mapping #tag from philosophy text and mapped in to collection
