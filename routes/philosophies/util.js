@@ -7,6 +7,7 @@ var _ = require('lodash');
 var _removeReference = function(philosophyId) {
   //db['comment'].remove({pId: db.ObjectID(philosophyId)});
   db['reply'].remove({philosophyId: db.ObjectID(philosophyId)});
+  db['polls'].remove({philosophyId: db.ObjectID(philosophyId)});
 };
 
 var insertOrUpdateTrend = function(trend) {
