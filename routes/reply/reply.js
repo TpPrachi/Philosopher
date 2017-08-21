@@ -17,6 +17,7 @@
   var logger = require('../../lib/logger');
   var _ = require('lodash');
   var util = require('util');
+  var notify = require('../../lib/notification');
 
   /* GET API for ALL records from collection. */
   router.post('/:philosophyId', function(req, res, next) {
@@ -44,11 +45,21 @@
 
     db['reply'].insert(req.body, function(err, replies) {
       if(err) {
-        logger.error(err);
+        logger.error("Error while insert reply :: " + err);
         res.status(501).send({"success":false, "message":err});
       }
-      // For increment counter of philosophy after add new reply
-      util.replyUpdated(req.params.philosophyId, true);
+      // Here for updating reply counter in philosophy
+      util.updateReplyCount(req.params.philosophyId, true);
+
+      // Prepare object for add information in notification collection
+      var prepareObject = {};
+      prepareObject["notifyTo"] = philosophy.userId;
+      prepareObject["notifyBy"] = req.body.UID;
+      prepareObject["notifyType"] = "5";
+      prepareObject["philosophyId"] = philosophy._id;
+      prepareObject["replyId"] = replies.insertedIds[0];
+
+      notify.addNotification(prepareObject);
       res.status(201).send({"success":true, "message":replies.insertedIds});
     });
   });
@@ -64,14 +75,14 @@
     });
   });
 
-  // GET API for getting all users who reply on philosophyId
+  // GET API for getting all users who reply on philosophyId. We are used this in reply all functionality
   router.get('/users/:replyId', function(req, res) {
     var select = {};
     select["users._id"] = 1;
     select["users.fullname"] = 1;
     select["users.profilePhoto"] = 1;
 
-    // Build aggregate object for get users details based on operations with information
+    // Build aggregate object for get users details based on operations with users information
     var aggregate = [{
         "$match": { _id: db.ObjectID(req.params.replyId)}
       },{
@@ -92,7 +103,7 @@
     //
     db['reply'].aggregate(aggregate, function(err, information) {
       if(err) {
-        logger.error(err);
+        logger.error("Error while getting users data of philosophy :: " + err);
         res.status(501).send({"success":false, "message":err});
       }
       res.status(201).json(information);
@@ -103,7 +114,7 @@
   router.delete('/:id:/:philosophyId', function(req, res) {
     db['reply'].remove({_id: db.ObjectID(req.params.id)}).toArray(function(err, reply) {
       if(err) {
-        logger.error(err);
+        logger.error("Error while deleting reply :: " + err);
         res.status(501).send({"success":false, "message":err});
       }
       // For decrement counter of philosophy after remove reply
@@ -216,7 +227,7 @@
     //
     db['reply'].aggregate(aggregate, function(err, information) {
       if(err) {
-        logger.error(err);
+        logger.error("Error while returning reply information :: " + err);
         res.status(501).send({"success":false, "message":err});
       }
       res.status(201).json(information);
