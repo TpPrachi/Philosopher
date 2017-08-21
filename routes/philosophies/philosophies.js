@@ -157,7 +157,7 @@
 
   router.patch('/:id/:operation/:flag' ,function(req, res, next) {
     var select = {};
-
+    var notification = 0;
     if(!_.isUndefined(req.params.operation) && req.params.operation == 1 ){
       select['like'] = 1;
     } else if(!_.isUndefined(req.params.operation) && req.params.operation == 2){
@@ -176,6 +176,7 @@
       } else {
         if (req.params.operation == 1) { // For Like
           if (req.params.flag == 'true') { // add into like info
+            notification = 1;
             philosophy.like.count = philosophy.like.count + 1;
             philosophy.like.info.push({
               _id : req.body.UID,
@@ -187,6 +188,7 @@
           }
         } else if (req.params.operation == 2) { // For Dislike
           if (req.params.flag == 'true') {
+            notification = 2;
             philosophy.dislike.count = philosophy.dislike.count + 1;
             philosophy.dislike.info.push({
               _id : req.body.UID,
@@ -198,6 +200,7 @@
           }
         } else if (req.params.operation == 3) { // For Objections
           if (req.params.flag == 'true') { // add into Objections info
+            notification = 3;
             philosophy.objections.count = philosophy.objections.count + 1;
             philosophy.objections.info.push({
               _id : req.body.UID,
@@ -218,6 +221,16 @@
             logger.error(err);
             res.status(501).send({"success":false, "message":err});
           }
+
+          if(notification >= 1 && notification <= 3) {
+            // Prepare object for add data in notification table
+            var prepareObject = {};
+            prepareObject["notifyTo"] = philosophy.userId;
+            prepareObject["notifyBy"] = UID;
+            prepareObject["notifyType"] = notification == 1 ? "like" : (notification == 2 ? 'dislike' : 'objections');
+            prepareObject["philosophyId"] = philosophy._id;
+          }
+
           res.status(200).send({"success":true, "message":"Success"});
         });
       }
