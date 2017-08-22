@@ -14,7 +14,7 @@
   var validate = require('../../lib/validator');
   var schema = require('./schema');
   var softSchema = require('./softSchema');
-  var logger = require('../../lib/logger');
+  var logger = require('../../lib/logger')(__filename);
   var _ = require('lodash');
   var util = require('util');
   var notify = require('../../lib/notification');

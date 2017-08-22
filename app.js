@@ -7,7 +7,7 @@ var app = express();
 var routes = require('./routes');
 var passport = require('passport');
 var db = require('./lib/db');
-var logger = require('./lib/logger');
+var logger = require('./lib/logger')(__filename);
 var busboy = require('connect-busboy');
 
 

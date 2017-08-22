@@ -12,7 +12,7 @@
   var router = express.Router();
   var db = require('../../lib/db');
   var query = require('../../lib/query');
-  var logger = require('../../lib/logger');
+  var logger = require('../../lib/logger')(__filename);
 
   /* GET API for ALL records from collection. */
   router.get('/', query.filter, function(req, res) {

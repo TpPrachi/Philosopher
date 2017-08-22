@@ -14,13 +14,13 @@
   var validate = require('../../lib/validator');
   var schema = require('./schema');
   var softSchema = require('./softSchema');
-  var logger = require('../../lib/logger');
+  var logger = require('../../lib/logger')(__filename);
   var _ = require('lodash');
   var query = require('../../lib/query');
   var projections = require("../../lib/projections/philosophies");
   var util = require('./util');
   var notify = require('../../lib/notification');
-  
+
   // Create single api which return count of all 4 points - may be not needed
   // Create api for getting list of all users who like (all 4) philosophies with username,user profile pic display link, user id
   // How to manage multilevel commnets and there info to display users information

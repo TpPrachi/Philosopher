@@ -10,7 +10,7 @@
   var express = require('express');
   var router = express.Router();
   var db = require('../../lib/db');
-  var logger = require('../../lib/logger');
+  var logger = require('../../lib/logger')(__filename);
   var notify = require('../../lib/notification');
   var validate = require('../../lib/validator');
   var schema = require('./schema');

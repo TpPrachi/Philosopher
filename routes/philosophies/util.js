@@ -1,6 +1,6 @@
 'use strict';
 var db = require('../../lib/db');
-var logger = require('../../lib/logger');
+var logger = require('../../lib/logger')(__filename);
 var _ = require('lodash');
 
 // For remove philosophy reference after removing philosophy from comment and reply

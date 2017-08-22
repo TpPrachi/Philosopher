@@ -1,6 +1,6 @@
 'use strict';
 var db = require('../../lib/db');
-var logger = require('../../lib/logger');
+var logger = require('../../lib/logger')(__filename);
 var _ = require('lodash');
 
 // Reply is deleted so need to descrement the counter of philosophies reply count
