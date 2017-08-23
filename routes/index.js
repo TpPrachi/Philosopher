@@ -11,11 +11,20 @@ var _configure = function(app) {
   var trends = require('./trends');
   var users = require('./users');
   var philosophies = require('./philosophies');
+  var comments = require('./comments');
+  var follow = require('./follow');
+  var reply = require('./reply');
+  var upload = require('./upload');
 
+  app.use('/upload', upload);
   app.use('/sample', sample);
+  app.use('/follow', follow);
   app.use('/trends', trends);
   app.use('/users', users);
   app.use('/philosophies', philosophies);
+  app.use('/comments', comments);
+  app.use('/reply', reply);
+
 };
 
 module.exports = {

@@ -6,10 +6,8 @@ var bool = types.bool;
 var rId = types.rId;
 
 var schema = {
-  trendName : rString.label('Trend Name'),
-  trendType : rString.label('Trend Type'),
-  totalCountOfTrend : rNumber.label('Total Count of Trend'),
-  isDeleted : bool.label('Is Deleted')
+  name : rString.label('Trend Name'),
+  count : rNumber.label('Total Count of Trend')
 }
 
 module.exports = schema;

@@ -3,7 +3,7 @@
 * @name routes/trends/trends.js
 * @author Jaydipsinh Vaghela <jaydip.vaghela@gmail.com>
 *
-* @version 0.0.0
+* @version 0.0.1
 */
 
 (function(){
@@ -11,62 +11,30 @@
   var express = require('express');
   var router = express.Router();
   var db = require('../../lib/db');
-  var validate = require('../../lib/validator');
-  var schema = require('./schema');
-  var softSchema = require('./softSchema');
-  var Joi = require('joi');
-  var logger = require('../../lib/logger')
-  var _ = require('lodash');
+  var query = require('../../lib/query');
+  var logger = require('../../lib/logger')(__filename);
 
   /* GET API for ALL records from collection. */
-  router.get('/', function(req, res, next) {
-    db['trends'].find({}).toArray(function(err, data) {
+  router.get('/', query.filter, function(req, res) {
+    db['trends'].find(req.filter, req.options.select || {}, req.options).toArray(function(err, trends) {
       if(err) {
-          logger.log(err);
-          res.status(501).send({"success":false, "message":err});
+        logger.error(err);
+        res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).json(data);
+      res.status(200).json(trends);
     });
   });
 
   /* GET API for selected record from collection. */
-  router.get('/:id', function(req, res, next) {
-    db['trends'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, data) {
-      if(err){
-          logger.log(err);
-          res.status(501).send({"success":false, "message":err});
-      }
-      res.status(200).json(data);
-    });
-  });
-
-  /* POST API for insert record in collection. */
-  router.post('/', validate(schema), function(req, res, next) {
-    var post = req.body;
-    post["CreatedDate"] = new Date();
-    db['trends'].insert(post, function(err, d) {
-      if(err){
-          logger.log(err);
-          res.status(501).send({"success":false, "message":err});
-      }
-      res.status(201).send({"success":true, "message":d.insertedIds});
-    });
-  });
-
-  /* PATCH API for update entity values. */
-  router.patch('/:id', validate(softSchema) ,function(req, res, next) {
-    var patch = req.body;
-    patch["UpdatedDate"] = new Date();
-    db['trends'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, data) {
-      if(err){
-        logger.log(err);
+  router.get('/:id', query.filter, function(req, res, next) {
+    db['trends'].find({_id: db.ObjectID(req.params.id)}, req.options).toArray(function(err, data) {
+      if(err) {
+        logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).send({"success":true, "message":data.value});
+      res.status(201).json({"success":true, "data": data});
     });
-
   });
-
 
   module.exports = router;
 

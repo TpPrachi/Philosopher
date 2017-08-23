@@ -1,0 +1,20 @@
+<!-- by surjeet.b@productivet.com -->
+<!-- this template will be used when an exception will occure in the system  -->
+<!-- version 0.0.5 -->
+Hi, <br/>
+This is auto alert message regarding PERFEQTA system <b>‘Failure’</b>. <br/>
+Please review the below error which has occured in PERFEQTA.<br/>
+<hr />
+
+<b>{{model.error}}</b><br/>
+<b>Description:</b> {{model.errorSatck}}
+<hr />
+
+The following error has occured in {{model.default.product}} <i>version
+<!-- {{model.settings.version.major}}.{{model.settings.version.minor}}.{{model.settings.version.build}}.{{model.settings.version.revision}}</i>. -->
+{{model.default.buildVersion}}</i>
+To fix it, either <a href="{{model.default.web}}/#/">click here</a> to login into the PERFEQTA or you may go to <a style="color: blue;" href="{{model.default.web}}/#/login">{{model.default.web}}/#/login</a>.<br/>
+<!-- If you have questions, comments or trouble, please contact your administrator. <br/> -->
+<br/>
+Thank you, <br/>
+{{model.default.company}} Team

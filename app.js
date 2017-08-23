@@ -1,45 +1,55 @@
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
-//var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var app = express();
 var routes = require('./routes');
 var passport = require('passport');
 var db = require('./lib/db');
-var logger = require('./lib/logger');
+var logger = require('./lib/logger')(__filename);
+var busboy = require('connect-busboy');
 
-logger.info('Logger test with INFO.');
-logger.error('Logger test with ERROR.');
 
-// view engine setup
+// ZmEzNDc0NDAtY2RkZS00NjE3LWFkZjMtMTZlOWIyYzc5Yzdh - oneSignle
+
+// view engine setup - currently we does not require view engine so we are not add in our express builder
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
+app.use(busboy());
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-//app.use(logger('dev'));
 app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({limit:'100mb', extended: true }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(passport.initialize());
 
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods", "GET, POST, HEAD, OPTIONS, PUT, DELETE, PATCH");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization,X-Authorization , If-Modified-Since, Cache-Control, Pragma, client-offset, x-content-type-options,x-frame-options,role-schema-update,If-Match,client-tz");
+    next();
+});
+
+// initialize passport for authentication and route security
+app.use(passport.initialize());
 require('./lib/oauth')(passport);
 
 // configure only authorization routes for bypass authentication (login && signup)
 app.use('/', require('./lib/oauth/authorization'));
 
+// get jwt token from store collection based on authorization headers
 app.use('/', function(req, res, next) {
   if(req.headers.authorization) {
     db['tokenmapped'].findOne({uuid:req.headers.authorization}, function(err, user) {
       if(err) {
         logger.error('App.js :: ' + err);
-        throw err;
+        return res.status(501).send({success: false, message: err});
       }
       if(user) {
         req.headers.authorization = user.token;
+        req.body.UID = user.userId;
       } else {
         logger.error('Invalid token provided.');
         return res.status(403).send({success: false, message: 'Invalid token provided.'});
@@ -52,6 +62,12 @@ app.use('/', function(req, res, next) {
   }
 
 });
+
+// Route for accessing images and videos from public directive.
+// this route is secure with token validation, means if you have valid token then you can access files unser public directory
+//app.use('/profile', express.static(path.join(__dirname, 'public')));
+process.env.FILE_STORE = path.join(__dirname, (process.env.FILE_STORE || './public/images/profile'));
+
 // authenticate every request for valida token and valid authorization
 require('./lib/authentication')(app, passport);
 
@@ -60,9 +76,8 @@ routes.configure(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+  logger.error("Not Found. Accessing route - " + req.path);
+  res.status(404).send({"success": false, "message":"Not Found. Accessing route - " + req.path});
 });
 
 // development error handler
@@ -80,6 +95,7 @@ if (app.get('env') === 'development') {
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
+  logger.error("Error found - " + err.message);
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,
