@@ -10,7 +10,7 @@
   var express = require('express');
   var router = express.Router();
   var db = require('../../lib/db');
-  var logger = require('../../lib/logger');
+  var logger = require('../../lib/logger')(__filename);
   var notify = require('../../lib/notification');
   var validate = require('../../lib/validator');
   var schema = require('./schema');
@@ -73,17 +73,16 @@
             var prepareObject = {};
             prepareObject["notifyTo"] = post['followingUser'];
             prepareObject["notifyBy"] = post['followedUser'];
-            prepareObject["notifyType"] = "follow";
+            prepareObject["notifyType"] = "1";
 
             //  update notification for add user in community
-            notify.addNotification(prepareObject).then(function(data) {
-              // For increment count of community
-              db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.UID)}, {$inc: { communityCount: 1}});
-              res.status(201).send({"success":true, "message":data});
-            }, function(err) {
-              logger.error(err);
-              res.status(501).send({"success":false, "message":err});
-            });
+            notify.addNotification(prepareObject);
+
+            // Code for increment community count of logged in user
+            db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.UID)}, {$inc: { communityCount: 1}});
+
+            res.status(201).send({"success":true, "message":data});
+
           });
         } else {
           res.status(501).send({"success":false, "message": "Please provide valid information for add user in community."});

@@ -14,7 +14,7 @@
   var schema = require('./schema');
   var softSchema = require('./softSchema');
   var Joi = require('joi');
-  var logger = require('../../lib/logger')
+  var logger = require('../../lib/logger')(__filename);
   var _ = require('lodash');
   var query = require('../../lib/query');
 

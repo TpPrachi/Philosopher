@@ -36,3 +36,5 @@
 {"message":"data and hash arguments required","stack":"Error: data and hash arguments required\n    at /home/prachi/Phylosophers/RowDesign/node_modules/bcrypt/bcrypt.js:179:16\n    at doNTCallback0 (node.js:430:9)\n    at process._tickCallback (node.js:359:13)","level":"error","timestamp":"2017-08-17T18:52:15.491Z"}
 {"level":"error","message":"Authentication failed. Wrong password.","timestamp":"2017-08-17T18:52:15.492Z"}
 {"message":"data and hash arguments required","stack":"Error: data and hash arguments required\n    at /home/prachi/Phylosophers/RowDesign/node_modules/bcrypt/bcrypt.js:179:16\n    at doNTCallback0 (node.js:430:9)\n    at process._tickCallback (node.js:359:13)","level":"error","timestamp":"2017-08-17T18:54:30.921Z"}
+{"level":"error","message":"Please provide valid answer key.","timestamp":"2017-08-22T14:38:49.187Z"}
+{"level":"error","message":"Please provide valid answer key.","label":"upload/upload.js","timestamp":"2017-08-22T14:39:28.478Z"}

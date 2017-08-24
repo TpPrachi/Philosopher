@@ -4,7 +4,7 @@
 var express = require('express');
 var router = express.Router();
 var fs = require('fs-extra');
-var logger = require('../../lib/logger');
+var logger = require('../../lib/logger')(__filename);
 var Jimp = require('jimp');
 var db = require('../../lib/db');
 

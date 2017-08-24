@@ -1,6 +1,6 @@
 'use strict';
 var db = require('../../lib/db');
-var logger = require('../../lib/logger');
+var logger = require('../../lib/logger')(__filename);
 var _ = require('lodash');
 
 // For remove philosophy reference after removing philosophy from comment and reply
@@ -19,9 +19,9 @@ var insertOrUpdateTrend = function(trend) {
 
     if(trendArr.length > 0) { // if count is greater that 1 then go for increment count;
       trendArr[0].count = trendArr[0].count + 1;
-      db['trends'].findOneAndUpdate({_id: trendArr[0]._id}, {$inc: { count: 1}});
+      db['trends'].findOneAndUpdate({_id: trendArr[0]._id}, {$set: {'UpdatedDate': new Date()}, $inc: { count: 1}});
     } else { // else insert new trend in table
-      db['trends'].insert({name: trend, count: 1});
+      db['trends'].insert({name: trend, count: 1, 'CreatedDate': new Date(), 'UpdatedDate': new Date()});
     }
   });
 };
@@ -70,14 +70,14 @@ var _trendMappingOnPatch = function(philosophy, philosophyId) {
             logger.info("Removed Trend :: " + trend);
             philosophyTrend.trends = _.without(philosophyTrend.trends, trend); // remove trend from philosophy
             // decrement trend used counter
-            db['trends'].findOneAndUpdate({name:trend}, {$inc: { count: -1}});
+            db['trends'].findOneAndUpdate({name:trend}, {$set: {'UpdatedDate': new Date()}, $inc: { count: -1}});
         });
 
         // Find trends which are in new philosophy but not in saved one
         _.forEach(_.difference(trends, philosophyTrend.trends), function(trend) {
             logger.info("New Added Trend :: " + trend);
-            philosophyTrend.trends.push(trend); // add new trend in philosophy
-            insertOrUpdateTrend(trend); // For inserting new trend
+            philosophyTrend.trends.push(trend); // For adding trend in philosophy object
+            insertOrUpdateTrend(trend); // For inserting new trends collection
         });
 
         // update trend array with removed and added trends
