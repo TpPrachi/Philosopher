@@ -18,7 +18,7 @@
       if(err) {
         res.status(501).send({success:false, message:"Error while removing mapping from token mapped collection."});
       }
-      res.send(201).send({success:true, message:"User logout successfully."});
+      res.status(201).send({success:true, message:"User logout successfully."});
     });
   });
 
