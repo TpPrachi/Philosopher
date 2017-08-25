@@ -1,1 +1,1 @@
-module.exports = require('./philosophies');
+module.exports = require('./notification');
