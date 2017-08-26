@@ -26,7 +26,7 @@
   // How to manage multilevel commnets and there info to display users information
 
   /* GET API for ALL records from collection. */
-  router.get('/', query.filter, function(req, res, next) {
+  router.get('/', query.filter, function(req, res, next) {    
     db['philosophies'].find(req.filter, req.options.select || projections || {}, req.options).toArray(function(err, philosophies) {
       if(err) {
         logger.log(err);
