@@ -81,7 +81,7 @@
             // Code for increment community count of logged in user
             db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.UID)}, {$inc: { communityCount: 1}});
 
-            res.status(201).send({"success":true, "message":data});
+            res.status(201).send({"success":true, "message":"Users added succesfully in your community."});
 
           });
         } else {

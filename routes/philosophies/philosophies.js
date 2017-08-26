@@ -157,7 +157,9 @@
   });
 
   router.patch('/:id/:operation/:flag' ,function(req, res, next) {
-    var select = {};
+    var select = {
+      'userId': 1
+    };
     var notification = 0;
     if(!_.isUndefined(req.params.operation) && req.params.operation == 1 ){
       select['like'] = 1;

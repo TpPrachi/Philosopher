@@ -15,6 +15,8 @@ var _configure = function(app) {
   var follow = require('./follow');
   var reply = require('./reply');
   var upload = require('./upload');
+  var logout = require('./logout');
+  var notification = require('./notification');
 
   app.use('/upload', upload);
   app.use('/sample', sample);
@@ -24,6 +26,8 @@ var _configure = function(app) {
   app.use('/philosophies', philosophies);
   app.use('/comments', comments);
   app.use('/reply', reply);
+  app.use('/logout', logout);
+  app.use('/notification', notification);
 
 };
 
