@@ -8,6 +8,42 @@ var logger = require('../../lib/logger')(__filename);
 var Jimp = require('jimp');
 var db = require('../../lib/db');
 
+// Video Upload Start.............................................................................
+
+// router.post('/video', function(req, res, next) {
+//   req.busboy.on('file', function (fieldname, file, filename) {
+//     logger.info("Uploading: " + filename);
+//     var filename = (new Date()).getTime() + '-' + filename;
+//     filename = decodeURI(filename);
+//     if (err) {
+//       logger.error(err);
+//     }
+//     var dir = process.env.FILE_STORE + '/temp' ;
+//     if (!fs.existsSync(dir)){
+//       fs.mkdirSync(dir);
+//     }
+//     //var fstream = fs.createWriteStream(dir
+//     var movieStream = fs.createReadStream(pathToFile);
+//
+//     movieStream.on('open', function () {
+//       res.writeHead(206, {
+//         "Content-Range": "bytes " + start + "-" + end + "/" + total,
+//         "Accept-Ranges": "bytes",
+//         "Content-Length": chunksize,
+//         "Content-Type": "video/mp4"
+//       });
+//       movieStream.pipe(res);
+//       res.status(201).json({file: filename});
+//     });
+//
+//     movieStream.on('error', function (err) {
+//       res.end(err);
+//     });
+//   });
+// });
+
+// Video Upload End...............................................................................
+
 router.post('/profilePhoto', function(req, res, next) {
   req.pipe(req.busboy);
   req.busboy.on('file', function (fieldname, file, filename) {
