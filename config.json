@@ -1,5 +1,5 @@
 {
-  "secret": "MagicOfMgicForLife",
+  "secret": "TimepassTimepassTimepass",
   "database": "mongodb://localhost:27017/philosophers",
   "mail" : {
       "user" : "jaydip.vaghela@gmail.com",
