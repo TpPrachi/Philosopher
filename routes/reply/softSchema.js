@@ -16,7 +16,7 @@ var object = types.object.bind(types);
 var schema = {
   userId: id.label('User Id'),
   philosophyId: id.label('philosophy Id'),
-  commentId: id.label('Comment Id'),
+  replyType: string.label("Reply Type"),
   like:object({
     count: number.label('Like Count'),
     info: array(object({
