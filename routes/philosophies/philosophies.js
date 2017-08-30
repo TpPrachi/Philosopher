@@ -26,14 +26,41 @@
   // How to manage multilevel commnets and there info to display users information
 
   /* GET API for ALL records from collection. */
-  router.get('/', query.filter, function(req, res, next) {    
-    db['philosophies'].find(req.filter, req.options.select || projections || {}, req.options).toArray(function(err, philosophies) {
+  router.get('/', query.filter, function(req, res, next) {
+    // Build aggregate object for get users details based on operations with information
+    var aggregate = [{
+        "$match": req.filter
+      },{
+        $lookup: {
+           from: "usersmapped",
+           localField: 'userId',
+           foreignField: "userId",
+           as: "users"
+        }
+      },{
+        $skip:req.options['skip']
+      },{
+        $limit:req.options['limit']
+      },{
+        $project:projections
+      }
+    ];
+    //
+    db['philosophies'].aggregate(aggregate, function(err, information) {
       if(err) {
-        logger.log(err);
+        logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).json(philosophies);
+      res.status(201).json(information);
     });
+
+    // db['philosophies'].find(req.filter, req.options.select || projections || {}, req.options).toArray(function(err, philosophies) {
+    //   if(err) {
+    //     logger.log(err);
+    //     res.status(501).send({"success":false, "message":err});
+    //   }
+    //   res.status(200).json(philosophies);
+    // });
   });
 
   /* GET API for selected record from collection. */
