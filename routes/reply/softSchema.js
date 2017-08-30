@@ -10,6 +10,7 @@ var bool = types.bool;
 var rId = types.rId;
 var rExtraLargeString = types.rExtraLargeString;
 var extraLargeString = types.extraLargeString;
+var optionalArray = types.optionalArray;
 var object = types.object.bind(types);
 
 
@@ -17,6 +18,7 @@ var schema = {
   userId: id.label('User Id'),
   philosophyId: id.label('philosophy Id'),
   replyType: string.label("Reply Type"),
+  notifyUsers: optionalArray,
   like:object({
     count: number.label('Like Count'),
     info: array(object({
