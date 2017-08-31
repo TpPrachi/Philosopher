@@ -11,6 +11,8 @@ var rExtraLargeString = types.rExtraLargeString;
 var object = types.object.bind(types);
 var any = types.any;
 
+//philosophyType : Text / Image / Video / Recording / Poll
+
 var schema = {
   userId: id.label('User Id'),
   philosophy: rExtraLargeString.label('Philosophy'),

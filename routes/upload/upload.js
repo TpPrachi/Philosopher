@@ -10,59 +10,24 @@ var db = require('../../lib/db');
 var multer  = require('multer')
 var upload = multer();
 
-// Video Upload Start...........................................................
-
-// router.post('/video', function(req, res, next) {
-//   req.busboy.on('file', function (fieldname, file, filename) {
-//     logger.info("Uploading: " + filename);
-//     var filename = (new Date()).getTime() + '-' + filename;
-//     filename = decodeURI(filename);
-//     if (err) {
-//       logger.error(err);
-//     }
-//
-//     var dir = process.env.FILE_STORE + '/temp' ;
-//     if (!fs.existsSync(dir)){
-//       fs.mkdirSync(dir);
-//     }
-//
-//     file.pipe(fs.createWriteStream(dir));
-//   });
-//   req.busboy.on('finish', function () {
-//     res.status(201).json({file: filename});
-//res.end();
-// });
-//req.pipe(req.busboy);
-
-//var fstream = fs.createWriteStream(dir);
-// var movieStream = fs.createReadStream(pathToFile);
-//
-// movieStream.on('open', function () {
-//   res.writeHead(206, {
-//     "Content-Range": "bytes " + start + "-" + end + "/" + total,
-//     "Accept-Ranges": "bytes",
-//     "Content-Length": chunksize,
-//     "Content-Type": "video/mp4"
-//   });
-//   movieStream.pipe(res);
-//   res.status(201).json({file: filename});
-// });
-
-// movieStream.on('error', function (err) {
-//   res.end(err);
-// });
-// });
-
-// Video Upload End.............................................................
-
 router.post('/profilePhoto', function(req, res, next) {
   req.pipe(req.busboy);
   req.busboy.on('file', function (fieldname, file, filename) {
     logger.info("Uploading: " + filename);
     var filename = (new Date()).getTime() + '-' + filename;
     filename = decodeURI(filename);
+
+    var dir = process.env.FILE_STORE + '/' + req.body.UID ;
+    if (!fs.existsSync(dir)){
+      fs.mkdirSync(dir);
+    }
+    var profilePhoto = dir + '/profilePhoto';
+    if (!fs.existsSync(profilePhoto)){
+      fs.mkdirSync(profilePhoto);
+    }
+
     var patch = {
-      profilePhoto : filename
+      profilePhoto : profilePhoto + '/' + filename
     }
     //Need to ssave path for profile photo
     db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.UID)}, {$set: patch}, function(err, data) {
@@ -70,14 +35,7 @@ router.post('/profilePhoto', function(req, res, next) {
         if (err) {
           logger.error(err);
         }
-        var dir = process.env.FILE_STORE + '/' + req.body.UID ;
-        if (!fs.existsSync(dir)){
-          fs.mkdirSync(dir);
-        }
-        var profilePhoto = dir + '/profilePhoto';
-        if (!fs.existsSync(profilePhoto)){
-          fs.mkdirSync(profilePhoto);
-        }
+
         var resizedImage = profilePhoto + '/resizedImage';
         if (!fs.existsSync(resizedImage)){
           fs.mkdirSync(resizedImage);
@@ -112,7 +70,17 @@ router.post('/philosophyPhoto', function(req, res, next) {
     var filename = (new Date()).getTime() + '-' + filename;
     filename = decodeURI(filename);
     //Path where file will be uploaded
-    arr.push(filename);
+
+    var dir = process.env.FILE_STORE + '/' + req.body.UID ;
+    if (!fs.existsSync(dir)){
+      fs.mkdirSync(dir);
+    }
+    var philosophyPhoto = dir + '/philosophyPhoto';
+    if (!fs.existsSync(philosophyPhoto)){
+      fs.mkdirSync(philosophyPhoto);
+    }
+
+    arr.push(philosophyPhoto + '/' + filename);
 
     var patch = {
       philosophyPhoto : arr
@@ -121,32 +89,25 @@ router.post('/philosophyPhoto', function(req, res, next) {
       if (err) {
         logger.error(err);
       }
-      var dir = process.env.FILE_STORE + '/' + req.body.UID ;
-      if (!fs.existsSync(dir)){
-        fs.mkdirSync(dir);
-      }
-      var philosophyPhoto = dir + '/philosophyPhoto';
-      if (!fs.existsSync(philosophyPhoto)){
-        fs.mkdirSync(philosophyPhoto);
-      }
-      var resizedPhilosophyImage = philosophyPhoto + '/resizedPhilosophyImage';
-      if (!fs.existsSync(resizedPhilosophyImage)){
-        fs.mkdirSync(resizedPhilosophyImage);
-      }
+
+      // var resizedPhilosophyImage = philosophyPhoto + '/resizedPhilosophyImage';
+      // if (!fs.existsSync(resizedPhilosophyImage)){
+      //   fs.mkdirSync(resizedPhilosophyImage);
+      // }
       var fstream = fs.createWriteStream(philosophyPhoto + '/' + filename);
-      var fstream1 = fs.createWriteStream(resizedPhilosophyImage + '/' + filename);
+      // var fstream1 = fs.createWriteStream(resizedPhilosophyImage + '/' + filename);
       file.pipe(fstream);
-      file.pipe(fstream1);
+      // file.pipe(fstream1);
       fstream.on('close', function () {
-        fstream1.on('close', function () {
-          Jimp.read(resizedPhilosophyImage + '/' + filename, function (err, file) {
-            logger.log("err :: " + err)
-            if (err) throw err;
-            file.resize(256, 256)
-            .quality(50)
-            .write(resizedPhilosophyImage + '/' + filename);
-          });
-        });
+        // fstream1.on('close', function () {
+        //   Jimp.read(resizedPhilosophyImage + '/' + filename, function (err, file) {
+        //     logger.log("err :: " + err)
+        //     if (err) throw err;
+        //     file.resize(256, 256)
+        //     .quality(50)
+        //     .write(resizedPhilosophyImage + '/' + filename);
+        //   });
+        // });
       });
     });
   });
