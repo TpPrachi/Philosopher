@@ -116,7 +116,7 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      if(_.isNull(philosophy)) {
+      if(_.isNull(philosophy)) { // if philosophy is not found based on params id then return with error
         logger.error("Please provide valid philosophy id.");
         res.status(501).send({"success":false, "message":"Please provide valid philosophy id."});
       }
@@ -129,7 +129,7 @@
         req.body["philosophyId"] = db.ObjectID(req.params.philosophyId);
         req.body["pollAnswer"] = req.params.answer;
 
-        // Here for mapping users and philosophy detail with poll mapped table
+        // Here for mapping users and philosophy detail with poll collection
         db['polls'].insert(req.body, function(err, poll) {
           if(err) {
             logger.error(err);
@@ -152,7 +152,7 @@
   router.patch('/:id', validate(softSchema) ,function(req, res, next) {
     req.body["UpdatedDate"] = new Date();
 
-    // For finding trends in philosophy and insert into trens table as well as update count for trend.
+    // For finding trends in philosophy and insert into trends collection as well as update count for trend.
     util.trendMappingOnPatch(req.body.philosophy, req.params.id);
     db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: req.body}, {returnOriginal: false}, function(err, philosophy) {
       if(err) {
@@ -161,7 +161,6 @@
       }
       res.status(200).send({"success":true, "message":philosophy.value});
     });
-
   });
 
   // For remove philosophy as well as comment and reply associated with philosophy
@@ -180,7 +179,7 @@
     var select = {
       'userId': 1
     };
-    var notification = 0;
+    var notification = 0; // var used for add requested information into notification collection, It hold type of operation affect on philosophy
     if(!_.isUndefined(req.params.operation) && req.params.operation == 1 ){
       select['like'] = 1;
     } else if(!_.isUndefined(req.params.operation) && req.params.operation == 2){
@@ -245,21 +244,19 @@
             res.status(501).send({"success":false, "message":err});
           }
 
-          if(notification >= 1 && notification <= 3) {
+          if(notification >= 1 && notification <= 3 && !_.isUndefined(philosophy)) {
             // Prepare object for add data in notification collection
-            var prepareObject = {};
-            prepareObject["notifyTo"] = philosophy.userId;
-            prepareObject["notifyBy"] = req.body.UID;
-            prepareObject["notifyType"] = notification == 1 ? "2" : (notification == 2 ? '3' : '4');
-            prepareObject["philosophyId"] = philosophy._id;
-
-            notify.addNotification([prepareObject]);
+            notify.addNotification([{
+              'notifyTo': philosophy.userId,
+              'notifyBy': req.body.UID,
+              'notifyType': (notification == 1 ? "2" : (notification == 2 ? '3' : '4')),
+              'philosophyId': philosophy._id
+            }]);
           }
 
           res.status(200).send({"success":true, "message":"Success"});
         });
       }
-
     });
   });
 
@@ -294,12 +291,10 @@
       },{
         $project: select
       },{
-        $sort: {fullname : 1}
-        // $sort: 'fullname'
-        //$skip - $limit (Not able to decide) - Prachi
+        $sort: {fullname: 1}
       }
     ];
-    //
+
     db['philosophies'].aggregate(aggregate, function(err, information) {
       if(err) {
         logger.error(err);

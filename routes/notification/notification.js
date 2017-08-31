@@ -17,9 +17,9 @@
   var query = require('../../lib/query');
 
   // GET api for getting notification based on filter data provided in query string
-  // We also need to provide information about users as well as philosophy for display with notification
+  // We also need to provide information about users as well as philosophy for display with notification tab
   router.get('/', query.filter, function(req, res, next) {
-    // Build aggregate object for get users details based on operations with information
+    // Build aggregate object for get users and philosophy details based on operations
     var aggregate = [{
         "$match": req.filter
       },{

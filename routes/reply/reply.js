@@ -208,7 +208,7 @@
         }
 
         // Code for add information to notification collection based on user action like,dislike or objection
-        if(notification >= 1 && notification <= 3) {
+        if(notification >= 1 && notification <= 3 && !_.isUndefined(reply)) {
           notify.addNotification([{
             'notifyTo': reply.userId,
             'notifyBy': req.body.UID,
