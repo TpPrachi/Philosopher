@@ -7,6 +7,53 @@ var fs = require('fs-extra');
 var logger = require('../../lib/logger')(__filename);
 var Jimp = require('jimp');
 var db = require('../../lib/db');
+var multer  = require('multer')
+var upload = multer();
+
+// Video Upload Start...........................................................
+
+// router.post('/video', function(req, res, next) {
+//   req.busboy.on('file', function (fieldname, file, filename) {
+//     logger.info("Uploading: " + filename);
+//     var filename = (new Date()).getTime() + '-' + filename;
+//     filename = decodeURI(filename);
+//     if (err) {
+//       logger.error(err);
+//     }
+//
+//     var dir = process.env.FILE_STORE + '/temp' ;
+//     if (!fs.existsSync(dir)){
+//       fs.mkdirSync(dir);
+//     }
+//
+//     file.pipe(fs.createWriteStream(dir));
+//   });
+//   req.busboy.on('finish', function () {
+//     res.status(201).json({file: filename});
+//res.end();
+// });
+//req.pipe(req.busboy);
+
+//var fstream = fs.createWriteStream(dir);
+// var movieStream = fs.createReadStream(pathToFile);
+//
+// movieStream.on('open', function () {
+//   res.writeHead(206, {
+//     "Content-Range": "bytes " + start + "-" + end + "/" + total,
+//     "Accept-Ranges": "bytes",
+//     "Content-Length": chunksize,
+//     "Content-Type": "video/mp4"
+//   });
+//   movieStream.pipe(res);
+//   res.status(201).json({file: filename});
+// });
+
+// movieStream.on('error', function (err) {
+//   res.end(err);
+// });
+// });
+
+// Video Upload End.............................................................
 
 router.post('/profilePhoto', function(req, res, next) {
   req.pipe(req.busboy);
@@ -17,6 +64,7 @@ router.post('/profilePhoto', function(req, res, next) {
     var patch = {
       profilePhoto : filename
     }
+    //Need to ssave path for profile photo
     db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.UID)}, {$set: patch}, function(err, data) {
       db['usersmapped'].findOneAndUpdate({userId: db.ObjectID(req.body.UID)}, {$set: patch}, function(err, data) {
         if (err) {
@@ -37,18 +85,19 @@ router.post('/profilePhoto', function(req, res, next) {
         var fstream = fs.createWriteStream(profilePhoto + '/' + filename);
         var fstream1 = fs.createWriteStream(resizedImage + '/' + filename);
         file.pipe(fstream);
-        file.pipe(fstream1);
+        // file.pipe(fstream1);
         fstream.on('close', function () {
-          fstream1.on('close', function () {
-            Jimp.read(resizedImage + '/' + filename, function (err, file) {
-              logger.log("err :: " + err)
-              if (err) throw err;
-              file.resize(256, 256)
-              .quality(50)
-              .write(resizedImage + '/' + filename);
-            });
-            res.status(201).json({file: filename});
-          });
+          // fstream1.on('close', function () {
+          //   Jimp.read(resizedImage + '/' + filename, function (err, file) {
+          //     logger.log("err :: " + err)
+          //     if (err) throw err;
+          //     file.resize(256, 256)
+          //     .quality(50)
+          //     .write(resizedImage + '/' + filename);
+          //   });
+          //   res.status(201).json({file: filename});
+          // });
+          res.status(201).json({file: filename});
         });
       });
     });
@@ -108,7 +157,7 @@ router.post('/philosophyPhoto', function(req, res, next) {
 
 router.get('/profilePhoto/:file', function(req, res, next) {
   if(!req.params.file){
-    res.status(422).json({'message' : 'file not provided'})
+    res.status(422).json({'message' : 'file not provided'});
     return;
   }
 
@@ -143,9 +192,3 @@ router.get('/philosophyPhoto/:file', function(req, res, next) {
 module.exports = router;
 
 })();
-
-
-// var ext = filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-// if(ext === 'jpg' || ext === 'png' || ext === 'gif'){
-//
-// }
