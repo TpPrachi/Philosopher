@@ -25,9 +25,16 @@
       },{
         $lookup: {
            from: "usersmapped",
-           localField: 'notifyBy',
            foreignField: "userId",
+           localField: 'notifyBy',
            as: "users"
+        }
+      },{
+        $lookup: {
+           from: "philosophies",
+           foreignField: "_id",
+           localField: 'philosophyId',
+           as: "philosophy"
         }
       },{
         $skip:req.options['skip']

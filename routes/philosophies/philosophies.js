@@ -33,8 +33,8 @@
       },{
         $lookup: {
            from: "usersmapped",
-           localField: 'userId',
            foreignField: "userId",
+           localField: 'userId',
            as: "users"
         }
       },{
@@ -54,13 +54,6 @@
       res.status(201).json(information);
     });
 
-    // db['philosophies'].find(req.filter, req.options.select || projections || {}, req.options).toArray(function(err, philosophies) {
-    //   if(err) {
-    //     logger.log(err);
-    //     res.status(501).send({"success":false, "message":err});
-    //   }
-    //   res.status(200).json(philosophies);
-    // });
   });
 
   /* GET API for selected record from collection. */
@@ -294,8 +287,8 @@
       },{
         $lookup: {
            from: "usersmapped",
-           localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
            foreignField: "userId",
+           localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
            as: "users"
         }
       },{

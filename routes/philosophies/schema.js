@@ -40,7 +40,7 @@ var schema = {
       date: date.label('Date')
     }).label('Objectios Info'))
   }).label('Objectios Details'),
-  commentCount: number.label('Comment Count'),
+  replyCount: number.label('Comment Count'),
   isDeleted: bool.label('Is Deleted')
 }
 

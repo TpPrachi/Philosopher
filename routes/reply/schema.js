@@ -37,7 +37,6 @@ var schema = {
       date: date.label('Date')
     }).label('Objectios Info'))
   }).label('Objectios Details'),
-  //commentCount: rNumber.label('Comment Count').default(0),
   isDeleted: bool.label('Is Deleted')
 }
 

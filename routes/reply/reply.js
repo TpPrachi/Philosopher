@@ -42,7 +42,6 @@
       count:0,
       info:[],
     };
-    //req.body['commentCount'] = 0; //May be not needed
 
     db['reply'].insert(req.body, function(err, replies) {
       if(err) {
@@ -105,8 +104,8 @@
       },{
         $lookup: {
            from: "usersmapped",
-           localField: 'userId',
            foreignField: "userId",
+           localField: 'userId',
            as: "users"
         }
       },{
