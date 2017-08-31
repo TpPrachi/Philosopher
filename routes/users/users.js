@@ -51,6 +51,10 @@
     var checkValidityForEmail = true;
 
     db['users'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, users) {
+      if(err){
+        logger.error(err);
+        res.status(501).send({"success":false, "message":err});
+      }
 
       if (users && users[0] && users[0].fullname) {
         if (patch && patch.fullname && patch.fullname ===  users[0].fullname) {
@@ -70,29 +74,22 @@
         }
       }
 
-      // db['users'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, data) {
-      // db['usersmapped'].update({userId: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, usersmappedData) {
-      //
-      //   if(err) {
-      //     logger.error(err);
-      //     res.status(501).send({"success":false, "message":err});
-      //   }
-      //   res.status(200).send({"success":true, "message":usersmappedData.value});
-      // });
-      //
-      //   if(err) {
-      //     logger.error(err);
-      //     res.status(501).send({"success":false, "message":err});
-      //   }
-      //   res.status(200).send({"success":true, "message":data.value});
-      // });
-
+      db['users'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, data) {
+        if(err) {
+          logger.error(err);
+          res.status(501).send({"success":false, "message":err});
+        }
+        db['usersmapped'].update({userId: db.ObjectID(req.params.id)}, {$set: {fullname : patch.fullname, email : patch.email}}, {returnOriginal: false}, function(err, usersmappedData) {
+          //res.status(200).send({"success":true, "message":usersmappedData.value});
+          if(err) {
+            logger.error(err);
+            res.status(501).send({"success":false, "message":err});
+          }
+          res.status(200).send({"success":true, "message":data.value});
+        });
+      });
       // Remove password fields from return object
-      if(err){
-        logger.error(err);
-        res.status(501).send({"success":false, "message":err});
-      }
-      res.status(200).json(users);
+      //res.status(200).json(data);
     });
 
     // Need to change here
