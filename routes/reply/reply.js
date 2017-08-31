@@ -18,6 +18,7 @@
   var _ = require('lodash');
   var util = require('util');
   var notify = require('../../lib/notification');
+  var query = require('../../lib/query');
 
   /* GET API for ALL records from collection. */
   router.post('/:philosophyId', function(req, res, next) {
