@@ -24,6 +24,7 @@
 
   /* Get Old Password Validation */
   router.get('/:userId/:oldPasssword' , function(req, res, next) {
+    // http://localhost:3009/users/59a19da699728f7dea3b5741/AdminUpdate777@123
     db['users'].findOne({_id: db.ObjectID(req.params.userId), tempPassword: req.params.oldPasssword}, function(err, user) {
       if (user && _.size(user) > 0) {
         res.status(200).json({success: true, data : user});
