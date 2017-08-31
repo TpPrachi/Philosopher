@@ -205,7 +205,7 @@
   });
 
   // GET for getting all users information who like, dislike or objection on reply
-  router.get('/:id/:operation/' ,function(req, res, next) {
+  router.get('/:id/:operation/', query.filter, function(req, res, next) {
     var select = {};
     // build select cluase for selected fields to send to response
     if(!_.isUndefined(req.params.operation) && req.params.operation == 1 ){
@@ -233,11 +233,11 @@
            as: "users"
         }
       },{
-        $project: select
+        $skip:req.options['skip']
       },{
-        $sort: {fullname : 1}
-        // $sort: 'fullname'
-        //$skip - $limit (Not able to decide) - Prachi
+        $limit:req.options['limit']
+      },{
+        $project: select
       }
     ];
     //
