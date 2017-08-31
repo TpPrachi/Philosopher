@@ -141,7 +141,11 @@
 
   // PATCH for update count based on parameter passed in params for like, dislike or objection
   router.patch('/:id/:operation/:flag' ,function(req, res, next) {
-    var select = {};
+    var select = {
+      'userId': 1,
+      'philosophyId':1
+    };
+    var notification = 0;
     if(!_.isUndefined(req.params.operation) && req.params.operation == 1 ){
       select['like'] = 1;
     } else if(!_.isUndefined(req.params.operation) && req.params.operation == 2){
@@ -158,6 +162,7 @@
 
       if (req.params.operation == 1) { // For Like
         if (req.params.flag == 'true') {
+          notification = 1;
           reply.like.count = reply.like.count + 1;
           reply.like.info.push({
             _id : req.body.UID,
@@ -169,6 +174,7 @@
         }
       } else if (req.params.operation == 2) { // For Dislike
         if (req.params.flag == 'true') {
+          notification = 2;
           reply.dislike.count = reply.dislike.count + 1;
           reply.dislike.info.push({
             _id : req.body.UID,
@@ -180,6 +186,7 @@
         }
       } else if (req.params.operation == 3) { // For Objections
         if (req.params.flag == 'true') {
+          notification = 3;
           reply.objections.count = reply.objections.count + 1;
           reply.objections.info.push({
             _id : req.body.UID,
@@ -199,6 +206,18 @@
           logger.error(err);
           res.status(501).send({"success":false, "message":err});
         }
+
+        // Code for add information to notification collection based on user action like,dislike or objection
+        if(notification >= 1 && notification <= 3) {
+          notify.addNotification([{
+            'notifyTo': reply.userId,
+            'notifyBy': req.body.UID,
+            'notifyType': (notification == 1 ? "2" : (notification == 2 ? '3' : '4')),
+            'philosophyId': reply.philosophyId,
+            'replyId': db.ObjectID(req.params.id)
+          }]);
+        }
+
         res.status(200).send({"success":true, "message": "Success"});
       });
     });
