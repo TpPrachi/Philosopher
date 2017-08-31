@@ -51,15 +51,31 @@
       // Here for updating reply counter in philosophy
       util.updateReplyCount(req.params.philosophyId, true);
 
-      // Prepare object for add information in notification collection
-      var prepareObject = {};
-      prepareObject["notifyTo"] = philosophy.userId;
-      prepareObject["notifyBy"] = req.body.UID;
-      prepareObject["notifyType"] = "5";
-      prepareObject["philosophyId"] = philosophy._id;
-      prepareObject["replyId"] = replies.insertedIds[0];
+      // Prepare object for add information to notification collection
+      if(req.body.replyType && req.body.replyType == 'reply') { // Add notification for reply
+        var prepareObject = {};
+        prepareObject["notifyTo"] = philosophy.userId;
+        prepareObject["notifyBy"] = req.body.UID;
+        prepareObject["notifyType"] = "5";
+        prepareObject["philosophyId"] = philosophy._id;
+        prepareObject["replyId"] = replies.insertedIds[0];
 
-      notify.addNotification(prepareObject);
+        notify.addNotification([prepareObject]);
+      } else if(req.body.replyType && req.body.replyType == 'replyAll') {  // Add notification for replyAll
+        if(req.body.notifyUsers && _.size(req.body.notifyUsers) > 0) {
+          notify.addNotification(_.reduce(req.body.notifyUsers, function(n, users) {
+            n.push({
+              'notifyTo':db.ObjectID(users.id),
+              'notifyBy':req.body.UID,
+              'notifyType':'6',
+              'philosophyId':philosophy._id,
+              'replyId':replies.insertedIds[0]
+            });
+            return n;
+          }, []));
+        }
+      }
+
       res.status(201).send({"success":true, "message":replies.insertedIds});
     });
   });
@@ -117,8 +133,8 @@
         logger.error("Error while deleting reply :: " + err);
         res.status(501).send({"success":false, "message":err});
       }
-      // For decrement counter of philosophy after remove reply
-      util.replyUpdated(req.params.philosophyId, false);
+      // For decrement counter of philosophy reply after remove reply
+      util.updateReplyCount(req.params.philosophyId, false);
       res.status(200).send({"success":true, "message": "Deleted Successfully."});
     });
   });

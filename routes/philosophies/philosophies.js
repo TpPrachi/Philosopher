@@ -260,7 +260,7 @@
             prepareObject["notifyType"] = notification == 1 ? "2" : (notification == 2 ? '3' : '4');
             prepareObject["philosophyId"] = philosophy._id;
 
-            notify.addNotification(prepareObject);
+            notify.addNotification([prepareObject]);
           }
 
           res.status(200).send({"success":true, "message":"Success"});

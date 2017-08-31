@@ -76,7 +76,7 @@
             prepareObject["notifyType"] = "1";
 
             //  update notification for add user in community
-            notify.addNotification(prepareObject);
+            notify.addNotification([prepareObject]);
 
             // Code for increment community count of logged in user
             db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.UID)}, {$inc: { communityCount: 1}});

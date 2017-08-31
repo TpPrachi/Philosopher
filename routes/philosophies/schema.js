@@ -11,7 +11,6 @@ var rExtraLargeString = types.rExtraLargeString;
 var object = types.object.bind(types);
 var any = types.any;
 
-
 var schema = {
   userId: id.label('User Id'),
   philosophy: rExtraLargeString.label('Philosophy'),
@@ -46,14 +45,3 @@ var schema = {
 }
 
 module.exports = schema;
-
-
-// comments
-//
-// comment
-// commentBy
-// philosophyId
-// isDeleted
-// llike
-// dislike
-// objections
