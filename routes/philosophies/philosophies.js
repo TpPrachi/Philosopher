@@ -51,7 +51,20 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      util.extendInfo(_.pick(information, ['_id']));
+      information = _.reduce(information, function(d, philosophy) {
+        // special case written for check current user is liked or dislike or objection on returned philosophies
+        philosophy.isLike = _.findIndex(philosophy.like.info, { _id: req.body.UID }) != -1 ? true : false;
+        philosophy.isDislike = _.findIndex(philosophy.dislike.info, { _id: req.body.UID }) != -1 ? true : false;
+        philosophy.isObjections = _.findIndex(philosophy.objections.info, { _id: req.body.UID }) != -1 ? true : false;
+
+        delete philosophy.like.info;
+        delete philosophy.dislike.info;
+        delete philosophy.objections.info;
+
+        d.push(philosophy);
+        return d;
+      }, []);
+
       res.status(201).json(information);
     });
 
