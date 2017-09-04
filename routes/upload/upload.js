@@ -26,8 +26,10 @@ router.post('/profilePhoto', function(req, res, next) {
       fs.mkdirSync(profilePhoto);
     }
 
+    var path = '/public/images/profile' + req.body.UID + '/profilePhoto';
+
     var patch = {
-      profilePhoto : profilePhoto + '/' + filename
+      profilePhoto : path + '/' + filename
     }
     //Need to ssave path for profile photo
     db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.UID)}, {$set: patch}, function(err, data) {
@@ -80,7 +82,9 @@ router.post('/philosophyPhoto', function(req, res, next) {
       fs.mkdirSync(philosophyPhoto);
     }
 
-    arr.push(philosophyPhoto + '/' + filename);
+    var path = '/public/images/profile' + req.body.UID + '/philosophyPhoto';
+
+    arr.push(path + '/' + filename);
 
     var patch = {
       philosophyPhoto : arr
