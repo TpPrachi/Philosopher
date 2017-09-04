@@ -2,6 +2,7 @@
 var db = require('../../lib/db');
 var logger = require('../../lib/logger')(__filename);
 var _ = require('lodash');
+var q = require('q');
 
 // For remove philosophy reference after removing philosophy from comment and reply
 var _removeReference = function(philosophyId) {
@@ -90,8 +91,17 @@ var _trendMappingOnPatch = function(philosophy, philosophyId) {
   }
 };
 
+var _extendInfo = function(information){
+  var deferred = q.defer();
+
+  console.log("information :: " + JSON.stringify(information));
+  deferred.resolve(true);
+  return deferred.promise;
+};
+
 module.exports = {
   removeReference: _removeReference,
   trendMappingOnPost: _trendMappingOnPost,
-  trendMappingOnPatch: _trendMappingOnPatch
+  trendMappingOnPatch: _trendMappingOnPatch,
+  extendInfo: _extendInfo
 };

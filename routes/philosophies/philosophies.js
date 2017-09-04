@@ -51,12 +51,13 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
+      util.extendInfo(_.pick(information, ['_id']));
       res.status(201).json(information);
     });
 
   });
 
-  /* GET API for selected record from collection. */
+  /* GET API for sel  ected record from collection. */
   router.get('/:id', function(req, res, next) {
     db['philosophies'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, philosophy) {
       if(err) {
