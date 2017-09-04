@@ -7,8 +7,8 @@ var fs = require('fs-extra');
 var logger = require('../../lib/logger')(__filename);
 var Jimp = require('jimp');
 var db = require('../../lib/db');
-var multer  = require('multer')
-var upload = multer();
+//var multer  = require('multer')
+//var upload = multer();
 
 router.post('/profilePhoto', function(req, res, next) {
   req.pipe(req.busboy);
