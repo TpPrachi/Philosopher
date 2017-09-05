@@ -16,67 +16,73 @@
   var softSchema = require('./softSchema');
   var logger = require('../../lib/logger')(__filename);
   var _ = require('lodash');
-  var util = require('util');
+  var util = require('./util');
   var notify = require('../../lib/notification');
   var query = require('../../lib/query');
 
   /* GET API for ALL records from collection. */
   router.post('/:philosophyId', function(req, res, next) {
-    //At the time of posting reply of comment need reference of philosophyId
-    req.body['philosophyId'] = db.ObjectID(req.params.philosophyId);
-    //At the time of posting reply of comment need to add commentId
-    //req.body['commentId'] = db.ObjectID(req.params.commentId);
+    db['philosophies'].findOne({_id: db.ObjectID(req.params.philosophyId)}, {userId:1}, function(err, philosophy) {
+      //At the time of posting reply of comment need reference of philosophyId
+      req.body['philosophyId'] = db.ObjectID(req.params.philosophyId);
 
-    req.body['userId'] = req.body.UID;
-    req.body['createdDate'] = new Date();
-    req.body['updatedDate'] = new Date();
-    req.body['like'] = {
-      count:0,
-      info:[],
-    };
-    req.body['dislike'] = {
-      count:0,
-      info:[],
-    };
-    req.body['objections'] = {
-      count:0,
-      info:[],
-    };
+      req.body['userId'] = req.body.UID;
+      req.body['createdDate'] = new Date();
+      req.body['updatedDate'] = new Date();
+      req.body['like'] = {
+        count:0,
+        info:[],
+      };
+      req.body['dislike'] = {
+        count:0,
+        info:[],
+      };
+      req.body['objections'] = {
+        count:0,
+        info:[],
+      };
 
-    db['reply'].insert(req.body, function(err, replies) {
-      if(err) {
-        logger.error("Error while insert reply :: " + err);
-        res.status(501).send({"success":false, "message":err});
-      }
-      // Here for updating reply counter in philosophy
-      util.updateReplyCount(req.params.philosophyId, true);
-
-      // Prepare object for add information to notification collection
-      if(req.body.replyType && req.body.replyType == 'reply') { // Add notification for reply
-        var prepareObject = {};
-        prepareObject["notifyTo"] = philosophy.userId;
-        prepareObject["notifyBy"] = req.body.UID;
-        prepareObject["notifyType"] = "5";
-        prepareObject["philosophyId"] = philosophy._id;
-        prepareObject["replyId"] = replies.insertedIds[0];
-
-        notify.addNotification([prepareObject]);
-      } else if(req.body.replyType && req.body.replyType == 'replyAll') {  // Add notification for replyAll
-        if(req.body.notifyUsers && _.size(req.body.notifyUsers) > 0) {
-          notify.addNotification(_.reduce(req.body.notifyUsers, function(n, users) {
-            n.push({
-              'notifyTo':db.ObjectID(users.id),
-              'notifyBy':req.body.UID,
-              'notifyType':'6',
-              'philosophyId':philosophy._id,
-              'replyId':replies.insertedIds[0]
-            });
-            return n;
-          }, []));
+      db['reply'].insert(req.body, function(err, replies) {
+        if(err) {
+          logger.error("Error while insert reply :: " + err);
+          res.status(501).send({"success":false, "message":err});
         }
-      }
+        // Here for updating reply counter in philosophy
+        util.updateReplyCount(req.params.philosophyId, true);
 
-      res.status(201).send({"success":true, "message":replies.insertedIds});
+        // Prepare object for add information to notification collection
+        if(req.body.replyType && req.body.replyType == 'reply') { // Add notification for reply
+          var prepareObject = {};
+          prepareObject["notifyTo"] = philosophy.userId;
+          prepareObject["notifyBy"] = req.body.UID;
+          prepareObject["notifyType"] = "5";
+          prepareObject["philosophyId"] = philosophy._id;
+          prepareObject["replyId"] = replies.insertedIds[0];
+
+          notify.addNotification([prepareObject]);
+        } else if(req.body.replyType && req.body.replyType == 'replyAll') {  // Add notification for replyAll
+          if(req.body.notifyUsers && _.size(req.body.notifyUsers) > 0) {
+            notify.addNotification(_.reduce(req.body.notifyUsers, function(n, users) {
+              n.push({
+                'notifyTo':db.ObjectID(users.id),
+                'notifyBy':req.body.UID,
+                'notifyType':'6',
+                'philosophyId':philosophy._id,
+                'replyId':replies.insertedIds[0]
+              });
+              return n;
+            }, []));
+          }
+        }
+        // Code for return actual updated count of reply on philosophy
+        db['philosophies'].findOne({_id: db.ObjectID(req.params.philosophyId)}, {'replyCount':1}, function(err, updatedPhilosophy){
+          if(err) {
+            logger.error(err);
+            res.status(200).json({"success":true, "data":"Success"});
+          }
+          res.status(200).json({"success":true, "data":updatedPhilosophy});
+        });
+      });
     });
   });
 
@@ -145,13 +151,18 @@
       'userId': 1,
       'philosophyId':1
     };
+    var selectAfterUpdate = {}; // var used for return updated count for patch api
     var notification = 0;
+
     if(!_.isUndefined(req.params.operation) && req.params.operation == 1 ){
       select['like'] = 1;
+      selectAfterUpdate['like.count'] = 1;
     } else if(!_.isUndefined(req.params.operation) && req.params.operation == 2){
       select['dislike'] = 1;
+      selectAfterUpdate['dislike.count'] = 1;
     } else if(!_.isUndefined(req.params.operation) && req.params.operation == 3){
       select['objections'] = 1;
+      selectAfterUpdate['objections.count'] = 1;
     }
 
     db['reply'].findOne({_id: db.ObjectID(req.params.id)}, select, function(err, reply) {
@@ -218,7 +229,14 @@
           }]);
         }
 
-        res.status(200).send({"success":true, "message": "Success"});
+        // Code for return actual updated count of like, dislike or objecetions
+        db['reply'].findOne({_id: db.ObjectID(req.params.id)}, selectAfterUpdate, function(err, updatedReply){
+          if(err) {
+            logger.error(err);
+            res.status(200).send({"success":true, "message": "Success"});
+          }
+          res.status(200).json({"success":true, "data":updatedReply});
+        });
       });
     });
   });

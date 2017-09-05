@@ -13,6 +13,7 @@ var object = types.object.bind(types);
 
 var schema = {
   userId: id.label('User Id'),
+  reply:rString.label("Reply Content"),
   philosophyId: id.label('philosophy Id'),
   replyType: rString.label("Reply Type"),
   notifyUsers: optionalArray,

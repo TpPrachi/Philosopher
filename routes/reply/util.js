@@ -1,7 +1,7 @@
 'use strict';
 var db = require('../../lib/db');
 // Reply is either added or removed there for take action based on flag isAdded
-_updateReplyCount = function(philosophyId, isAdded) {
+var _updateReplyCount = function(philosophyId, isAdded) {
     db['philosophies'].findOneAndUpdate({_id: db.ObjectID(philosophyId)}, {$inc: { replyCount: (isAdded ? 1 : -1)}});
 };
 
