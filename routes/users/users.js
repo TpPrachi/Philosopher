@@ -100,7 +100,7 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).json(users);
+      res.status(200).json({"success":true, "data":users});
     });
   });
 
@@ -111,7 +111,7 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).json(users);
+      res.status(200).json({"success":true, "data":users});
     });
   });
 

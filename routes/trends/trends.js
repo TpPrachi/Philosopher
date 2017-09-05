@@ -21,7 +21,7 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).json(trends);
+      res.status(200).json({"success":true, "data":trends});
     });
   });
 

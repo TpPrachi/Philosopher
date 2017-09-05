@@ -77,7 +77,7 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).json(philosophy);
+      res.status(200).json({"success":true, "data":philosophy});
     });
   });
 
@@ -193,13 +193,21 @@
     var select = {
       'userId': 1
     };
+    var selectAfterUpdate = {}; // var used for return updated count for patch api
     var notification = 0; // var used for add requested information into notification collection, It hold type of operation affect on philosophy
+
     if(!_.isUndefined(req.params.operation) && req.params.operation == 1 ){
       select['like'] = 1;
+      selectAfterUpdate['like.count'] = 1;
     } else if(!_.isUndefined(req.params.operation) && req.params.operation == 2){
       select['dislike'] = 1;
+      selectAfterUpdate['dislike.count'] = 1;
     } else if(!_.isUndefined(req.params.operation) && req.params.operation == 3){
       select['objections'] = 1;
+      selectAfterUpdate['objections.count'] = 1;
+    } else {
+      logger.error("Please provide valid information about operation.");
+      res.status(501).send({"success":false, "message":"Please provide valid information about operation"});
     }
 
     db['philosophies'].findOne({_id: db.ObjectID(req.params.id)}, select, function(err, philosophy) {
@@ -268,7 +276,14 @@
             }]);
           }
 
-          res.status(200).send({"success":true, "message":"Success"});
+          // Code for return actual updated count of like, dislike or objecetions
+          db['philosophies'].findOne({_id: db.ObjectID(req.params.id)}, selectAfterUpdate, function(err, updatedPhilosophy){
+            if(err) {
+              logger.error(err);
+            }
+            res.status(200).json({"success":true, "data":updatedPhilosophy});
+          });
+
         });
       }
     });
@@ -287,7 +302,7 @@
     } else {
       res.status(501).send({"success":false, "message": "Please provide valid data for information."});
     }
-    select["users._id"] = 1;
+    select["users.userId"] = 1;
     select["users.fullname"] = 1;
 
     // Build aggregate object for get users details based on operations with information
@@ -314,7 +329,7 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(201).json(information);
+      res.status(201).json({"success":true, "data":information});
     });
   });
 

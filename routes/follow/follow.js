@@ -44,7 +44,7 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(201).json(information);
+      res.status(201).json({"success":true, "data":information});
     });
   });
 

@@ -87,7 +87,7 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).json(reply);
+      res.status(200).json({"success":true, "data":reply});
     });
   });
 
@@ -122,7 +122,7 @@
         logger.error("Error while getting users data of philosophy :: " + err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(201).json(information);
+      res.status(201).json({"success":true, "data":information});
     });
   });
 
@@ -236,7 +236,7 @@
     } else {
       res.status(501).send({"success":false, "message": "Please provide valid data for information."});
     }
-    select["users._id"] = 1;
+    select["users.userId"] = 1;
     select["users.fullname"] = 1;
 
     // Build aggregate object for get users details based on operations with information
@@ -265,7 +265,7 @@
         logger.error("Error while returning reply information :: " + err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(201).json(information);
+      res.status(201).json({"success":true, "data":information});
     });
   });
 
