@@ -23,77 +23,121 @@
   /* GET API for ALL records from collection. */
   router.post('/:philosophyId', function(req, res, next) {
     db['philosophies'].findOne({_id: db.ObjectID(req.params.philosophyId)}, {userId:1}, function(err, philosophy) {
-      //At the time of posting reply of comment need reference of philosophyId
-      req.body['philosophyId'] = db.ObjectID(req.params.philosophyId);
+      if(err) {
+        logger.error("Error while getting philosophy in reply :: " + err);
+        res.status(501).send({"success":false, "message":err});
+      }
 
-      req.body['userId'] = req.body.UID;
-      req.body['createdDate'] = new Date();
-      req.body['updatedDate'] = new Date();
-      req.body['like'] = {
-        count:0,
-        info:[],
-      };
-      req.body['dislike'] = {
-        count:0,
-        info:[],
-      };
-      req.body['objections'] = {
-        count:0,
-        info:[],
-      };
+      // check for valid philosophy if not then return with error
+      if(_.isNull(philosophy)) {
+        res.status(501).send({"success":false, "message":"Please provide valid philosophy id for post reply."});
+      } else {
+        //At the time of posting reply of comment need reference of philosophyId
+        req.body['philosophyId'] = db.ObjectID(req.params.philosophyId);
 
-      db['reply'].insert(req.body, function(err, replies) {
-        if(err) {
-          logger.error("Error while insert reply :: " + err);
-          res.status(501).send({"success":false, "message":err});
-        }
-        // Here for updating reply counter in philosophy
-        util.updateReplyCount(req.params.philosophyId, true);
+        req.body['userId'] = req.body.UID;
+        req.body['createdDate'] = new Date();
+        req.body['updatedDate'] = new Date();
+        req.body['like'] = {
+          count:0,
+          info:[],
+        };
+        req.body['dislike'] = {
+          count:0,
+          info:[],
+        };
+        req.body['objections'] = {
+          count:0,
+          info:[],
+        };
 
-        // Prepare object for add information to notification collection
-        if(req.body.replyType && req.body.replyType == 'reply') { // Add notification for reply
-          var prepareObject = {};
-          prepareObject["notifyTo"] = philosophy.userId;
-          prepareObject["notifyBy"] = req.body.UID;
-          prepareObject["notifyType"] = "5";
-          prepareObject["philosophyId"] = philosophy._id;
-          prepareObject["replyId"] = replies.insertedIds[0];
-
-          notify.addNotification([prepareObject]);
-        } else if(req.body.replyType && req.body.replyType == 'replyAll') {  // Add notification for replyAll
-          if(req.body.notifyUsers && _.size(req.body.notifyUsers) > 0) {
-            notify.addNotification(_.reduce(req.body.notifyUsers, function(n, users) {
-              n.push({
-                'notifyTo':db.ObjectID(users.id),
-                'notifyBy':req.body.UID,
-                'notifyType':'6',
-                'philosophyId':philosophy._id,
-                'replyId':replies.insertedIds[0]
-              });
-              return n;
-            }, []));
-          }
-        }
-        // Code for return actual updated count of reply on philosophy
-        db['philosophies'].findOne({_id: db.ObjectID(req.params.philosophyId)}, {'replyCount':1}, function(err, updatedPhilosophy){
+        db['reply'].insert(req.body, function(err, replies) {
           if(err) {
-            logger.error(err);
-            res.status(200).json({"success":true, "data":"Success"});
+            logger.error("Error while insert reply :: " + err);
+            res.status(501).send({"success":false, "message":err});
           }
-          res.status(200).json({"success":true, "data":updatedPhilosophy});
+          // Here for updating reply counter in philosophy
+          util.updateReplyCount(req.params.philosophyId, true);
+
+          // Prepare object for add information to notification collection
+          if(req.body.replyType && req.body.replyType == 'reply') { // Add notification for reply
+            var prepareObject = {};
+            prepareObject["notifyTo"] = philosophy.userId;
+            prepareObject["notifyBy"] = req.body.UID;
+            prepareObject["notifyType"] = "5";
+            prepareObject["philosophyId"] = philosophy._id;
+            prepareObject["replyId"] = replies.insertedIds[0];
+
+            notify.addNotification([prepareObject]);
+          } else if(req.body.replyType && req.body.replyType == 'replyAll') {  // Add notification for replyAll
+            if(req.body.notifyUsers && _.size(req.body.notifyUsers) > 0) {
+              notify.addNotification(_.reduce(req.body.notifyUsers, function(n, users) {
+                n.push({
+                  'notifyTo':db.ObjectID(users.id),
+                  'notifyBy':req.body.UID,
+                  'notifyType':'6',
+                  'philosophyId':philosophy._id,
+                  'replyId':replies.insertedIds[0]
+                });
+                return n;
+              }, []));
+            }
+          }
+          // Code for return actual updated count of reply on philosophy
+          db['philosophies'].findOne({_id: db.ObjectID(req.params.philosophyId)}, {'replyCount':1}, function(err, updatedPhilosophy){
+            if(err) {
+              logger.error(err);
+              res.status(200).json({"success":true, "data":"Success"});
+            }
+            res.status(200).json({"success":true, "data":updatedPhilosophy});
+          });
         });
-      });
+      }
     });
   });
 
   /* GET API for ALL records from collection. */
-  router.get('/:philosophyId', function(req, res) {
-    db['reply'].find({philosophyId: db.ObjectID(req.params.philosophyId)}).toArray(function(err, reply) {
+  router.get('/:philosophyId', query.filter, function(req, res) {
+    req.filter = req.filter || {};
+    req.filter['philosophyId'] = db.ObjectID(req.params.philosophyId);
+
+    // Build aggregate object for get users details based on operations with information
+    var aggregate = [{
+        "$match": req.filter
+      },{
+        $lookup: {
+           from: "usersmapped",
+           foreignField: "userId",
+           localField: 'userId',
+           as: "users"
+        }
+      },{
+        $skip:req.options['skip']
+      },{
+        $limit:req.options['limit']
+      } // Need to projection for require fields
+    ];
+    //
+    db['reply'].aggregate(aggregate, function(err, information) {
       if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).json({"success":true, "data":reply});
+      information = _.reduce(information, function(d, reply) {
+        // special case written for check current user is liked or dislike or objection on returned philosophies
+        reply.isLike = _.findIndex(reply.like.info, { _id: req.body.UID }) != -1 ? true : false;
+        reply.isDislike = _.findIndex(reply.dislike.info, { _id: req.body.UID }) != -1 ? true : false;
+        reply.isObjections = _.findIndex(reply.objections.info, { _id: req.body.UID }) != -1 ? true : false;
+
+        delete reply.like.info;
+        delete reply.dislike.info;
+        delete reply.objections.info;
+
+        d.push(reply);
+        return d;
+      }, []);
+
+      res.status(201).json(information);
     });
   });
 
