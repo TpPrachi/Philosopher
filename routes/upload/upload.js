@@ -10,6 +10,12 @@ var db = require('../../lib/db');
 //var multer  = require('multer')
 //var upload = multer();
 
+//Get API for uploaded items
+
+//Mailer implementetion
+
+
+
 router.post('/profilePhoto', function(req, res, next) {
   req.pipe(req.busboy);
   req.busboy.on('file', function (fieldname, file, filename) {

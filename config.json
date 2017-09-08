@@ -3,7 +3,7 @@
   "database": "mongodb://localhost:27017/philosophers",
   "mail" : {
       "user" : "jaydip.vaghela@gmail.com",
-      "pass" : "Password@123",
+      "pass" : "job@protsys",
       "host" : "smtp.gmail.com",
       "port" : "587",
       "from" : "jaydip.vaghela@gmail.com"
