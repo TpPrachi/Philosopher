@@ -21,6 +21,7 @@
   var jwt = require('jwt-simple');
   var config = require('../../config');
   const uuidV1 = require('uuid/v1');
+  var mailer = require('../../lib/mailer');
 
   /* Get Old Password Validation */
   router.get('/:userId/:oldPasssword' , function(req, res, next) {
@@ -75,7 +76,19 @@
               // We are store actual token in tokenmapped table and send UUID to authorization token to user with response.
               db['tokenmapped'].findOneAndUpdate({userId : db.ObjectID(user.value._id)},{$set : {token:'JWT ' + token, userId:user.value._id, uuid:UUID, modifiedDate:new Date()}}, function(err, data){
                 logger.info('Token Saved to Token Mapped, After Change Password :: ' + JSON.stringify(data));
-                res.status(200).json({success: true, token: UUID});
+
+                mailer.send('finish-change-password', user.value, user.value.email, function sendMailCallback(e, b) {
+                  if (e) {
+                    logger.error('User change password successfully.');
+                    logger.info(user.value);
+                    logger.error(e);
+                  } else {
+                    logger.info(user.value.email.underline + ' got registered sucessfully');
+                  }
+                });
+                delete user.value.password;
+                delete user.value.tempPassword;
+                res.status(200).json({success: true, token: UUID, user : user.value});
               });
               // return the information including UUID mappend with JWT token
               //res.json({success: true, token: 'JWT ' + token});
