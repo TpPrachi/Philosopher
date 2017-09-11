@@ -3,22 +3,29 @@
 (() => {
   const _ = require('lodash');
 
-  trem(5000);
+  trem(50000, function(d,n){
+    console.log(d);
+    console.log(n);
+  });
 
-  function trem(n) {
-    var res = rec(n,n-1);
-    console.log(res);
+  function trem(n, cb) {
+    function rec(n,k, cb) {
+        if(k <= 1) {
+          n += 1;
+          cb(n);
+          return null;
+        } else {
+          return function(){
+              n = n+k
+              return rec.bind(this, n, k-1, cb);
+          };
+        }
+    }
+
+    return rec.bind(this, n, n-1, cb);
   }
 
-  function rec(n,k) {
-      if(k <= 1) {
-        n += 1;
-        return n;
-      } else {
-        n = n+k
-        return rec.bind(null, n, k-1);
-      }
-  }
+
 
 })();
 
