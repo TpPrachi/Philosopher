@@ -19,8 +19,8 @@
       }
   }
 
-  const findRec = 500000;
-  findFactorial(findRec, function(vv){
+  const findFact = 500000;
+  findFactorial(findFact, function(vv) {
     console.log("VV :: " + vv);
   });
 })();
