@@ -280,7 +280,7 @@
           db['philosophies'].findOne({_id: db.ObjectID(req.params.id)}, selectAfterUpdate, function(err, updatedPhilosophy){
             if(err) {
               logger.error(err);
-              res.status(200).json({"success":true, "data":"Success"});
+              res.status(500).json({"success":false, "error": err});
             }
             res.status(200).json({"success":true, "data":updatedPhilosophy});
           });
