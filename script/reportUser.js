@@ -13,23 +13,18 @@ MongoClient.connect(url, function (err, db)
 
     var collection = db.collection('reportUser');
     var type1 = {
-      "_id": ObjectId("571751efc74217130039947c"),
       "title": "Sexual Content"
     };
     var type2 = {
-      "_id": ObjectId("5717521dc742171300399484"),
       "title": "Violent or repulsive content"
     };
     var type3 =  {
-      "_id": ObjectId("57175257c74217130039948c"),
       "title": "Harmful Dangerous Acts"
     };
     var type4 =   {
-      "_id": ObjectId("57175272c7421713003994e1"),
       "title": "Child Abuse"
     };
     var type5 = {
-      "_id": ObjectId("571751efc22217130039947c"),
       "title": "Rasist Content"
     };
 
