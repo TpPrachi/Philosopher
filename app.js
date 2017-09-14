@@ -49,7 +49,7 @@ app.use('/', function(req, res, next) {
       }
       if(user) {
         req.headers.authorization = user.token;
-        req.body.UID = user.userId;
+        req.body.userId = user.userId;
       } else {
         logger.error('Invalid token provided.');
         return res.status(403).send({success: false, message: 'Invalid token provided.'});

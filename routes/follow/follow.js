@@ -54,12 +54,12 @@
   router.post('/:id/:status', function(req, res, next) {
     var post = {};
     //req.params.id : Whom I am going to follow (followedUser)
-    //req.body.UID : Logged In user Id (followingUser)
+    //req.body.userId : Logged In user Id (followingUser)
     //25 July, 2017
     if(req.params.status == 1) {
-      db['follow'].find({followedUser:db.ObjectID(req.params.id),followingUser:db.ObjectID(req.body.UID)}).toArray(function(err, followData) {
+      db['follow'].find({followedUser:db.ObjectID(req.params.id),followingUser:db.ObjectID(req.body.userId)}).toArray(function(err, followData) {
         if (followData.length == 0) {
-          post['followingUser'] = db.ObjectID(req.body.UID);
+          post['followingUser'] = db.ObjectID(req.body.userId);
           post['followedUser'] = db.ObjectID(req.params.id);
           post["createdDate"] = new Date();
 
@@ -79,7 +79,7 @@
             notify.addNotification([prepareObject]);
 
             // Code for increment community count of logged in user
-            db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.UID)}, {$inc: { communityCount: 1}});
+            db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.userId)}, {$inc: { communityCount: 1}});
 
             res.status(201).send({"success":true, "message":"Users added succesfully in your community."});
 
@@ -90,9 +90,9 @@
       });
     } else if(req.params.status == 0) {
       // remove user from community
-      db['follow'].remove({followedUser:db.ObjectID(req.params.id),followingUser:db.ObjectID(req.body.UID)});
+      db['follow'].remove({followedUser:db.ObjectID(req.params.id),followingUser:db.ObjectID(req.body.userId)});
       // For decrement count of community
-      db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.UID)}, {$inc: { communityCount: -1}});
+      db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.userId)}, {$inc: { communityCount: -1}});
       res.status(201).send({"success":true, "message": 'Removed - Unfollow'});
     } else {
       res.status(501).send({"success":true, "message": 'Please provide valid information.'});

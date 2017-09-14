@@ -23,7 +23,7 @@ router.post('/profilePhoto', function(req, res, next) {
     var filename = (new Date()).getTime() + '-' + filename;
     filename = decodeURI(filename);
 
-    var dir = process.env.FILE_STORE + '/' + req.body.UID ;
+    var dir = process.env.FILE_STORE + '/' + req.body.userId ;
     if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
     }
@@ -32,14 +32,14 @@ router.post('/profilePhoto', function(req, res, next) {
       fs.mkdirSync(profilePhoto);
     }
 
-    var path = '/public/images/profile' + req.body.UID + '/profilePhoto';
+    var path = '/public/images/profile' + req.body.userId + '/profilePhoto';
 
     var patch = {
       profilePhoto : path + '/' + filename
     }
     //Need to ssave path for profile photo
-    db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.UID)}, {$set: patch}, function(err, data) {
-      db['usersmapped'].findOneAndUpdate({userId: db.ObjectID(req.body.UID)}, {$set: patch}, function(err, data) {
+    db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.userId)}, {$set: patch}, function(err, data) {
+      db['usersmapped'].findOneAndUpdate({userId: db.ObjectID(req.body.userId)}, {$set: patch}, function(err, data) {
         if (err) {
           logger.error(err);
         }
@@ -79,7 +79,7 @@ router.post('/philosophyPhoto', function(req, res, next) {
     filename = decodeURI(filename);
     //Path where file will be uploaded
 
-    var dir = process.env.FILE_STORE + '/' + req.body.UID ;
+    var dir = process.env.FILE_STORE + '/' + req.body.userId ;
     if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
     }
@@ -88,14 +88,14 @@ router.post('/philosophyPhoto', function(req, res, next) {
       fs.mkdirSync(philosophyPhoto);
     }
 
-    var path = '/public/images/profile' + req.body.UID + '/philosophyPhoto';
+    var path = '/public/images/profile' + req.body.userId + '/philosophyPhoto';
 
     arr.push(path + '/' + filename);
 
     var patch = {
       philosophyPhoto : arr
     }
-    db['philosophies'].findOneAndUpdate({UID: db.ObjectID(req.body.UID)}, {$set: patch}, function(err, data) {
+    db['philosophies'].findOneAndUpdate({UID: db.ObjectID(req.body.userId)}, {$set: patch}, function(err, data) {
       if (err) {
         logger.error(err);
       }
@@ -132,7 +132,7 @@ router.get('/profilePhoto/:file', function(req, res, next) {
     return;
   }
 
-  var filename = process.env.FILE_STORE  + '/' + req.body.UID + '/profilePhoto/'+ req.params.file;
+  var filename = process.env.FILE_STORE  + '/' + req.body.userId + '/profilePhoto/'+ req.params.file;
 
   filename = decodeURI(filename);
   if (!fs.existsSync(filename)){
@@ -149,7 +149,7 @@ router.get('/philosophyPhoto/:file', function(req, res, next) {
     return;
   }
 
-  var filename = process.env.FILE_STORE  + '/' + req.body.UID + '/philosophyPhoto/'+ req.params.file;
+  var filename = process.env.FILE_STORE  + '/' + req.body.userId + '/philosophyPhoto/'+ req.params.file;
 
   filename = decodeURI(filename);
   if (!fs.existsSync(filename)){
