@@ -53,9 +53,9 @@
       }
       information = _.reduce(information, function(d, philosophy) {
         // special case written for check current user is liked or dislike or objection on returned philosophies
-        philosophy.isLike = _.findIndex(philosophy.like.info, { _id: req.body.UID }) != -1 ? true : false;
-        philosophy.isDislike = _.findIndex(philosophy.dislike.info, { _id: req.body.UID }) != -1 ? true : false;
-        philosophy.isObjections = _.findIndex(philosophy.objections.info, { _id: req.body.UID }) != -1 ? true : false;
+        philosophy.isLike = _.findIndex(philosophy.like.info, { _id: req.body.userId }) != -1 ? true : false;
+        philosophy.isDislike = _.findIndex(philosophy.dislike.info, { _id: req.body.userId }) != -1 ? true : false;
+        philosophy.isObjections = _.findIndex(philosophy.objections.info, { _id: req.body.userId }) != -1 ? true : false;
 
         delete philosophy.like.info;
         delete philosophy.dislike.info;
@@ -86,7 +86,7 @@
     var post = req.body;
     req.body["CreatedDate"] = new Date();
     req.body["UpdatedDate"] = new Date();
-    req.body["userId"] = req.body.UID;
+    //req.body["userId"] = req.body.userId;
     req.body["replyCount"] = 0;
     req.body['like'] = {
       count:0,
@@ -139,7 +139,7 @@
       if(_.includes(Object.keys(philosophy ? philosophy.pollAnsCount : {}), req.params.answer)) {
         req.body["CreatedDate"] = new Date();
         req.body["UpdatedDate"] = new Date();
-        req.body["userId"] = req.body.UID;
+        //req.body["userId"] = req.body.userId;
         req.body["philosophyId"] = db.ObjectID(req.params.philosophyId);
         req.body["pollAnswer"] = req.params.answer;
 
@@ -223,11 +223,11 @@
             notification = 1;
             philosophy.like.count = philosophy.like.count + 1;
             philosophy.like.info.push({
-              _id : req.body.UID,
+              _id : req.body.userId,
               date : new Date()
             });
           } else if (req.params.flag == 'false') { // remove from like info
-            var removeIds = _.remove(philosophy.like.info, {_id:req.body.UID});
+            var removeIds = _.remove(philosophy.like.info, {_id:req.body.userId});
             philosophy.like.count = philosophy.like.count - removeIds.length >= 0 ? philosophy.like.count - removeIds.length : 0;
           }
         } else if (req.params.operation == 2) { // For Dislike
@@ -235,11 +235,11 @@
             notification = 2;
             philosophy.dislike.count = philosophy.dislike.count + 1;
             philosophy.dislike.info.push({
-              _id : req.body.UID,
+              _id : req.body.userId,
               date : new Date()
             });
           } else if (req.params.flag == 'false')  { // remove from Dislike info
-            var removeIds = _.remove(philosophy.dislike.info, {_id:req.body.UID});
+            var removeIds = _.remove(philosophy.dislike.info, {_id:req.body.userId});
             philosophy.dislike.count = philosophy.dislike.count - removeIds.length >= 0 ? philosophy.dislike.count - removeIds.length : 0;
           }
         } else if (req.params.operation == 3) { // For Objections
@@ -247,11 +247,11 @@
             notification = 3;
             philosophy.objections.count = philosophy.objections.count + 1;
             philosophy.objections.info.push({
-              _id : req.body.UID,
+              _id : req.body.userId,
               date : new Date()
             });
           } else if (req.params.flag == 'false') { // remove from Objections info
-            var removeIds = _.remove(philosophy.objections.info, {_id:req.body.UID});
+            var removeIds = _.remove(philosophy.objections.info, {_id:req.body.userId});
             philosophy.objections.count = philosophy.objections.count - removeIds.length >= 0 ? philosophy.objections.count - removeIds.length : 0;
           }
         } else {
@@ -270,7 +270,7 @@
             // Prepare object for add data in notification collection
             notify.addNotification([{
               'notifyTo': philosophy.userId,
-              'notifyBy': req.body.UID,
+              'notifyBy': req.body.userId,
               'notifyType': (notification == 1 ? "2" : (notification == 2 ? '3' : '4')),
               'philosophyId': philosophy._id
             }]);

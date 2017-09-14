@@ -35,7 +35,7 @@
         //At the time of posting reply of comment need reference of philosophyId
         req.body['philosophyId'] = db.ObjectID(req.params.philosophyId);
 
-        req.body['userId'] = req.body.UID;
+        //req.body['userId'] = req.body.userId;
         req.body['createdDate'] = new Date();
         req.body['updatedDate'] = new Date();
         req.body['like'] = {
@@ -63,7 +63,7 @@
           if(req.body.replyType && req.body.replyType == 'reply') { // Add notification for reply
             var prepareObject = {};
             prepareObject["notifyTo"] = philosophy.userId;
-            prepareObject["notifyBy"] = req.body.UID;
+            prepareObject["notifyBy"] = req.body.userId;
             prepareObject["notifyType"] = "5";
             prepareObject["philosophyId"] = philosophy._id;
             prepareObject["replyId"] = replies.insertedIds[0];
@@ -74,7 +74,7 @@
               notify.addNotification(_.reduce(req.body.notifyUsers, function(n, users) {
                 n.push({
                   'notifyTo':db.ObjectID(users.id),
-                  'notifyBy':req.body.UID,
+                  'notifyBy':req.body.userId,
                   'notifyType':'6',
                   'philosophyId':philosophy._id,
                   'replyId':replies.insertedIds[0]
@@ -125,9 +125,9 @@
       }
       information = _.reduce(information, function(d, reply) {
         // special case written for check current user is liked or dislike or objection on returned philosophies
-        reply.isLike = _.findIndex(reply.like.info, { _id: req.body.UID }) != -1 ? true : false;
-        reply.isDislike = _.findIndex(reply.dislike.info, { _id: req.body.UID }) != -1 ? true : false;
-        reply.isObjections = _.findIndex(reply.objections.info, { _id: req.body.UID }) != -1 ? true : false;
+        reply.isLike = _.findIndex(reply.like.info, { _id: req.body.userId }) != -1 ? true : false;
+        reply.isDislike = _.findIndex(reply.dislike.info, { _id: req.body.userId }) != -1 ? true : false;
+        reply.isObjections = _.findIndex(reply.objections.info, { _id: req.body.userId }) != -1 ? true : false;
 
         delete reply.like.info;
         delete reply.dislike.info;
@@ -220,11 +220,11 @@
           notification = 1;
           reply.like.count = reply.like.count + 1;
           reply.like.info.push({
-            _id : req.body.UID,
+            _id : req.body.userId,
             date : new Date()
           });
         } else {
-          var removeIds = _.remove(reply.like.info, {_id:req.body.UID});
+          var removeIds = _.remove(reply.like.info, {_id:req.body.userId});
           reply.like.count = reply.like.count - removeIds.length >= 0 ? reply.like.count - removeIds.length : 0;
         }
       } else if (req.params.operation == 2) { // For Dislike
@@ -232,11 +232,11 @@
           notification = 2;
           reply.dislike.count = reply.dislike.count + 1;
           reply.dislike.info.push({
-            _id : req.body.UID,
+            _id : req.body.userId,
             date : new Date()
           });
         } else {
-          var removeIds = _.remove(reply.dislike.info, {_id:req.body.UID});
+          var removeIds = _.remove(reply.dislike.info, {_id:req.body.userId});
           reply.dislike.count = reply.dislike.count - removeIds.length >= 0 ? reply.dislike.count - removeIds.length : 0;
         }
       } else if (req.params.operation == 3) { // For Objections
@@ -244,11 +244,11 @@
           notification = 3;
           reply.objections.count = reply.objections.count + 1;
           reply.objections.info.push({
-            _id : req.body.UID,
+            _id : req.body.userId,
             date : new Date()
           });
         } else {
-          var removeIds = _.remove(reply.objections.info, {_id:req.body.UID});
+          var removeIds = _.remove(reply.objections.info, {_id:req.body.userId});
           reply.objections.count = reply.objections.count - removeIds.length >= 0 ? reply.objections.count - removeIds.length : 0;
         }
       } else {
@@ -266,7 +266,7 @@
         if(notification >= 1 && notification <= 3 && !_.isUndefined(reply)) {
           notify.addNotification([{
             'notifyTo': reply.userId,
-            'notifyBy': req.body.UID,
+            'notifyBy': req.body.userId,
             'notifyType': (notification == 1 ? "2" : (notification == 2 ? '3' : '4')),
             'philosophyId': reply.philosophyId,
             'replyId': db.ObjectID(req.params.id)

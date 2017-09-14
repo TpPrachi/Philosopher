@@ -31,7 +31,7 @@
         res.status(200).json({success: true, data : user});
       }else {
         logger.error("Provided Old Password is not match with the record.");
-        res.status(400).send({"sucess":false, "message":"Provided Old Password is not match with the record."});
+        res.status(400).send({"success":false, "message":"Provided Old Password is not match with the record."});
       }
     });
   });
@@ -83,7 +83,7 @@
                     logger.info(user.value);
                     logger.error(e);
                   } else {
-                    logger.info(user.value.email.underline + ' got registered sucessfully');
+                    logger.info(user.value.email.underline + ' got registered successfully');
                   }
                 });
                 delete user.value.password;
@@ -101,7 +101,7 @@
       });
     }else {
       logger.error("New Password & Confirm Password must be same.");
-      res.status(400).send({"sucess":false, "message":"New Password & Confirm Password must be same."});
+      res.status(400).send({"success":false, "message":"New Password & Confirm Password must be same."});
     }
   });
 

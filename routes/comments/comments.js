@@ -22,7 +22,7 @@
     var post = req.body;
     //At the time of posting comment need to add philosophyId
     req.body['pId'] = db.ObjectID(req.params.id);
-    req.body['userId'] = req.body.UID;
+    req.body['userId'] = req.body.userId;
     req.body['createDate'] = new Date();
     req.body['like'] = {
       count:0,
@@ -83,11 +83,11 @@
         if (req.params.flag == 'true') {
           comment.like.count = comment.like.count + 1;
           comment.like.info.push({
-            _id : req.body.UID,
+            _id : req.body.userId,
             date : new Date()
           });
         } else {
-          var removeIds = _.remove(comment.like.info, {_id:req.body.UID});
+          var removeIds = _.remove(comment.like.info, {_id:req.body.userId});
           comment.like.count = comment.like.count - removeIds.length;
           comment.like.count = comment.like.count >= 0 ? comment.like.count : 0;
         }
@@ -95,11 +95,11 @@
         if (req.params.flag == 'true') {
           comment.dislike.count = comment.dislike.count + 1;
           comment.dislike.info.push({
-            _id : req.body.UID,
+            _id : req.body.userId,
             date : new Date()
           });
         } else {
-          var removeIds = _.remove(comment.dislike.info, {_id:req.body.UID});
+          var removeIds = _.remove(comment.dislike.info, {_id:req.body.userId});
           comment.dislike.count = comment.dislike.count - removeIds.length;
           comment.dislike.count = comment.dislike.count >= 0 ? comment.dislike.count : 0;
         }
@@ -107,11 +107,11 @@
         if (req.params.flag == 'true') {
           comment.objections.count = comment.objections.count + 1;
           comment.objections.info.push({
-            _id : req.body.UID,
+            _id : req.body.userId,
             date : new Date()
           });
         } else {
-          var removeIds = _.remove(comment.objections.info, {_id:req.body.UID});
+          var removeIds = _.remove(comment.objections.info, {_id:req.body.userId});
           comment.objections.count = comment.objections.count - removeIds.length;
           comment.objections.count = comment.objections.count >= 0 ? comment.objections.count : 0;
         }
