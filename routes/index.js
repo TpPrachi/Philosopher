@@ -17,6 +17,7 @@ var _configure = function(app) {
   var upload = require('./upload');
   var logout = require('./logout');
   var notification = require('./notification');
+  var reports = require('./reports');
 
   app.use('/upload', upload);
   app.use('/sample', sample);
@@ -28,6 +29,7 @@ var _configure = function(app) {
   app.use('/reply', reply);
   app.use('/logout', logout);
   app.use('/notification', notification);
+  app.use('/reports', reports);
 
 };
 
