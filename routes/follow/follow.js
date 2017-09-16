@@ -1,5 +1,5 @@
 /**
-* @name routes/trends/trends.js
+* @name routes/follow/follow.js
 * @author Jaydipsinh Vaghela <jaydip.vaghela@gmail.com>
 *
 * @version 0.0.0
@@ -12,11 +12,7 @@
   var db = require('../../lib/db');
   var logger = require('../../lib/logger')(__filename);
   var notify = require('../../lib/notification');
-  var validate = require('../../lib/validator');
-  var schema = require('./schema');
-  var softSchema = require('./softSchema');
   var query = require('../../lib/query');
-  var _ = require('lodash');
 
   /* GET API for ALL records from collection. */
   router.get('/:id', query.filter, function(req, res, next) {

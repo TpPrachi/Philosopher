@@ -142,16 +142,18 @@
   });
 
   // GET API for getting all users who reply on philosophyId. We are used this in reply all functionality
-  router.get('/users/:replyId', function(req, res) {
+  router.get('/users/:philosophyId', query.filter, function(req, res) {
     var select = {};
     select["users._id"] = 1;
     select["users.fullname"] = 1;
     select["users.profilePhoto"] = 1;
 
+    // For adding search criteria if passed in query string for find.
+    req.filter['philosophyId'] = db.ObjectID(req.params.philosophyId);
+    req.filter['users.fullname'] = "Komal Saxena";
+    logger.info("req.filter :: " + JSON.stringify(req.filter))
     // Build aggregate object for get users details based on operations with users information
     var aggregate = [{
-        "$match": { _id: db.ObjectID(req.params.replyId)}
-      },{
         $lookup: {
            from: "usersmapped",
            foreignField: "userId",
@@ -159,14 +161,18 @@
            as: "users"
         }
       },{
-        $project: select
+          "$match": req.filter
+      },{
+        $skip:req.options['skip']
+      },{
+        $limit:req.options['limit']
       },{
         $sort: {"users.fullname" : 1}
-        // $sort: 'fullname'
-        //$skip - $limit (Not able to decide) - Prachi
+      },{
+        $project: select
       }
     ];
-    //
+
     db['reply'].aggregate(aggregate, function(err, information) {
       if(err) {
         logger.error("Error while getting users data of philosophy :: " + err);
