@@ -1,6 +1,6 @@
 /**
 * @name routes/reports/reports.js
-* @author Jaydipsinh Vaghela <jaydip.vaghela@gmail.com>
+* @author Prachi Thakkar <prachi@gmail.com>
 *
 * @version 0.0.0
 */
@@ -12,7 +12,6 @@
   var logger = require('../../lib/logger')(__filename);
 
   router.post('/:reportUserId/:reportId', function(req, res, next) {
-    //will be careful next time for this kind of find - findOne differece - Prachi
     db['reportUser'].findOne({_id:db.ObjectID(req.params.reportId)}, function(err, reportData) {
       var postReport = {};
       if (reportData.length > 0) {
@@ -28,7 +27,6 @@
           res.status(201).send({"success":true, "message":"User reported succefully."});
         });
       } else {
-        //I thought it was a bad request.wrong information -- prachi
         res.status(500).send({"success":false, "message": "Please provide valid information for report."});
       }
     });
