@@ -18,7 +18,7 @@ var _configure = function(app) {
   var logout = require('./logout');
   var notification = require('./notification');
   var reports = require('./reports');
-  //var groups = require('./groups');
+  var groups = require('./groups');
 
   app.use('/upload', upload);
   app.use('/sample', sample);
@@ -31,7 +31,7 @@ var _configure = function(app) {
   app.use('/logout', logout);
   app.use('/notification', notification);
   app.use('/reports', reports);
-  //app.use('/groups', groups);
+  app.use('/groups', groups);
 
 };
 
