@@ -12,7 +12,7 @@
   var logger = require('../../lib/logger')(__filename);
 
   router.get('/', function(req, res, next) {
-    db['reports'].find({}).toArray(function(err, reports) {
+    db['reportUser'].find({}).toArray(function(err, reports) {
         if(err) {
           logger.error(err);
           res.status(501).send({"success":false, "message":err});
