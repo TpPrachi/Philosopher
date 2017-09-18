@@ -126,6 +126,7 @@ router.post('/philosophyPhoto', function(req, res, next) {
   });
 });
 
+//http://localhost:3009/upload/profilePhoto/1505755277674-IMG_1901.JPG
 router.get('/profilePhoto/:file', function(req, res, next) {
   if(!req.params.file){
     res.status(422).json({'message' : 'file not provided'});
