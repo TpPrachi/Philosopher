@@ -11,6 +11,16 @@
   var db = require('../../lib/db');
   var logger = require('../../lib/logger')(__filename);
 
+  router.get('/', function(req, res, next) {
+    db['reports'].find({}).toArray(function(err, reports) {
+        if(err) {
+          logger.error(err);
+          res.status(501).send({"success":false, "message":err});
+        }
+        res.status(201).send({"success":true, "data":reports});
+    });
+  });
+
   router.post('/:reportUserId/:reportId', function(req, res, next) {
     db['reportUser'].findOne({_id:db.ObjectID(req.params.reportId)}, function(err, reportData) {
       var postReport = {};
