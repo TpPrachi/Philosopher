@@ -112,6 +112,8 @@
            as: "users"
         }
       },{
+        $sort: {'UpdatedDate':-1}
+      },{
         $skip:req.options['skip']
       },{
         $limit:req.options['limit']
