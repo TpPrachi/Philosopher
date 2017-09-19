@@ -21,9 +21,8 @@
         // If we find any error still allow to execute query
         logger.error("Error while getting following information of users for filtering.");
       }
-      var users = [];
       // Prepare array of all users that logged in user followed.
-      users = _.reduce(followed, function(c, f) {
+      var users = _.reduce(followed, function(c, f) {
         c.push({'userId': db.ObjectID(f.followedUser), 'isAdmin' : false});
         return c;
       }, [{'userId': db.ObjectID(req.body.userId), 'isAdmin' : true}]);
@@ -31,21 +30,10 @@
     });
   });
 
-  // Input Parameters should be like
-  // {
-  //     "groupName" : "Important Group",
-  //     "adminUserId" : "59b69dee3985b53cac5a133c",
-  //     "groupMembers" : [
-  //         "59b69dee3985b53cac5a133c",
-  //         "59b69d6133a5953c0d62a40e",
-  //         "599ec31b2e26d4258855d5a2"
-  //     ]
-  // }
-  
 router.post('/create', function(req, res, next) {
   var postGroup = {};
 
-  postGroup["CreatedDate"] = new Date();
+  postGroup["createdDate"] = new Date();
   postGroup["groupName"] = req.body.groupName;
   postGroup["adminUserId"] = req.body.userId;
   var objectId = [];
@@ -84,10 +72,8 @@ router.get('/:groupId', function(req, res, next) {
          from: "usersmapped",
          localField: "groupMembers",
          foreignField: "userId",
-         as: "userDetail"
+         as: "users"
       }
-    },{
-      $sort: {"users.fullname" : 1}
     }
   ];
 
@@ -101,5 +87,5 @@ router.get('/:groupId', function(req, res, next) {
 });
 
 
-    module.exports = router;
-  })();
+  module.exports = router;
+})();
