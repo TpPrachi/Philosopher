@@ -105,7 +105,7 @@
     if(req.body['philosophyType'] == 'poll') {
       req.body["pollCount"] = 0;
       req.body["pollAnsCount"] = {};
-      _.forEach(Object.keys(req.body['pollQuestions']), function(key) {
+      _.forEach(Object.keys(req.body['pollAnswer']), function(key) {
         req.body["pollAnsCount"][key] = 0;
       });
     }
@@ -150,8 +150,15 @@
             res.status(501).send({"success":false, "message":err});
           }
           // Here for update poll answer count as well as individual question answer count for later use
-          db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.philosophyId)}, {$set: {'UpdatedDate': new Date()}, $inc: { 'pollCount': 1, ["pollAnsCount." + req.params.answer] : 1}});
-          res.status(201).send({"success":true, "message":poll.insertedIds});
+          db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.philosophyId)}, {$set: {'UpdatedDate': new Date()}, $inc: { 'pollCount': 1, ["pollAnsCount." + req.params.answer] : 1}}, {'new' : true }, function(err, philosophy) {
+            if(err) {
+              logger.error('Error while answer of poll question :: ' + err);
+              res.status(501).send({"success":false, "message":err});
+            }
+            logger.info("philosophy :: " + JSON.stringify(philosophy));
+            res.status(201).send({"success":true, "data":philosophy});
+          });
+
         });
       } else {
         if(!_.isNull(philosophy)) {
