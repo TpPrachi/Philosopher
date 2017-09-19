@@ -16,6 +16,7 @@
 
   //http://localhost:3009/groups/followedUsers
   router.get('/users', function(req, res, next) {
+    // Need to aggregate - Jaydip
     db['follow'].find({followingUser:db.ObjectID(req.body.userId)}, {followedUser:1}).toArray(function(err, followed) {
       if(err) {
         // If we find any error still allow to execute query
@@ -33,9 +34,12 @@
 router.post('/', function(req, res, next) {
   var postGroup = {};
 
-  postGroup["createdDate"] = new Date();
+  postGroup["CreatedDate"] = new Date();
+  postGroup["UpdatedDate"] = new Date(); // there should be always to date for any insert object CreatedDate and UpdatedDate - Jaydip
   postGroup["groupName"] = req.body.groupName;
   postGroup["adminUserId"] = req.body.userId;
+
+  // No Need to create extra variable directly use _.reduce on req.body.groupMembers - Jaydip
   var objectId = [];
   _.forIn(req.body.groupMembers, function(id) {
     objectId.push(db.ObjectID(id));
@@ -99,6 +103,8 @@ router.delete('/:id', function(req, res, next) {
 //You can not add logedIn user/Admin User Id 's Id in removeMembers.
 router.patch('/:id', function(req, res, next) {
   var patch = {};
+
+  // if there is no groupName and removeMembers then What you don't get reply of that request - Jaydip
   if (req.body.groupName || req.body.removeMembers) {
     db['groups'].findOne({_id:db.ObjectID(req.params.id), adminUserId: db.ObjectID(req.body.userId)}, function(err, data){
       if(err) {
@@ -109,17 +115,20 @@ router.patch('/:id', function(req, res, next) {
         res.status(501).send({"success":false, "message":'Group Not Found.'});
       }else {
 
+        // unclear why you doing this? - Jaydip
         if (req.body.groupName) {
           patch["groupName"] = req.body.groupName;
         }else {
           patch["groupName"] = data.groupName;
         }
 
-
+        // This is not good code need to change it - Jaydip
         if (req.body.removeMembers && req.body.addMembers) {
           var arrayRemove = _.filter(data.groupMembers, function(id) {
             return req.body.removeMembers.indexOf(id.toString()) == -1;
           });
+
+          // Same here need to use reduce - Jaydip
           var objectId = [];
           _.forIn(req.body.addMembers, function(id) {
             objectId.push(db.ObjectID(id));
@@ -144,6 +153,7 @@ router.patch('/:id', function(req, res, next) {
             logger.error(err);
             res.status(501).send({"success":false, "message":err});
           }
+          // Here might be need to return update document for group - Jaydip
           res.status(200).send({"success":true});
         });
       }
