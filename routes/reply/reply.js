@@ -151,8 +151,6 @@
     select["users.username"] = 1;
     select["users.profilePhoto"] = 1;
 
-    // For adding search criteria if passed in query string for find.
-
     // Build aggregate object for get users details based on operations with users information
     var aggregate = [{
         $lookup: {
@@ -167,8 +165,6 @@
         $skip:req.options['skip']
       },{
         $limit:req.options['limit']
-      },{
-        $sort: {"users.username" : 1}
       },{
         $project: select
       }
