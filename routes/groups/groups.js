@@ -97,37 +97,59 @@ router.delete('/:id', function(req, res, next) {
 });
 
 //You can not add logedIn user/Admin User Id 's Id in removeMembers.
-// router.patch('/:id', function(req, res, next) {
-//   var patch = {};
-//   if (req.body.groupName) {
-//     patch["groupName"] = req.body.groupName;
-//   }
-//   patch["modifiedDate"] = new Date();
-//   // "removeMembers" : ["599ec31b2e26d4258855d5a2","599ec31b2e26d4258855d5a2"];
-//   if (req.body.groupName || req.body.removeMembers) {
-//     db['groups'].findOne({_id:db.ObjectID(req.params.id), adminUserId: db.ObjectID(req.body.userId)}, function(err, data){
-//       if(err) {
-//         logger.error(err);
-//         res.status(501).send({"success":false, "message":err});
-//       }
-//
-//       if (req.body.removeMembers) {
-//
-//         var objectId = [];
-//         _.forIn(req.body.removeMembers, function(id) {
-//           objectId.push(db.ObjectID(id));
-//         });
-//
-//         req.body.removeMembers = objectId;
-//
-//         console.log(req.body.removeMembers);
-//
-//         patch["groupMembers"] = _.filter(data.groupMembers, req.body.removeMembers);
-//         console.log(patch["groupMembers"]);
-//       }
-//     });
-//   }
-// });
+router.patch('/:id', function(req, res, next) {
+  var patch = {};
+  if (req.body.groupName || req.body.removeMembers) {
+    db['groups'].findOne({_id:db.ObjectID(req.params.id), adminUserId: db.ObjectID(req.body.userId)}, function(err, data){
+      if(err) {
+        logger.error(err);
+        res.status(501).send({"success":false, "message":err});
+      }
+      if (!data) {
+        res.status(501).send({"success":false, "message":'Group Not Found.'});
+      }else {
+
+        if (req.body.groupName) {
+          patch["groupName"] = req.body.groupName;
+        }else {
+          patch["groupName"] = data.groupName;
+        }
+
+
+        if (req.body.removeMembers && req.body.addMembers) {
+          var arrayRemove = _.filter(data.groupMembers, function(id) {
+            return req.body.removeMembers.indexOf(id.toString()) == -1;
+          });
+          var objectId = [];
+          _.forIn(req.body.addMembers, function(id) {
+            objectId.push(db.ObjectID(id));
+          });
+          patch["groupMembers"] = arrayRemove.concat(objectId);
+        }else if(req.body.removeMembers){
+          patch["groupMembers"] = _.filter(data.groupMembers, function(id) {
+            return req.body.removeMembers.indexOf(id.toString()) == -1;
+          });
+        }else if(req.body.addMembers){
+          var objectId = [];
+          _.forIn(req.body.addMembers, function(id) {
+            objectId.push(db.ObjectID(id));
+          });
+          patch["groupMembers"] = data.groupMembers.concat(objectId);
+        }else {
+          patch["groupMembers"] = data.groupMembers;
+        }
+
+        db['groups'].update({_id: db.ObjectID(req.params.id)}, {$set: {groupName : patch["groupName"], groupMembers : patch["groupMembers"]}}, function(err, updatedGroup) {
+          if(err) {
+            logger.error(err);
+            res.status(501).send({"success":false, "message":err});
+          }
+          res.status(200).send({"success":true});
+        });
+      }
+    });
+  }
+});
 
 
   module.exports = router;
