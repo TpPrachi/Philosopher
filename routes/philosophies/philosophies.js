@@ -150,13 +150,15 @@
             res.status(501).send({"success":false, "message":err});
           }
           // Here for update poll answer count as well as individual question answer count for later use
-          db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.philosophyId)}, {$set: {'UpdatedDate': new Date()}, $inc: { 'pollCount': 1, ["pollAnsCount." + req.params.answer] : 1}}, {'new' : true }, function(err, philosophy) {
+          db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.philosophyId)}, {$set: {'UpdatedDate': new Date()}, $inc: { 'pollCount': 1, ["pollAnsCount." + req.params.answer] : 1}}, {projection: {pollCount:1, pollAnsCount:1}}, function(err, test) {
             if(err) {
               logger.error('Error while answer of poll question :: ' + err);
               res.status(501).send({"success":false, "message":err});
             }
-            logger.info("philosophy :: " + JSON.stringify(philosophy));
-            res.status(201).send({"success":true, "data":philosophy});
+            db['philosophies'].findOne({_id: db.ObjectID(req.params.philosophyId)}, {pollCount:1, pollAnsCount:1}, function(err, udpatedPhilosophy){
+                res.status(201).send({"success":true, "data":udpatedPhilosophy});
+            });
+
           });
 
         });
@@ -312,6 +314,7 @@
     }
     select["users.userId"] = 1;
     select["users.fullname"] = 1;
+    select["users.username"] = 1;
 
     // Build aggregate object for get users details based on operations with information
     var aggregate = [{
@@ -328,7 +331,7 @@
       },{
         $project: select
       },{
-        $sort: {fullname: 1}
+        $sort: {username: 1}
       }
     ];
 

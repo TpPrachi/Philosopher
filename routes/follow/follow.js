@@ -27,7 +27,7 @@
            as: "users"
         }
       },{
-        $sort: {"users.fullname" : 1}
+        $sort: {"users.username" : 1}
       }, {
         $skip: req.options.skip
       }, {

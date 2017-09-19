@@ -146,12 +146,11 @@
     var select = {};
     select["users._id"] = 1;
     select["users.fullname"] = 1;
+    select["users.username"] = 1;
     select["users.profilePhoto"] = 1;
 
     // For adding search criteria if passed in query string for find.
-    req.filter['philosophyId'] = db.ObjectID(req.params.philosophyId);
-    req.filter['users.fullname'] = "Komal Saxena";
-    logger.info("req.filter :: " + JSON.stringify(req.filter))
+
     // Build aggregate object for get users details based on operations with users information
     var aggregate = [{
         $lookup: {
@@ -167,7 +166,7 @@
       },{
         $limit:req.options['limit']
       },{
-        $sort: {"users.fullname" : 1}
+        $sort: {"users.username" : 1}
       },{
         $project: select
       }
@@ -306,6 +305,7 @@
     }
     select["users.userId"] = 1;
     select["users.fullname"] = 1;
+    select["users.username"] = 1;
 
     // Build aggregate object for get users details based on operations with information
     var aggregate = [{
