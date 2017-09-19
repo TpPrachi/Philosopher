@@ -164,9 +164,7 @@
       },{
         $project: select
       },{
-        $sort: {username : 1}
-        // $sort: 'fullname'
-        //$skip - $limit (Not able to decide) - Prachi
+        $sort: {'UpdatedDate':-1}
       }
     ];
     //
