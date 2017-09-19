@@ -15,7 +15,6 @@
   var query = require('../../lib/query');
 
   //http://localhost:3009/groups/followedUsers
-
   router.get('/followedUsers', function(req, res, next) {
     db['follow'].find({followingUser:db.ObjectID(req.body.userId)}, {followedUser:1}).toArray(function(err, followed) {
       if(err) {
@@ -32,60 +31,34 @@
     });
   });
 
-//   Responce : {
-//     "success": true,
-//     "users": [
-//         {
-//             "userId": "59b69dee3985b53cac5a133c",
-//             "isAdmin": true
-//         },
-//         {
-//             "userId": "59b69d6133a5953c0d62a40e",
-//             "isAdmin": false
-//         },
-//         {
-//             "userId": "599ec31b2e26d4258855d5a2",
-//             "isAdmin": false
-//         },
-//         {
-//             "userId": "5973af82cbc7a6363618b92a",
-//             "isAdmin": false
-//         }
-//     ]
-// }
-
-// Input for create user
-
-// {
-// 	"groupName" : "My First Group",
-// 	"groupMembers" : [{
-//     "userId": "59b69dee3985b53cac5a133c",
-//     "isAdmin": true
-//   },
-//   {
-//     "userId": "59b69d6133a5953c0d62a40e",
-//     "isAdmin": false
-//   },
-//   {
-//     "userId": "599ec31b2e26d4258855d5a2",
-//     "isAdmin": false
-//   }]
-// }
-
+  // Input Parameters should be like
+  // {
+  //     "groupName" : "Important Group",
+  //     "adminUserId" : "59b69dee3985b53cac5a133c",
+  //     "groupMembers" : [
+  //         "59b69dee3985b53cac5a133c",
+  //         "59b69d6133a5953c0d62a40e",
+  //         "599ec31b2e26d4258855d5a2"
+  //     ]
+  // }
+  
 router.post('/create', function(req, res, next) {
   var postGroup = {};
 
   postGroup["CreatedDate"] = new Date();
   postGroup["groupName"] = req.body.groupName;
   postGroup["adminUserId"] = req.body.userId;
-  postGroup["groupMembers"] = req.body.groupMembers;
+  var objectId = [];
+  _.forIn(req.body.groupMembers, function(id) {
+    objectId.push(db.ObjectID(id));
+  });
+  postGroup["groupMembers"] = objectId;
 
   db['groups'].insert(postGroup, function(err, group) {
     if(err) {
       logger.error(err);
       res.status(501).send({"success":false, "message":err});
     }
-    console.log(group);
     res.status(201).send({"success":true, "message":group.ops[0].groupName + ' creted succefully.'});
   });
 });
@@ -100,40 +73,29 @@ router.get('/',query.filter , function(req, res, next) {
   });
 });
 
-router.get('/:groupId', function(req, res, next) {
-  db['groups'].findOne({_id:db.ObjectID(req.params.groupId)}, function(err, group) {
-    if(err){
-      logger.error(err);
-      res.status(501).send({"success":false, "message":err});
-    }
-    console.log(group);
-    res.status(200).json({"success":true, "data":group});
-  });
-});
 
-router.get('/:adminUserId', query.filter, function(req, res, next) {
-  // Build aggregate object for get users details based on following information
-  //groupId : 59c0185766dc9277e78d262d
+router.get('/:groupId', function(req, res, next) {
   var aggregate = [{
-      "$match": { adminUserId: db.ObjectID(req.params.adminUserId)}
+      "$match": { _id: db.ObjectID(req.params.groupId)}
+    },{
+      $unwind : "$groupMembers"
     },{
       $lookup: {
          from: "usersmapped",
-         localField: 'adminUserId',
+         localField: "groupMembers",
          foreignField: "userId",
-         as: "users"
+         as: "userDetail"
       }
     },{
       $sort: {"users.fullname" : 1}
     }
   ];
-  //
+
   db['groups'].aggregate(aggregate, function(err, group) {
     if(err) {
       logger.error(err);
       res.status(501).send({"success":false, "message":err});
     }
-    console.log(group);
     res.status(201).json({"success":true, "data":group});
   });
 });
