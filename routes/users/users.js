@@ -88,6 +88,7 @@
                 });
                 delete user.value.password;
                 delete user.value.tempPassword;
+                delete user.value.oldPasssword;
                 res.status(200).json({success: true, token: UUID, user : user.value});
               });
               // return the information including UUID mappend with JWT token
@@ -108,7 +109,7 @@
   /* GET API for ALL records from collection. */
   router.get('/', query.filter, function(req, res, next) {
     var allUsers = [];
-    db['users'].find(req.filter, req.options.select || {password:0,tempPassword:0}, req.options).toArray(function(err, users) {
+    db['users'].find(req.filter, req.options.select || {password:0, tempPassword:0, oldPasssword:0}, req.options).toArray(function(err, users) {
       if(err){
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
@@ -119,7 +120,7 @@
 
   /* GET API for selected record from collection. */
   router.get('/:id', function(req, res, next) {
-    db['users'].find({_id: db.ObjectID(req.params.id)},{password:0,tempPassword:0}).toArray(function(err, users) {
+    db['users'].find({_id: db.ObjectID(req.params.id)},{password:0,tempPassword:0 ,oldPasssword:0}).toArray(function(err, users) {
       if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
