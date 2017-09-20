@@ -21,10 +21,6 @@
   var util = require('./util');
   var notify = require('../../lib/notification');
 
-  // Create single api which return count of all 4 points - may be not needed
-  // Create api for getting list of all users who like (all 4) philosophies with username,user profile pic display link, user id
-  // How to manage multilevel commnets and there info to display users information
-
   /* GET API for ALL records from collection. */
   router.get('/', query.filter, function(req, res, next) {
     // Build aggregate object for get users details based on operations with information
@@ -67,7 +63,7 @@
         return d;
       }, []);
 
-      res.status(201).json(information);
+      res.status(201).json({"success":true, "data":information});
     });
 
   });
