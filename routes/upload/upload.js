@@ -32,7 +32,7 @@ router.post('/profilePhoto', function(req, res, next) {
       fs.mkdirSync(profilePhoto);
     }
 
-    var path = '/public/images/profile' + req.body.userId + '/profilePhoto';
+    var path = '/public/images/profile/' + req.body.userId + '/profilePhoto';
 
     var patch = {
       profilePhoto : path + '/' + filename
@@ -88,7 +88,7 @@ router.post('/philosophyPhoto', function(req, res, next) {
       fs.mkdirSync(philosophyPhoto);
     }
 
-    var path = '/public/images/profile' + req.body.userId + '/philosophyPhoto';
+    var path = '/public/images/profile/' + req.body.userId + '/philosophyPhoto';
 
     arr.push(path + '/' + filename);
 
@@ -126,6 +126,7 @@ router.post('/philosophyPhoto', function(req, res, next) {
   });
 });
 
+//http://localhost:3009/upload/profilePhoto/1505755277674-IMG_1901.JPG
 router.get('/profilePhoto/:file', function(req, res, next) {
   if(!req.params.file){
     res.status(422).json({'message' : 'file not provided'});

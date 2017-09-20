@@ -18,7 +18,7 @@ var schema = {
   philosophy: rExtraLargeString.label('Philosophy'),
   philosophyType: rString.label('Philosophy Type'),
   trends: any.label('Trends array'),
-  pollQuestions: any.label('Questions of poll'),
+  pollAnswer: any.label('Answer of poll'),
   pollCount: number.label("Total number of answer given of poll"),
   pollLength: any.label('Number of days poll active'),
   like:object({

@@ -38,6 +38,8 @@
            as: "users"
         }
       },{
+        $sort: {'UpdatedDate':-1}
+      },{
         $skip:req.options['skip']
       },{
         $limit:req.options['limit']
@@ -105,7 +107,7 @@
     if(req.body['philosophyType'] == 'poll') {
       req.body["pollCount"] = 0;
       req.body["pollAnsCount"] = {};
-      _.forEach(Object.keys(req.body['pollQuestions']), function(key) {
+      _.forEach(Object.keys(req.body['pollAnswer']), function(key) {
         req.body["pollAnsCount"][key] = 0;
       });
     }
@@ -150,8 +152,17 @@
             res.status(501).send({"success":false, "message":err});
           }
           // Here for update poll answer count as well as individual question answer count for later use
-          db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.philosophyId)}, {$set: {'UpdatedDate': new Date()}, $inc: { 'pollCount': 1, ["pollAnsCount." + req.params.answer] : 1}});
-          res.status(201).send({"success":true, "message":poll.insertedIds});
+          db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.philosophyId)}, {$set: {'UpdatedDate': new Date()}, $inc: { 'pollCount': 1, ["pollAnsCount." + req.params.answer] : 1}}, {projection: {pollCount:1, pollAnsCount:1}}, function(err, test) {
+            if(err) {
+              logger.error('Error while answer of poll question :: ' + err);
+              res.status(501).send({"success":false, "message":err});
+            }
+            db['philosophies'].findOne({_id: db.ObjectID(req.params.philosophyId)}, {pollCount:1, pollAnsCount:1}, function(err, udpatedPhilosophy){
+                res.status(201).send({"success":true, "data":udpatedPhilosophy});
+            });
+
+          });
+
         });
       } else {
         if(!_.isNull(philosophy)) {
@@ -305,6 +316,7 @@
     }
     select["users.userId"] = 1;
     select["users.fullname"] = 1;
+    select["users.username"] = 1;
 
     // Build aggregate object for get users details based on operations with information
     var aggregate = [{
@@ -321,7 +333,7 @@
       },{
         $project: select
       },{
-        $sort: {fullname: 1}
+        $sort: {username: 1}
       }
     ];
 

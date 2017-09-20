@@ -1,7 +1,7 @@
 var mongodb = require('mongodb');
 var MongoClient = mongodb.MongoClient;
 
-var url = (process.env.DB_PORT ? process.env.DB_PORT.replace('tcp://','mongodb://') : 'mongodb://localhost:27017') + ('/' + (process.env.DB_NAME || '/web'));
+var url = (process.env.DB_PORT ? process.env.DB_PORT.replace('tcp://','mongodb://') : 'mongodb://localhost:27017') + ('/' + (process.env.DB_NAME || 'philosophers'));
 
 MongoClient.connect(url, function (err, db)
 {

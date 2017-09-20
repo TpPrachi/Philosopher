@@ -10,6 +10,7 @@ var bool = types.bool;
 var userSignUp = {
   email: rString.label('Email').email(),
   fullname : rString.label('Full Name'),
+  username : rString.label('User Name'),
   dateOfBirth : date.label('Date Of Birth'),
   gender : string.label('Gender'),
   biolosophy : bigString.label('Biolosophy'),

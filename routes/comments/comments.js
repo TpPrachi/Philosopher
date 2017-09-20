@@ -147,6 +147,7 @@
     }
     select["users._id"] = 1;
     select["users.fullname"] = 1;
+    select["users.username"] = 1;
 
     // Build aggregate object for get users details based on operations with information
     var aggregate = [{
@@ -163,9 +164,7 @@
       },{
         $project: select
       },{
-        $sort: {fullname : 1}
-        // $sort: 'fullname'
-        //$skip - $limit (Not able to decide) - Prachi
+        $sort: {'UpdatedDate':-1}
       }
     ];
     //

@@ -112,6 +112,8 @@
            as: "users"
         }
       },{
+        $sort: {'UpdatedDate':-1}
+      },{
         $skip:req.options['skip']
       },{
         $limit:req.options['limit']
@@ -142,16 +144,15 @@
   });
 
   // GET API for getting all users who reply on philosophyId. We are used this in reply all functionality
-  router.get('/users/:replyId', function(req, res) {
+  router.get('/users/:philosophyId', query.filter, function(req, res) {
     var select = {};
     select["users._id"] = 1;
     select["users.fullname"] = 1;
+    select["users.username"] = 1;
     select["users.profilePhoto"] = 1;
 
     // Build aggregate object for get users details based on operations with users information
     var aggregate = [{
-        "$match": { _id: db.ObjectID(req.params.replyId)}
-      },{
         $lookup: {
            from: "usersmapped",
            foreignField: "userId",
@@ -159,14 +160,16 @@
            as: "users"
         }
       },{
-        $project: select
+          "$match": req.filter
       },{
-        $sort: {"users.fullname" : 1}
-        // $sort: 'fullname'
-        //$skip - $limit (Not able to decide) - Prachi
+        $skip:req.options['skip']
+      },{
+        $limit:req.options['limit']
+      },{
+        $project: select
       }
     ];
-    //
+
     db['reply'].aggregate(aggregate, function(err, information) {
       if(err) {
         logger.error("Error while getting users data of philosophy :: " + err);
@@ -300,6 +303,7 @@
     }
     select["users.userId"] = 1;
     select["users.fullname"] = 1;
+    select["users.username"] = 1;
 
     // Build aggregate object for get users details based on operations with information
     var aggregate = [{

@@ -37,6 +37,8 @@
            as: "philosophy"
         }
       },{
+        $sort: {'UpdatedDate':-1}
+      },{
         $skip:req.options['skip']
       },{
         $limit:req.options['limit']
