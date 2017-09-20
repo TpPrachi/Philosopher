@@ -61,42 +61,35 @@
           }, {returnOriginal: false}, function(err, user) {
             logger.info('Change Password successfully.');
             // Compare req password hash with usered store password hash
-            var isMatch = true;
-            if (isMatch) {
-              // if user is found and password is right create a token with jwt standard
+            db['users'].findOne({_id: db.ObjectID(req.params.userId)}, function(err, updatedUser) {
               var inputForToken = {};
-              inputForToken['_id'] = user.value._id;
-              inputForToken['email'] = user.value.email;
-              inputForToken['password'] = user.value.password;
+              inputForToken['_id'] = updatedUser._id;
+              inputForToken['email'] = updatedUser.email;
+              inputForToken['password'] = updatedUser.password;
               inputForToken['timestamp'] = new Date().getTime();
 
               var token = jwt.encode(inputForToken, config.secret);
               var UUID = uuidV1();
 
               // We are store actual token in tokenmapped table and send UUID to authorization token to user with response.
-              db['tokenmapped'].findOneAndUpdate({userId : db.ObjectID(user.value._id)},{$set : {token:'JWT ' + token, userId:user.value._id, uuid:UUID, modifiedDate:new Date()}}, function(err, data){
+              db['tokenmapped'].findOneAndUpdate({userId : db.ObjectID(updatedUser._id)},{$set : {token:'JWT ' + token, userId:updatedUser._id, uuid:UUID, modifiedDate:new Date()}}, function(err, data){
                 logger.info('Token Saved to Token Mapped, After Change Password :: ' + JSON.stringify(data));
 
-                mailer.send('finish-change-password', user.value, user.value.email, function sendMailCallback(e, b) {
+                mailer.send('finish-change-password', updatedUser, updatedUser.email, function sendMailCallback(e, b) {
                   if (e) {
                     logger.error('User change password successfully.');
-                    logger.info(user.value);
+                    logger.info(updatedUser);
                     logger.error(e);
                   } else {
-                    logger.info(user.value.email.underline + ' got registered successfully');
+                    logger.info(updatedUser.email.underline + ' got registered successfully');
                   }
                 });
-                delete user.value.password;
-                delete user.value.tempPassword;
-                delete user.value.oldPasssword;
-                res.status(200).json({success: true, token: UUID, user : user.value});
+                delete updatedUser.password;
+                delete updatedUser.tempPassword;
+                delete updatedUser.oldPasssword;
+                res.status(200).json({success: true, token: UUID, user : updatedUser});
               });
-              // return the information including UUID mappend with JWT token
-              //res.json({success: true, token: 'JWT ' + token});
-            } else {
-              logger.info('Authentication failed. Wrong password.');
-              res.status(200).send({success: false, message: 'Authentication failed. Wrong password.'});
-            }
+            });
           });
         });
       });

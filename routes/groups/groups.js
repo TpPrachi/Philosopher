@@ -90,6 +90,7 @@ router.get('/:id', function(req, res, next) {
   });
 });
 
+//Cancel/Delete the group by Admin User Only
 router.delete('/:id', function(req, res, next) {
   db['groups'].findOneAndDelete({_id:db.ObjectID(req.params.id), adminUserId: db.ObjectID(req.body.userId)}, function(err, data){
     if (_.isNull(data.value)) {
@@ -100,12 +101,57 @@ router.delete('/:id', function(req, res, next) {
   });
 });
 
+//Leave the group by different user
+//group id and that user id (logged in userid)
+//red.body.userId or need to pass userid in parameter
+router.patch('/leave/:id/:userId', function(req, res, next) {
+  db['groups'].findOne({_id:db.ObjectID(req.params.id)}, function(err, data){
+    if(err) {
+      logger.error(err);
+      res.status(501).send({"success":false, "message":err});
+    }
+    if (!data) {
+      res.status(501).send({"success":false, "message":'Group Not Found.'});
+    }else {
+      data.groupMembers = _.filter(data.groupMembers, function (id) {
+        return id.toString() !== req.params.userId;
+      });
+
+      // db['groups'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: data}, function(err, group) {
+      //   if(err) {
+      //     logger.error(err);
+      //     res.status(501).send({"success":false, "message":err});
+      //   }
+      //   // Here might be need to return update document for group - Jaydip - verify
+      //   db['groups'].findOne({_id:db.ObjectID(req.params.id)}, function(err, updatedGroup){
+      //     if(err) {
+      //       logger.error(err);
+      //       res.status(501).send({"success":false, "message":err});
+      //     }
+      //     res.status(200).send({"success":true, group : updatedGroup});
+      //   });
+      // });
+      db['groups'].findAndModify(
+        {_id:db.ObjectID(req.params.id)},[],
+        { $set : data}, {new : true, upsert:true}, function(err, group) {
+        if (err) {
+          logger.error(err);
+          res.status(501).send({"success":false, "message":err});
+        }
+        res.status(200).send({"success":true, group : group.value});
+      });
+
+    }
+  });
+});
+
+
 //You can not add logedIn user/Admin User Id 's Id in removeMembers.
 router.patch('/:id', function(req, res, next) {
   var patch = {};
 
-  // if there is no groupName and removeMembers then What you don't get reply of that request - Jaydip
-  if (req.body.groupName || req.body.removeMembers) {
+  // if there is no groupName and removeMembers then What you don't get reply of that request - Jaydip - verfiy
+  if (req.body.groupName || req.body.removeMembers || req.body.addMembers) {
     db['groups'].findOne({_id:db.ObjectID(req.params.id), adminUserId: db.ObjectID(req.body.userId)}, function(err, data){
       if(err) {
         logger.error(err);
@@ -114,50 +160,53 @@ router.patch('/:id', function(req, res, next) {
       if (!data) {
         res.status(501).send({"success":false, "message":'Group Not Found.'});
       }else {
-
-        // unclear why you doing this? - Jaydip
+        // unclear why you doing this? - Jaydip - verify
         if (req.body.groupName) {
           patch["groupName"] = req.body.groupName;
-        }else {
-          patch["groupName"] = data.groupName;
         }
 
-        // This is not good code need to change it - Jaydip
-        if (req.body.removeMembers && req.body.addMembers) {
-          var arrayRemove = _.filter(data.groupMembers, function(id) {
+        patch["groupMembers"] = data.groupMembers;
+
+        if(req.body.removeMembers){
+          patch["groupMembers"] = _.filter(patch["groupMembers"], function(id) {
             return req.body.removeMembers.indexOf(id.toString()) == -1;
           });
+        }
 
-          // Same here need to use reduce - Jaydip
+        if(req.body.addMembers){
           var objectId = [];
           _.forIn(req.body.addMembers, function(id) {
             objectId.push(db.ObjectID(id));
           });
-          patch["groupMembers"] = arrayRemove.concat(objectId);
-        }else if(req.body.removeMembers){
-          patch["groupMembers"] = _.filter(data.groupMembers, function(id) {
-            return req.body.removeMembers.indexOf(id.toString()) == -1;
-          });
-        }else if(req.body.addMembers){
-          var objectId = [];
-          _.forIn(req.body.addMembers, function(id) {
-            objectId.push(db.ObjectID(id));
-          });
-          patch["groupMembers"] = data.groupMembers.concat(objectId);
-        }else {
-          patch["groupMembers"] = data.groupMembers;
+          patch["groupMembers"] = patch["groupMembers"].concat(objectId);
         }
-
-        db['groups'].update({_id: db.ObjectID(req.params.id)}, {$set: {groupName : patch["groupName"], groupMembers : patch["groupMembers"]}}, function(err, updatedGroup) {
-          if(err) {
+        // db['groups'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, function(err, group) {
+        //   if(err) {
+        //     logger.error(err);
+        //     res.status(501).send({"success":false, "message":err});
+        //   }
+        //   // Here might be need to return update document for group - Jaydip - verify
+        //   db['groups'].findOne({_id:db.ObjectID(req.params.id)}, function(err, updatedGroup){
+        //     if(err) {
+        //       logger.error(err);
+        //       res.status(501).send({"success":false, "message":err});
+        //     }
+        //     res.status(200).send({"success":true, group : updatedGroup});
+        //   });
+        // });
+        db['groups'].findAndModify(
+          {_id:db.ObjectID(req.params.id)},[],
+          { $set : patch}, {new : true, upsert:true}, function(err, group) {
+          if (err) {
             logger.error(err);
             res.status(501).send({"success":false, "message":err});
           }
-          // Here might be need to return update document for group - Jaydip
-          res.status(200).send({"success":true});
+          res.status(200).send({"success":true, group : group.value});
         });
       }
     });
+  }else {
+    res.status(501).send({"success":false, "message":'Invalid inputs provided.'});
   }
 });
 
