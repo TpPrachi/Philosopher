@@ -19,6 +19,7 @@ var _configure = function(app) {
   var notification = require('./notification');
   var reports = require('./reports');
   var groups = require('./groups');
+  var polls = require('./polls');
 
   app.use('/upload', upload);
   app.use('/sample', sample);
@@ -32,6 +33,7 @@ var _configure = function(app) {
   app.use('/notification', notification);
   app.use('/reports', reports);
   app.use('/groups', groups);
+  app.use('/polls', polls);
 
 };
 
