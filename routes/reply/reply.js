@@ -151,6 +151,9 @@
     select["users.username"] = 1;
     select["users.profilePhoto"] = 1;
 
+    // special case added for add filter for getting users of specific philosophy.
+    req.filter['philosophyId'] = db.ObjectID(req.params.philosophyId);
+
     // Build aggregate object for get users details based on operations with users information
     var aggregate = [{
         $lookup: {
