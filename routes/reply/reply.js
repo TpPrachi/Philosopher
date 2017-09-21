@@ -262,7 +262,9 @@
         res.status(501).send({"success":false, "message":'Operation does not match'});
       }
 
-      db['reply'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: reply}, {returnOriginal: false}, function(err, updatedReply) {
+      db['reply'].findAndModify(
+        {_id: db.ObjectID(req.params.id)}, {}, {$set: reply},
+        {new: true, fields: selectAfterUpdate }, function(err, updatedReply) {
         if(err) {
           logger.error(err);
           res.status(501).send({"success":false, "message":err});
@@ -279,14 +281,7 @@
           }]);
         }
 
-        // Code for return actual updated count of like, dislike or objecetions
-        db['reply'].findOne({_id: db.ObjectID(req.params.id)}, selectAfterUpdate, function(err, updatedReply){
-          if(err) {
-            logger.error(err);
-            res.status(200).send({"success":true, "message": "Success"});
-          }
-          res.status(200).json({"success":true, "data":updatedReply});
-        });
+        res.status(200).json({"success":true, "data":updatedReply.value});
       });
     });
   });

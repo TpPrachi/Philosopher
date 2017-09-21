@@ -148,15 +148,15 @@
             res.status(501).send({"success":false, "message":err});
           }
           // Here for update poll answer count as well as individual question answer count for later use
-          db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.philosophyId)}, {$set: {'UpdatedDate': new Date()}, $inc: { 'pollCount': 1, ["pollAnsCount." + req.params.answer] : 1}}, {projection: {pollCount:1, pollAnsCount:1}}, function(err, test) {
+          db['philosophies'].findAndModify(
+            {_id: db.ObjectID(req.params.philosophyId)}, {},
+            {$set: {'UpdatedDate': new Date()}, $inc: { 'pollCount': 1, ["pollAnsCount." + req.params.answer] : 1}},
+            {new : true, fields:{'pollCount':1, 'pollAnsCount':1}}, function(err, philosophy) {
             if(err) {
               logger.error('Error while answer of poll question :: ' + err);
               res.status(501).send({"success":false, "message":err});
             }
-            db['philosophies'].findOne({_id: db.ObjectID(req.params.philosophyId)}, {pollCount:1, pollAnsCount:1}, function(err, udpatedPhilosophy){
-                res.status(201).send({"success":true, "data":udpatedPhilosophy});
-            });
-
+            res.status(201).send({"success":true, "data":philosophy.value});
           });
 
         });
@@ -175,7 +175,9 @@
 
     // For finding trends in philosophy and insert into trends collection as well as update count for trend.
     util.trendMappingOnPatch(req.body.philosophy, req.params.id);
-    db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: req.body}, {returnOriginal: false}, function(err, philosophy) {
+    db['philosophies'].findAndModify(
+      {_id: db.ObjectID(req.params.id)}, {}, {$set: req.body},
+      {new: true}, function(err, philosophy) {
       if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
@@ -267,7 +269,9 @@
         }
 
         philosophy["UpdatedDate"] = new Date();
-        db['philosophies'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: philosophy}, {returnOriginal: false}, function(err, updatedPhilosophy) {
+        db['philosophies'].findAndModify(
+         {_id: db.ObjectID(req.params.id)}, {}, {$set: philosophy},
+         {new: true, fields: selectAfterUpdate}, function(err, updatedPhilosophy) {
           if(err) {
             logger.error(err);
             res.status(501).send({"success":false, "message":err});
@@ -283,15 +287,7 @@
             }]);
           }
 
-          // Code for return actual updated count of like, dislike or objecetions
-          db['philosophies'].findOne({_id: db.ObjectID(req.params.id)}, selectAfterUpdate, function(err, updatedPhilosophy){
-            if(err) {
-              logger.error(err);
-              res.status(500).json({"success":false, "error": err});
-            }
-            res.status(200).json({"success":true, "data":updatedPhilosophy});
-          });
-
+          res.status(200).json({"success":true, "data":updatedPhilosophy.value});
         });
       }
     });
