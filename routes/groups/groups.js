@@ -116,30 +116,33 @@ router.delete('/:id', function(req, res, next) {
 //group id and that user id (logged in userid)
 //red.body.userId or need to pass userid in parameter
 router.patch('/leave/:id/:userId', function(req, res, next) {
-  db['groups'].findOne({_id:db.ObjectID(req.params.id)}, function(err, data){
+  // data.groupMembers = _.filter(data.groupMembers, function (id) {
+  //   return id.toString() !== req.params.userId;
+  // });
+  //
+  // db['groups'].findAndModify(
+  //   {_id:db.ObjectID(req.params.id)},[],
+  //   { $set : data}, {new : true, upsert:true}, function(err, group) {
+  //     if (err) {
+  //       logger.error(err);
+  //       res.status(501).send({"success":false, "message":err});
+  //     }
+  //     res.status(200).send({"success":true, group : group.value});
+  //   });
+  db['groups'].findOneAndUpdate({_id:db.ObjectID(req.params.id)}, {$pull: {groupMembers: db.ObjectID(req.params.userId)}}, function(err, g){
     if(err) {
-      logger.error(err);
-      res.status(501).send({"success":false, "message":err});
+      return res.status(500).json({'error' : 'Error when you are leaving the group.'});
     }
-    if (!data) {
-      res.status(501).send({"success":false, "message":'Group Not Found.'});
-    }else {
-      data.groupMembers = _.filter(data.groupMembers, function (id) {
-        return id.toString() !== req.params.userId;
-      });
-
-      db['groups'].findAndModify(
-        {_id:db.ObjectID(req.params.id)},[],
-        { $set : data}, {new : true, upsert:true}, function(err, group) {
-        if (err) {
-          logger.error(err);
-          res.status(501).send({"success":false, "message":err});
-        }
-        res.status(200).send({"success":true, group : group.value});
-      });
-
-    }
+    db['groups'].findOne({_id:db.ObjectID(req.params.id)}, function(err, group){
+      if(err) {
+        return res.status(500).json({'error' : 'Error when you are leaving the group.'});
+      }
+      if (!group.value) {
+        res.status(200).send({"success":true, group : group});
+      }
+    });
   });
+  //Need to check for findAndModify $push & $pull working example - Prachi
 });
 
 
