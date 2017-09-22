@@ -15,36 +15,47 @@
   var query = require('../../lib/query');
 
   //http://localhost:3009/groups/followedUsers
-  router.get('/users', function(req, res, next) {
-    // Need to aggregate - Jaydip
-    db['follow'].find({followingUser:db.ObjectID(req.body.userId)}, {followedUser:1}).toArray(function(err, followed) {
-      if(err) {
-        // If we find any error still allow to execute query
-        logger.error("Error while getting following information of users for filtering.");
+  router.get('/users', query.filter, function(req, res, next) {
+    var aggregate = [{
+        "$match": { followingUser: db.ObjectID(req.body.userId)}
+      },{
+        $lookup: {
+           from: "usersmapped",
+           localField: 'followedUser',
+           foreignField: "userId",
+           as: "users"
+        }
+      },{
+        $sort: {"users.username" : 1}
+      }, {
+        $skip: req.options.skip
+      }, {
+        $limit: req.options.limit
       }
-      // Prepare array of all users that logged in user followed.
-      var users = _.reduce(followed, function(c, f) {
-        c.push({'userId': db.ObjectID(f.followedUser), 'isAdmin' : false});
-        return c;
-      }, [{'userId': db.ObjectID(req.body.userId), 'isAdmin' : true}]);
-      res.status(200).json({success: true, users : users});
+    ];
+
+    db['follow'].aggregate(aggregate, function(err, group) {
+      if(err) {
+        logger.error(err);
+        res.status(501).send({"success":false, "message":err});
+      }
+      res.status(201).json({"success":true, "data":group});
     });
+
   });
 
 router.post('/', function(req, res, next) {
   var postGroup = {};
 
   postGroup["CreatedDate"] = new Date();
-  postGroup["UpdatedDate"] = new Date(); // there should be always to date for any insert object CreatedDate and UpdatedDate - Jaydip
+  postGroup["UpdatedDate"] = new Date();
   postGroup["groupName"] = req.body.groupName;
   postGroup["adminUserId"] = req.body.userId;
 
-  // No Need to create extra variable directly use _.reduce on req.body.groupMembers - Jaydip
-  var objectId = [];
-  _.forIn(req.body.groupMembers, function(id) {
-    objectId.push(db.ObjectID(id));
-  });
-  postGroup["groupMembers"] = objectId;
+  postGroup["groupMembers"] = _.reduce(req.body.groupMembers, function(c, v){
+    c.push(db.ObjectID(v));
+    return c;
+  }, []);
 
   db['groups'].insert(postGroup, function(err, group) {
     if(err) {
@@ -117,20 +128,6 @@ router.patch('/leave/:id/:userId', function(req, res, next) {
         return id.toString() !== req.params.userId;
       });
 
-      // db['groups'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: data}, function(err, group) {
-      //   if(err) {
-      //     logger.error(err);
-      //     res.status(501).send({"success":false, "message":err});
-      //   }
-      //   // Here might be need to return update document for group - Jaydip - verify
-      //   db['groups'].findOne({_id:db.ObjectID(req.params.id)}, function(err, updatedGroup){
-      //     if(err) {
-      //       logger.error(err);
-      //       res.status(501).send({"success":false, "message":err});
-      //     }
-      //     res.status(200).send({"success":true, group : updatedGroup});
-      //   });
-      // });
       db['groups'].findAndModify(
         {_id:db.ObjectID(req.params.id)},[],
         { $set : data}, {new : true, upsert:true}, function(err, group) {
@@ -174,26 +171,13 @@ router.patch('/:id', function(req, res, next) {
         }
 
         if(req.body.addMembers){
-          var objectId = [];
-          _.forIn(req.body.addMembers, function(id) {
-            objectId.push(db.ObjectID(id));
-          });
-          patch["groupMembers"] = patch["groupMembers"].concat(objectId);
+          var addMembers = _.reduce(req.body.addMembers, function(c, v){
+            c.push(db.ObjectID(v));
+            return c;
+          }, []);
+          patch["groupMembers"] = patch["groupMembers"].concat(addMembers);
         }
-        // db['groups'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, function(err, group) {
-        //   if(err) {
-        //     logger.error(err);
-        //     res.status(501).send({"success":false, "message":err});
-        //   }
-        //   // Here might be need to return update document for group - Jaydip - verify
-        //   db['groups'].findOne({_id:db.ObjectID(req.params.id)}, function(err, updatedGroup){
-        //     if(err) {
-        //       logger.error(err);
-        //       res.status(501).send({"success":false, "message":err});
-        //     }
-        //     res.status(200).send({"success":true, group : updatedGroup});
-        //   });
-        // });
+
         db['groups'].findAndModify(
           {_id:db.ObjectID(req.params.id)},[],
           { $set : patch}, {new : true, upsert:true}, function(err, group) {
