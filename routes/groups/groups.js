@@ -103,7 +103,7 @@ router.get('/:id', function(req, res, next) {
 
 //Cancel/Delete the group by Admin User Only
 router.delete('/:id', function(req, res, next) {
-  db['groups'].findOneAndDelete({_id:db.ObjectID(req.params.id), adminUserId: db.ObjectID(req.body.userId)}, function(err, data){
+  db['groups'].findOneAndDelete({_id:db.ObjectID(req.params.id)}, function(err, data){
     if (_.isNull(data.value)) {
       res.status(501).send({"success":false, "message":'Error while canceling the group.'});
     }else {
@@ -160,7 +160,6 @@ router.patch('/:id', function(req, res, next) {
       if (!data) {
         res.status(501).send({"success":false, "message":'Group Not Found.'});
       }else {
-        // unclear why you doing this? - Jaydip - verify
         if (req.body.groupName) {
           patch["groupName"] = req.body.groupName;
         }
