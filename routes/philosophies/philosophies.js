@@ -151,7 +151,7 @@
           db['philosophies'].findAndModify(
             {_id: db.ObjectID(req.params.philosophyId)}, {},
             {$set: {'UpdatedDate': new Date()}, $inc: { 'pollCount': 1, ["pollAnsCount." + req.params.answer] : 1}},
-            {new : true, fields:{'pollCount':1, 'pollAnsCount':1}}, function(err, philosophy) {
+            {new : true}, function(err, philosophy) {
             if(err) {
               logger.error('Error while answer of poll question :: ' + err);
               res.status(501).send({"success":false, "message":err});
