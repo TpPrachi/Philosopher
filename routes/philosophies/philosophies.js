@@ -23,47 +23,61 @@
 
   /* GET API for ALL records from collection. */
   router.get('/', query.filter, function(req, res, next) {
-    // Build aggregate object for get users details based on operations with information
-    var aggregate = [{
-        "$match": req.filter
-      },{
-        $lookup: {
-           from: "usersmapped",
-           foreignField: "userId",
-           localField: 'userId',
-           as: "users"
-        }
-      },{
-        $sort: {'UpdatedDate':-1}
-      },{
-        $skip:req.options['skip']
-      },{
-        $limit:req.options['limit']
-      },{
-        $project:projections
-      }
-    ];
-    //
-    db['philosophies'].aggregate(aggregate, function(err, information) {
+
+    db['follow'].find({followingUser:db.ObjectID(req.body.userId)}, {followedUser:1}).toArray(function(err, followed) {
       if(err) {
-        logger.error(err);
-        res.status(501).send({"success":false, "message":err});
+        // If we find any error still allow to execute query
+        logger.error("Error while getting following information of users for filtering.");
+        next();
       }
-      information = _.reduce(information, function(d, philosophy) {
-        // special case written for check current user is liked or dislike or objection on returned philosophies
-        philosophy.isLike = _.findIndex(philosophy.like.info, { _id: req.body.userId }) != -1 ? true : false;
-        philosophy.isDislike = _.findIndex(philosophy.dislike.info, { _id: req.body.userId }) != -1 ? true : false;
-        philosophy.isObjections = _.findIndex(philosophy.objections.info, { _id: req.body.userId }) != -1 ? true : false;
+      // Prepare array of all users that logged in user followed.
+      req.filter['$or'] = _.reduce(followed, function(c, f) {
+        c.push({'userId': db.ObjectID(f.followedUser)});
+        return c;
+      }, [{'userId': db.ObjectID(req.body.userId)}]);
 
-        delete philosophy.like.info;
-        delete philosophy.dislike.info;
-        delete philosophy.objections.info;
+      // Build aggregate object for get users details based on operations with information
+      var aggregate = [{
+          "$match": req.filter
+        },{
+          $lookup: {
+             from: "usersmapped",
+             foreignField: "userId",
+             localField: 'userId',
+             as: "users"
+          }
+        },{
+          $sort: {'UpdatedDate':-1}
+        },{
+          $skip:req.options['skip']
+        },{
+          $limit:req.options['limit']
+        },{
+          $project:projections
+        }
+      ];
+      //
+      db['philosophies'].aggregate(aggregate, function(err, information) {
+        if(err) {
+          logger.error(err);
+          res.status(501).send({"success":false, "message":err});
+        }
+        information = _.reduce(information, function(d, philosophy) {
+          // special case written for check current user is liked or dislike or objection on returned philosophies
+          philosophy.isLike = _.findIndex(philosophy.like.info, { _id: req.body.userId }) != -1 ? true : false;
+          philosophy.isDislike = _.findIndex(philosophy.dislike.info, { _id: req.body.userId }) != -1 ? true : false;
+          philosophy.isObjections = _.findIndex(philosophy.objections.info, { _id: req.body.userId }) != -1 ? true : false;
 
-        d.push(philosophy);
-        return d;
-      }, []);
+          delete philosophy.like.info;
+          delete philosophy.dislike.info;
+          delete philosophy.objections.info;
 
-      res.status(201).json({"success":true, "data":information});
+          d.push(philosophy);
+          return d;
+        }, []);
+
+        res.status(201).json({"success":true, "data":information});
+      });
     });
 
   });
