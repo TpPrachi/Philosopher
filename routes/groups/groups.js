@@ -68,9 +68,9 @@ router.post('/', validate(schema), function(req, res, next) {
   });
 });
 
-router.get('/',query.filter , function(req, res, next) {
+router.get('/', query.filter, function(req, res, next) {
   db['groups'].find(req.filter, req.options.select || {groupName : 1}, req.options).toArray(function(err, groups) {
-    if(err){
+    if(err) {
       logger.error(err);
       res.status(501).send({"success":false, "message":err});
     }
@@ -117,16 +117,16 @@ router.delete('/:id', function(req, res, next) {
 //Leave the group by different user
 //group id and that user id (logged in userid)
 //red.body.userId or need to pass userid in parameter
-router.patch('/leave/:id/:userId', function(req, res, next) {
+router.patch('/leave/:id', function(req, res, next) {
   db['groups'].findAndModify(
     {_id:db.ObjectID(req.params.id)},{},
-    {$pull: {groupMembers: db.ObjectID(req.params.userId)}},
-    {new : true, upsert:true}, function(err, group) {
+    {$pull: {groupMembers: db.ObjectID(req.body.userId)}},
+    {new : true}, function(err, group) {
       if (err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).send({"success":true, group : group.value});
+      res.status(200).send({"success":true, data : group.value});
     });
 });
 
@@ -136,7 +136,6 @@ router.patch('/:id', validate(softSchema), function(req, res, next) {
   var patch = {};
 
   if(req.body.groupName || req.body.removeMembers || req.body.addMembers) {
-
     db['groups'].findOne({_id:db.ObjectID(req.params.id), adminUserId: db.ObjectID(req.body.userId)}, function(err, data){
       if(err) {
         logger.error(err);
@@ -166,12 +165,12 @@ router.patch('/:id', validate(softSchema), function(req, res, next) {
 
         db['groups'].findAndModify(
           {_id:db.ObjectID(req.params.id)},[],
-          { $set : patch}, {new : true, upsert:true}, function(err, group) {
+          { $set : patch}, {new : true}, function(err, group) {
           if (err) {
             logger.error(err);
             res.status(501).send({"success":false, "message":err});
           }
-          res.status(200).send({"success":true, group : group.value});
+          res.status(200).send({"success":true, data : group.value});
         });
       }
     });

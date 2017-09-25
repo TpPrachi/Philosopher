@@ -160,7 +160,7 @@
           logger.error(err);
           res.status(501).send({"success":false, "message":err});
         }
-        db['usersmapped'].update({userId: db.ObjectID(req.params.id)}, {$set: {fullname : patch.fullname, email : patch.email}}, {returnOriginal: false}, function(err, usersmappedData) {
+        db['usersmapped'].update({userId: db.ObjectID(req.params.id)}, {$set: {fullname : patch.fullname, email : patch.email, biolosophy: patch.biolosophy }}, {returnOriginal: false}, function(err, usersmappedData) {
           //res.status(200).send({"success":true, "message":usersmappedData.value});
           if(err) {
             logger.error(err);

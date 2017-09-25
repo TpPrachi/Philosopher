@@ -308,6 +308,7 @@
     }
     select["users.userId"] = 1;
     select["users.fullname"] = 1;
+    select["users.biolosophy"] = 1;
     select["users.username"] = 1;
 
     // Build aggregate object for get users details based on operations with information
