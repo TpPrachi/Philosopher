@@ -135,35 +135,33 @@ router.patch('/leave/:id/:userId', function(req, res, next) {
 router.patch('/:id', validate(softSchema), function(req, res, next) {
   var patch = {};
 
-  // if there is no groupName and removeMembers then What you don't get reply of that request - Jaydip - verfiy
-  if (req.body.groupName || req.body.removeMembers || req.body.addMembers) {
+  if(req.body.groupName || req.body.removeMembers || req.body.addMembers) {
 
     db['groups'].findOne({_id:db.ObjectID(req.params.id), adminUserId: db.ObjectID(req.body.userId)}, function(err, data){
       if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      if (!data) {
+      if(!data) {
         res.status(501).send({"success":false, "message":'Group Not Found.'});
-      }else {
+      } else {
         if (req.body.groupName) {
           patch["groupName"] = req.body.groupName;
         }
 
         patch["groupMembers"] = data.groupMembers;
 
-        if(req.body.removeMembers){
+        if(req.body.removeMembers) {
           patch["groupMembers"] = _.filter(patch["groupMembers"], function(id) {
             return req.body.removeMembers.indexOf(id.toString()) == -1;
           });
         }
 
-        if(req.body.addMembers){
-          var addMembers = _.reduce(req.body.addMembers, function(c, v){
+        if(req.body.addMembers) {
+          patch["groupMembers"] = patch["groupMembers"].concat(_.reduce(req.body.addMembers, function(c, v){
             c.push(db.ObjectID(v));
             return c;
-          }, []);
-          patch["groupMembers"] = patch["groupMembers"].concat(addMembers);
+          }, []));
         }
 
         db['groups'].findAndModify(
