@@ -160,7 +160,17 @@
           logger.error(err);
           res.status(501).send({"success":false, "message":err});
         }
-        db['usersmapped'].update({userId: db.ObjectID(req.params.id)}, {$set: {fullname : patch.fullname, email : patch.email, biolosophy: patch.biolosophy }}, {returnOriginal: false}, function(err, usersmappedData) {
+        var select = {};
+        if (data.value.fullname) {
+          select['fullname'] = data.value.fullname;
+        }
+        if (data.value.email) {
+          select['email'] = data.value.email;
+        }
+        if (data.value.biolosophy) {
+          select['biolosophy'] = data.value.biolosophy;
+        }
+        db['usersmapped'].update({userId: db.ObjectID(req.params.id)}, {$set: select}, {returnOriginal: false}, function(err, usersmappedData) {
           //res.status(200).send({"success":true, "message":usersmappedData.value});
           if(err) {
             logger.error(err);

@@ -2,12 +2,12 @@ var types = require('../../lib/validator/types');
 var array = types.array;
 var string =  types.string;
 var any = types.any;
+var anyArray = types.anyArray;
 
 var schema = {
  groupName: string.label('Group Name'),
- addMembers: any.label('Array Of Add Members'),
- removeMembers: any.label('Array of Remove Members'),
- //Need to resolve here how to provide property for array() of elements -- Prachi
+ addMembers: anyArray.label('Array Of Add Members'),
+ removeMembers: anyArray.label('Array of Remove Members')
 }
 
 module.exports = schema;
