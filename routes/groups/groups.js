@@ -20,8 +20,6 @@
   //http://localhost:3009/groups/followedUsers
   router.get('/users', query.filter, function(req, res, next) {
     var aggregate = [{
-        "$match": { followingUser: db.ObjectID(req.body.userId)}
-      },{
         $lookup: {
            from: "usersmapped",
            localField: 'followedUser',
@@ -29,19 +27,22 @@
            as: "users"
         }
       },{
+          "$match": { followingUser: db.ObjectID(req.body.userId)}
+      },{
         $sort: {"users.username" : 1}
-      }, {
+      },{
         $skip: req.options.skip
-      }, {
+      },{
         $limit: req.options.limit
       }
     ];
-    db['follow'].aggregate(aggregate, function(err, group) {
+
+    db['follow'].aggregate(aggregate, function(err, users) {
       if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(201).json({"success":true, "data":group});
+      res.status(201).json({"success":true, "data": users});
     });
 
   });
