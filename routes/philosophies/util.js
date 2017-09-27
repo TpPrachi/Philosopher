@@ -13,7 +13,8 @@ var _removeReference = function(philosophyId) {
 
 var insertOrUpdateTrend = function(trend) {
   // Find with trend name if find then update count else insert new trend in trend table
-  db['trends'].find({name:trend.toLowerCase()}).toArray(function(err, trendArr) {
+
+  db['trends'].find({name:new RegExp(["^", trend, "$"].join(""), "i")}).toArray(function(err, trendArr) {
     if(err) {
       logger.error("Error while finding trend in _trendMappingOnPost :: " + err);
     }
@@ -22,7 +23,7 @@ var insertOrUpdateTrend = function(trend) {
       trendArr[0].count = trendArr[0].count + 1;
       db['trends'].findOneAndUpdate({_id: trendArr[0]._id}, {$set: {'UpdatedDate': new Date()}, $inc: { count: 1}});
     } else { // else insert new trend in table
-      db['trends'].insert({name: trend.toLowerCase(), count: 1, 'CreatedDate': new Date(), 'UpdatedDate': new Date()});
+      db['trends'].insert({name: trend, count: 1, 'CreatedDate': new Date(), 'UpdatedDate': new Date()});
     }
   });
 };
@@ -34,7 +35,7 @@ var trendMapping = function(philosophy, philosophyId) {
     if(i != 0 && !_.isUndefined(value) && value != '' && !_.isNull(value)) {
       var trend = value.indexOf(' ') !== -1 ? value.substring(0,value.indexOf(' ')) : value;
       trends.push(trend.toLowerCase());
-      insertOrUpdateTrend(trend.toLowerCase());
+      insertOrUpdateTrend(trend);
     }
   });
 
@@ -78,7 +79,7 @@ var _trendMappingOnPatch = function(philosophy, philosophyId) {
         _.forEach(_.difference(trends, philosophyTrend.trends), function(trend) {
             logger.info("New Added Trend :: " + trend.toLowerCase());
             philosophyTrend.trends.push(trend.toLowerCase()); // For adding trend in philosophy object
-            insertOrUpdateTrend(trend.toLowerCase()); // For inserting new trends collection
+            insertOrUpdateTrend(trend); // For inserting new trends collection
         });
 
         // update trend array with removed and added trends
