@@ -21,6 +21,7 @@ var schema = {
   pollAnswer: any.label('Answer of poll'),
   pollCount: number.label("Total number of answer given of poll"),
   pollLength: any.label('Number of days poll active'),
+  pic: any.label("sdfsdffs"),
   like:object({
     count: rNumber.label('Like Count').default(0),
     info: array(object({
