@@ -113,12 +113,12 @@
 
   /* GET API for selected record from collection. */
   router.get('/:id', function(req, res, next) {
-    db['users'].find({_id: db.ObjectID(req.params.id)},{password:0,tempPassword:0 ,oldPasssword:0}).toArray(function(err, users) {
+    db['users'].findOne({_id: db.ObjectID(req.params.id)},{password:0,tempPassword:0 ,oldPasssword:0}, function(err, user) {
       if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).json({"success":true, "data":users});
+      res.status(200).json({"success":true, "data":user});
     });
   });
 
@@ -128,14 +128,14 @@
     var patch = req.body;
     patch["UpdatedDate"] = new Date();
 
-    db['users'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, users) {
+    db['users'].findOne({_id: db.ObjectID(req.params.id)}, function(err, users) {
       if(err){
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
 
-      if (users && users[0] && users[0].email) {
-        if (patch && patch.email && patch.email ===  users[0].email) {
+      if (users && users && users.email) {
+        if (patch && patch.email && patch.email ===  users.email) {
           res.status(501).send({"success":false, "message": "Patching the same email, Please provide valid data for perform operation."});
         }
       }
@@ -145,22 +145,15 @@
           logger.error(err);
           res.status(501).send({"success":false, "message":err});
         }
-        var select = {};
-        if (data.value.fullname) {
-          select['fullname'] = data.value.fullname;
-        }
-        if (data.value.email) {
-          select['email'] = data.value.email;
-        }
-        if (data.value.biolosophy) {
-          select['biolosophy'] = data.value.biolosophy;
-        }
+        var select = _.pick(data.value, ['email', 'fullname', 'biolosophy']);
         db['usersmapped'].update({userId: db.ObjectID(req.params.id)}, {$set: select}, {returnOriginal: false}, function(err, usersmappedData) {
           //res.status(200).send({"success":true, "message":usersmappedData.value});
           if(err) {
             logger.error(err);
             res.status(501).send({"success":false, "message":err});
           }
+          delete data.value.password;
+          delete data.value.tempPassword;
           res.status(200).send({"success":true, "message":data.value});
         });
       });
