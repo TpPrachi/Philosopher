@@ -154,7 +154,8 @@
           }
           delete data.value.password;
           delete data.value.tempPassword;
-          res.status(200).send({"success":true, "message":data.value});
+          delete data.value.oldPassword;
+          res.status(200).send({"success":true, "data":data.value});
         });
       });
     });
