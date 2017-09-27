@@ -9,7 +9,7 @@ var Jimp = require('jimp');
 var db = require('../../lib/db');
 
 //Upload Profile Photo
-router.post('/profilePhoto', function(req, res, next) {
+router.post('/profile', function(req, res, next) {
   req.pipe(req.busboy);
   req.busboy.on('file', function (fieldname, file, filename) {
     logger.info("Uploading: " + filename);
@@ -45,7 +45,7 @@ router.post('/profilePhoto', function(req, res, next) {
 });
 
 //Upload Philosophy Photo
-router.post('/philosophyPhoto', function(req, res, next) {
+router.post('/philosophy', function(req, res, next) {
   req.pipe(req.busboy);
   var philosophyPhotoStore = [];
   req.busboy.on('file', function (fieldname, file, filename) {
@@ -78,7 +78,7 @@ router.post('/philosophyPhoto', function(req, res, next) {
 });
 
 //Upload Group Photo
-router.post('/groupPhoto', function(req, res, next) {
+router.post('/group', function(req, res, next) {
   req.pipe(req.busboy);
   req.busboy.on('file', function (fieldname, file, filename) {
     logger.info("Uploading: " + filename);
@@ -90,7 +90,7 @@ router.post('/groupPhoto', function(req, res, next) {
       fs.mkdirSync(dir);
     }
     var patch = {
-      profilePhoto : '/public/images/profile/groupPhoto/' + filename
+      groupPhoto : '/public/images/profile/groupPhoto/' + filename
     }
     //Need to ssave path for profile photo
     db['groups'].findOneAndUpdate({_id: db.ObjectID(req.body.userId)}, {$set: patch}, function(err, data) {
@@ -112,7 +112,7 @@ router.post('/groupPhoto', function(req, res, next) {
 });
 
 //Get Profile Photo
-router.get('/profilePhoto/:file', function(req, res, next) {
+router.get('/profile/:file', function(req, res, next) {
   if(!req.params.file){
     res.status(422).json({'message' : 'file not provided'});
     return;
@@ -130,7 +130,7 @@ router.get('/profilePhoto/:file', function(req, res, next) {
 });
 
 //Get Philosophy Photo
-router.get('/philosophyPhoto/:file', function(req, res, next) {
+router.get('/philosophy/:file', function(req, res, next) {
   if(!req.params.file){
     res.status(422).json({'message' : 'file not provided'})
     return;
@@ -147,7 +147,7 @@ router.get('/philosophyPhoto/:file', function(req, res, next) {
 });
 
 //Get Group Photo
-router.get('/groupPhoto/:file', function(req, res, next) {
+router.get('/group/:file', function(req, res, next) {
   if(!req.params.file){
     res.status(422).json({'message' : 'file not provided'})
     return;
