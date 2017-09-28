@@ -83,19 +83,22 @@ router.post('/group', function(req, res, next) {
           if (err) {
             logger.error(err);
           }
-          var resizedImage = dir + '/resizedImage';
-          if (!fs.existsSync(resizedImage)){
-            fs.mkdirSync(resizedImage);
+          if(data.value == null) {
+            res.status(500).send({"success":false, message : "Please provide valid group information."});
+          } else {
+            var resizedImage = dir + '/resizedImage';
+            if (!fs.existsSync(resizedImage)){
+              fs.mkdirSync(resizedImage);
+            }
+            var fstream = fs.createWriteStream(dir + '/' + filename);
+            file.pipe(fstream);
+            fstream.on('close', function () {
+              res.status(201).send({"success":true, file : filename, message : "Successfully uploaded group picture."});
+            });
           }
-          var fstream = fs.createWriteStream(dir + '/' + filename);
-          var fstream1 = fs.createWriteStream(resizedImage + '/' + filename);
-          file.pipe(fstream);
-          fstream.on('close', function () {
-            res.status(201).send({"success":true, file : filename, message : "Successfully uploaded group picture."});
-          });
         });
       }else {
-        res.status(501).send({"success":false, "message":"Invalid query string parameter."});
+        res.status(500).send({"success":false, "message":"Invalid query string parameter."});
       }
     }else {
       var resizedImage = dir + '/resizedImage';
@@ -103,7 +106,6 @@ router.post('/group', function(req, res, next) {
         fs.mkdirSync(resizedImage);
       }
       var fstream = fs.createWriteStream(dir + '/' + filename);
-      var fstream1 = fs.createWriteStream(resizedImage + '/' + filename);
       file.pipe(fstream);
       fstream.on('close', function () {
         res.status(201).send({"success":true, file : filename});
