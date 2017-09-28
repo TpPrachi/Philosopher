@@ -78,26 +78,25 @@ router.post('/group', function(req, res, next) {
       fs.mkdirSync(dir);
     }
     if (req.query.id) {
-      if(req.query.id.length == 24 && db.ObjectID.isValid(req.query.id)) {
-        req.query.id = db.ObjectID(req.query.id);
+      if (req.query.id.length == 24 && db.ObjectID.isValid(req.query.id)) {
+        db['groups'].findOneAndUpdate({_id: db.ObjectID(req.query.id)}, {$set: {groupPhoto : filename}}, function(err, data) {
+          if (err) {
+            logger.error(err);
+          }
+          var resizedImage = dir + '/resizedImage';
+          if (!fs.existsSync(resizedImage)){
+            fs.mkdirSync(resizedImage);
+          }
+          var fstream = fs.createWriteStream(dir + '/' + filename);
+          var fstream1 = fs.createWriteStream(resizedImage + '/' + filename);
+          file.pipe(fstream);
+          fstream.on('close', function () {
+            res.status(201).send({"success":true, file : filename, message : "Successfully uploaded group picture."});
+          });
+        });
       }else {
         res.status(501).send({"success":false, "message":"Invalid query string parameter."});
       }
-      db['groups'].findOneAndUpdate({_id: req.query.id}, {$set: {groupPhoto : filename}}, function(err, data) {
-        if (err) {
-          logger.error(err);
-        }
-        var resizedImage = dir + '/resizedImage';
-        if (!fs.existsSync(resizedImage)){
-          fs.mkdirSync(resizedImage);
-        }
-        var fstream = fs.createWriteStream(dir + '/' + filename);
-        var fstream1 = fs.createWriteStream(resizedImage + '/' + filename);
-        file.pipe(fstream);
-        fstream.on('close', function () {
-          res.status(201).send({"success":true, file : filename, message : "Successfully uploaded group picture."});
-        });
-      });
     }else {
       var resizedImage = dir + '/resizedImage';
       if (!fs.existsSync(resizedImage)){
