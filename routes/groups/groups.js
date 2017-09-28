@@ -70,7 +70,7 @@ router.post('/', validate(schema), function(req, res, next) {
 });
 
 router.get('/', query.filter, function(req, res, next) {
-  db['groups'].find(req.filter, req.options.select || {groupName : 1}, req.options).toArray(function(err, groups) {
+  db['groups'].find(req.filter, req.options.select || {groupName : 1, groupPhoto:1}, req.options).toArray(function(err, groups) {
     if(err) {
       logger.error(err);
       res.status(501).send({"success":false, "message":err});
