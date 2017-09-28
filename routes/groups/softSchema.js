@@ -8,7 +8,7 @@ var schema = {
  groupName: string.label('Group Name'),
  addMembers: anyArray.label('Array Of Add Members'),
  removeMembers: anyArray.label('Array of Remove Members'),
- profilePhoto: string.label('Profile Photo of Group')
+ groupPhoto: string.label('Profile Photo of Group')
 }
 
 module.exports = schema;

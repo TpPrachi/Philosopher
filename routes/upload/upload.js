@@ -19,16 +19,12 @@ router.post('/profile', function(req, res, next) {
     if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
     }
-    var patch = {
-      profilePhoto : '/public/images/profile/profilePhoto/' + filename
-    }
     //Need to ssave path for profile photo
-    db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.userId)}, {$set: patch}, function(err, data) {
-      db['usersmapped'].findOneAndUpdate({userId: db.ObjectID(req.body.userId)}, {$set: patch}, function(err, data) {
+    db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.userId)}, {$set: {profilePhoto : filename}}, function(err, data) {
+      db['usersmapped'].findOneAndUpdate({userId: db.ObjectID(req.body.userId)}, {$set:  {profilePhoto : filename}}, function(err, data) {
         if (err) {
           logger.error(err);
         }
-
         var resizedImage = dir + '/resizedImage';
         if (!fs.existsSync(resizedImage)){
           fs.mkdirSync(resizedImage);
@@ -57,19 +53,11 @@ router.post('/philosophy', function(req, res, next) {
     if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
     }
-    philosophyPhotoStore.push('/public/images/profile/philosophyPhoto/' + filename);
-    var patch = {
-      philosophyPhoto : philosophyPhotoStore
-    }
-    db['philosophies'].findOneAndUpdate({UID: db.ObjectID(req.body.userId)}, {$set: patch}, function(err, data) {
-      if (err) {
-        logger.error(err);
-      }
-      var fstream = fs.createWriteStream(dir + '/' + filename);
-      file.pipe(fstream);
-      fstream.on('close', function () {
-        logger.info('Close fstream')
-      });
+    philosophyPhotoStore.push(filename);
+    var fstream = fs.createWriteStream(dir + '/' + filename);
+    file.pipe(fstream);
+    fstream.on('close', function () {
+      logger.info('Close fstream')
     });
   });
   req.busboy.on('finish', function (fieldname, file, filename) {
@@ -78,25 +66,39 @@ router.post('/philosophy', function(req, res, next) {
 });
 
 //Upload Group Photo
+//http://localhost:3009/upload/group?id=59c63d2d869912283cdb7e6c
 router.post('/group', function(req, res, next) {
   req.pipe(req.busboy);
   req.busboy.on('file', function (fieldname, file, filename) {
     logger.info("Uploading: " + filename);
     var filename = (new Date()).getTime() + '-' + filename;
     filename = decodeURI(filename);
-
     var dir = process.env.FILE_STORE + '/groupPhoto' ;
     if (!fs.existsSync(dir)){
       fs.mkdirSync(dir);
     }
-    var patch = {
-      groupPhoto : '/public/images/profile/groupPhoto/' + filename
-    }
-    //Need to ssave path for profile photo
-    db['groups'].findOneAndUpdate({_id: db.ObjectID(req.body.userId)}, {$set: patch}, function(err, data) {
-      if (err) {
-        logger.error(err);
+    if (req.query.id) {
+      if(req.query.id.length == 24 && db.ObjectID.isValid(req.query.id)) {
+        req.query.id = db.ObjectID(req.query.id);
+      }else {
+        res.status(501).send({"success":false, "message":"Invalid query string parameter."});
       }
+      db['groups'].findOneAndUpdate({_id: req.query.id}, {$set: {groupPhoto : filename}}, function(err, data) {
+        if (err) {
+          logger.error(err);
+        }
+        var resizedImage = dir + '/resizedImage';
+        if (!fs.existsSync(resizedImage)){
+          fs.mkdirSync(resizedImage);
+        }
+        var fstream = fs.createWriteStream(dir + '/' + filename);
+        var fstream1 = fs.createWriteStream(resizedImage + '/' + filename);
+        file.pipe(fstream);
+        fstream.on('close', function () {
+          res.status(201).send({"success":true, file : filename, message : "Successfully uploaded group picture."});
+        });
+      });
+    }else {
       var resizedImage = dir + '/resizedImage';
       if (!fs.existsSync(resizedImage)){
         fs.mkdirSync(resizedImage);
@@ -105,9 +107,9 @@ router.post('/group', function(req, res, next) {
       var fstream1 = fs.createWriteStream(resizedImage + '/' + filename);
       file.pipe(fstream);
       fstream.on('close', function () {
-        res.status(201).json({file: filename});
+        res.status(201).send({"success":true, file : filename});
       });
-    });
+    }
   });
 });
 

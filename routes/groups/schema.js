@@ -13,7 +13,7 @@ var schema = {
  UpdatedDate: date.label('Updated Date'),
  groupName: rString.label('Group Name'),
  groupMembers: anyArray.label('Array Of Group Members'),
- profilePhoto: string.label('Profile Photo of Group')
+ groupPhoto: string.label('Profile Photo of Group')
 }
 
 module.exports = schema;
