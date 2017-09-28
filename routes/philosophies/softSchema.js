@@ -12,6 +12,7 @@ var rExtraLargeString = types.rExtraLargeString;
 var extraLargeString = types.extraLargeString;
 var object = types.object.bind(types);
 var any = types.any;
+var anyArray = types.anyArray;
 
 var schema = {
   philosophy: extraLargeString.label('Philosophy'),
@@ -20,6 +21,7 @@ var schema = {
   pollAnswer: any.label('Questions of poll'),
   pollCount: number.label("Total number of answer given of poll"),
   pollLength: any.label('Number of days poll active'),
+  images: anyArray.label("Array of Images Names"),
   like:object({
     count: number.label('Like Count'),
     info: array(object({

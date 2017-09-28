@@ -21,7 +21,7 @@
   var util = require('./util');
   var notify = require('../../lib/notification');
 
-  /* GET API for ALL records from collection. */
+  /* GET API for ALL philosophies from collection. */
   router.get('/', query.filter, function(req, res, next) {
 
     db['follow'].find({followingUser:db.ObjectID(req.body.userId)}, {followedUser:1}).toArray(function(err, followed) {
@@ -56,7 +56,7 @@
           $project:projections
         }
       ];
-      //
+      logger.info("aggregate :: " + JSON.stringify(aggregate));
       db['philosophies'].aggregate(aggregate, function(err, information) {
         if(err) {
           logger.error(err);
@@ -82,7 +82,56 @@
 
   });
 
-  /* GET API for sel  ected record from collection. */
+  // Get users specific philosophies based on user id.
+  router.get('/user/:user', query.filter, function(req, res, next) {
+      req.filter['userId'] = db.ObjectID(req.params.user);
+
+      // Build aggregate object for get users details based on operations with information
+      var aggregate = [{
+          "$match": req.filter
+        },{
+          $lookup: {
+             from: "usersmapped",
+             foreignField: "userId",
+             localField: 'userId',
+             as: "users"
+          }
+        },{
+          $sort: {'CreatedDate':-1}
+        },{
+          $skip:req.options['skip']
+        },{
+          $limit:req.options['limit']
+        },{
+          $project:projections
+        }
+      ];
+
+      db['philosophies'].aggregate(aggregate, function(err, information) {
+        logger.info("information :: " + information.length);
+        if(err) {
+          logger.error(err);
+          res.status(501).send({"success":false, "message":err});
+        }
+        information = _.reduce(information, function(d, philosophy) {
+          // special case written for check current user is liked or dislike or objection on returned philosophies
+          philosophy.isLike = _.findIndex(philosophy.like.info, { _id: req.body.userId }) != -1 ? true : false;
+          philosophy.isDislike = _.findIndex(philosophy.dislike.info, { _id: req.body.userId }) != -1 ? true : false;
+          philosophy.isObjections = _.findIndex(philosophy.objections.info, { _id: req.body.userId }) != -1 ? true : false;
+
+          delete philosophy.like.info;
+          delete philosophy.dislike.info;
+          delete philosophy.objections.info;
+
+          d.push(philosophy);
+          return d;
+        }, []);
+
+        res.status(201).json({"success":true, "data":information});
+      });
+  });
+
+  /* GET API for selected record from collection. */
   router.get('/:id', function(req, res, next) {
     db['philosophies'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, philosophy) {
       if(err) {

@@ -112,7 +112,7 @@
            as: "users"
         }
       },{
-        $sort: {'UpdatedDate':-1}
+        $sort: {'CreatedDate':-1}
       },{
         $skip:req.options['skip']
       },{
