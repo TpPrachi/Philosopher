@@ -41,19 +41,36 @@ router.post('/profile', function(req, res, next) {
 });
 
 //Upload Philosophy Photo
-router.post('/philosophy', function(req, res, next) {
+//type = photo , video , recording
+router.post('/philosophy/:type', function(req, res, next) {
   req.pipe(req.busboy);
-  var philosophyPhotoStore = [];
+  var temp = [];
   req.busboy.on('file', function (fieldname, file, filename) {
     logger.info("Uploading: " + filename);
     var filename = (new Date()).getTime() + '-' + filename;
     filename = decodeURI(filename);
     //Path where file will be uploaded
-    var dir = process.env.FILE_STORE + '/philosophyPhoto';
-    if (!fs.existsSync(dir)){
-      fs.mkdirSync(dir);
+    if (req.params.type == 'photo') {
+      var dir = process.env.FILE_STORE + '/philosophyPhoto';
+      if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir);
+      }
+      temp.push(filename);
     }
-    philosophyPhotoStore.push(filename);
+    if (req.params.type == 'video') {
+      var dir = process.env.FILE_STORE + '/philosophyVideo';
+      if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir);
+      }
+      temp.push(filename);
+    }
+    if (req.params.type == 'recording') {
+      var dir = process.env.FILE_STORE + '/philosophyRecording';
+      if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir);
+      }
+      temp.push(filename);
+    }
     var fstream = fs.createWriteStream(dir + '/' + filename);
     file.pipe(fstream);
     fstream.on('close', function () {
@@ -61,7 +78,7 @@ router.post('/philosophy', function(req, res, next) {
     });
   });
   req.busboy.on('finish', function (fieldname, file, filename) {
-    res.status(201).json({file: philosophyPhotoStore});
+    res.status(201).json({file: temp});
   });
 });
 
