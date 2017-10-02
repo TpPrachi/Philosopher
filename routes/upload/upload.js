@@ -41,7 +41,6 @@ router.post('/profile', function(req, res, next) {
 });
 
 //Upload Philosophy Photo
-//type = photo , video , recording
 router.post('/philosophy/:type', function(req, res, next) {
   req.pipe(req.busboy);
   var temp = [];
@@ -50,6 +49,7 @@ router.post('/philosophy/:type', function(req, res, next) {
     var filename = (new Date()).getTime() + '-' + filename;
     filename = decodeURI(filename);
     //Path where file will be uploaded
+    //type = photo , video , recording
     if (req.params.type == 'photo') {
       var dir = process.env.FILE_STORE + '/philosophyPhoto';
       if (!fs.existsSync(dir)){
@@ -150,12 +150,22 @@ router.get('/profile/:file', function(req, res, next) {
 });
 
 //Get Philosophy Photo
-router.get('/philosophy/:file', function(req, res, next) {
+router.get('/philosophy/:type/:file', function(req, res, next) {
   if(!req.params.file){
     res.status(422).json({'message' : 'file not provided'})
     return;
   }
-  var filename = process.env.FILE_STORE  + '/philosophyPhoto/'+ req.params.file;
+
+  //type = photo , video , recording
+  if (req.params.type == 'photo') {
+    var filename = process.env.FILE_STORE  + '/philosophyPhoto/'+ req.params.file;
+  }
+  if (req.params.type == 'video') {
+    var filename = process.env.FILE_STORE  + '/philosophyVideo/'+ req.params.file;
+  }
+  if (req.params.type == 'recording') {
+    var filename = process.env.FILE_STORE  + '/philosophyRecording/'+ req.params.file;
+  }
 
   filename = decodeURI(filename);
   if (!fs.existsSync(filename)){
