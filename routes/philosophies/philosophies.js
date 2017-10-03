@@ -56,7 +56,7 @@
           $project:projections
         }
       ];
-      logger.info("aggregate :: " + JSON.stringify(aggregate));
+      
       db['philosophies'].aggregate(aggregate, function(err, information) {
         if(err) {
           logger.error(err);
@@ -148,6 +148,11 @@
     req.body["CreatedDate"] = new Date();
     req.body["UpdatedDate"] = new Date();
     //req.body["userId"] = req.body.userId;
+
+    req.body["trends"] = [];
+    req.body["images"] = [];
+    req.body["video"] = "";
+    req.body["recording"] = "";
     req.body["replyCount"] = 0;
     req.body['like'] = {
       count:0,
@@ -165,6 +170,7 @@
     // For handling poll question and answer in different collection
     if(req.body['philosophyType'] == 'poll') {
       req.body["pollCount"] = 0;
+      req.body["pollLength"] = "";
       req.body["pollAnsCount"] = {};
       _.forEach(Object.keys(req.body['pollAnswer']), function(key) {
         req.body["pollAnsCount"][key] = 0;

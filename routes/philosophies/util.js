@@ -34,7 +34,7 @@ var trendMapping = function(philosophy, philosophyId) {
   _.forEach(philosophy.split('#'), function(value, i) {
     if(i != 0 && !_.isUndefined(value) && value != '' && !_.isNull(value)) {
       var trend = value.indexOf(' ') !== -1 ? value.substring(0,value.indexOf(' ')) : value;
-      trends.push(trend.toLowerCase());
+      trends.push(trend);
       insertOrUpdateTrend(trend);
     }
   });
@@ -63,13 +63,13 @@ var _trendMappingOnPatch = function(philosophy, philosophyId) {
         var trends = [];
         _.forEach(philosophy.split('#'), function(value, i) {
           if(i != 0 && !_.isUndefined(value) && value != '' && !_.isNull(value)) {
-            trends.push(value.indexOf(' ') !== -1 ? value.substring(0,value.indexOf(' ')).toLowerCase() : value.toLowerCase());
+            trends.push(value.indexOf(' ') !== -1 ? value.substring(0,value.indexOf(' ')) : value);
           }
         });
 
         // Find trends which are in saved one but not in patched philosophy
         _.forEach(_.difference(philosophyTrend.trends, trends), function(trend) {
-            logger.info("Removed Trend :: " + trend.toLowerCase());
+            logger.info("Removed Trend :: " + trend);
             philosophyTrend.trends = _.without(philosophyTrend.trends, trend); // remove trend from philosophy
             // decrement trend used counter
             db['trends'].findOneAndUpdate({name:new RegExp(["^", trend, "$"].join(""), "i")}, {$set: {'UpdatedDate': new Date()}, $inc: { count: -1}});
@@ -77,8 +77,8 @@ var _trendMappingOnPatch = function(philosophy, philosophyId) {
 
         // Find trends which are in new philosophy but not in saved one
         _.forEach(_.difference(trends, philosophyTrend.trends), function(trend) {
-            logger.info("New Added Trend :: " + trend.toLowerCase());
-            philosophyTrend.trends.push(trend.toLowerCase()); // For adding trend in philosophy object
+            logger.info("New Added Trend :: " + trend);
+            philosophyTrend.trends.push(trend); // For adding trend in philosophy object
             insertOrUpdateTrend(trend); // For inserting new trends collection
         });
 

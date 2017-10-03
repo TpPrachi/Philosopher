@@ -54,6 +54,8 @@ router.post('/', validate(schema), function(req, res, next) {
   postGroup["UpdatedDate"] = new Date();
   postGroup["groupName"] = req.body.groupName;
   postGroup["adminUserId"] = req.body.userId;
+  postGroup["groupPhoto"] = "";
+
 
   postGroup["groupMembers"] = _.reduce(req.body.groupMembers, function(c, v){
     c.push(db.ObjectID(v));
