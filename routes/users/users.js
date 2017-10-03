@@ -111,6 +111,32 @@
     });
   });
 
+  // /* GET API for provide list of users for suggestion */
+  // router.get('/suggestion', query.filter, function(req, res, next) {
+  //   db['follow'].find({followingUser:db.ObjectID(req.body.userId)}, {followedUser:1}).toArray(function(err, followed) {
+  //     if(err) {
+  //
+  //     }
+  //     // Prepare array of all users that logged in user followed.
+  //     req.filter['_id'] = {};
+  //     req.filter['_id']['$nin'] = _.reduce(followed, function(c, f) {
+  //       c.push(db.ObjectID(f.followedUser));
+  //       return c;
+  //     }, [db.ObjectID(req.body.userId)]);
+  //
+  //     logger.info("req.filter :: " + JSON.stringify(req.filter));
+  //
+  //     db['users'].find(req.filter, req.options.select || {password:0, tempPassword:0, oldPasssword:0}, req.options).toArray(function(err, users) {
+  //       if(err) {
+  //         logger.error(err);
+  //         res.status(501).send({"success":false, "message":err});
+  //       }
+  //       res.status(200).json({"success":true, "data":users});
+  //     });
+  //   });
+  //
+  // });
+
   /* GET API for selected record from collection. */
   router.get('/:id', function(req, res, next) {
     db['users'].findOne({_id: db.ObjectID(req.params.id)},{password:0,tempPassword:0 ,oldPasssword:0}, function(err, user) {
