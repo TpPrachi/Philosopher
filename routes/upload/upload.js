@@ -41,19 +41,36 @@ router.post('/profile', function(req, res, next) {
 });
 
 //Upload Philosophy Photo
-router.post('/philosophy', function(req, res, next) {
+router.post('/philosophy/:type', function(req, res, next) {
   req.pipe(req.busboy);
-  var philosophyPhotoStore = [];
+  var temp = [];
   req.busboy.on('file', function (fieldname, file, filename) {
     logger.info("Uploading: " + filename);
     var filename = (new Date()).getTime() + '-' + filename;
     filename = decodeURI(filename);
     //Path where file will be uploaded
-    var dir = process.env.FILE_STORE + '/philosophyPhoto';
-    if (!fs.existsSync(dir)){
-      fs.mkdirSync(dir);
+    //type = photo , video , recording
+    if (req.params.type == 'photo') {
+      var dir = process.env.FILE_STORE + '/philosophyPhoto';
+      if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir);
+      }
+      temp.push(filename);
     }
-    philosophyPhotoStore.push(filename);
+    if (req.params.type == 'video') {
+      var dir = process.env.FILE_STORE + '/philosophyVideo';
+      if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir);
+      }
+      temp.push(filename);
+    }
+    if (req.params.type == 'recording') {
+      var dir = process.env.FILE_STORE + '/philosophyRecording';
+      if (!fs.existsSync(dir)){
+        fs.mkdirSync(dir);
+      }
+      temp.push(filename);
+    }
     var fstream = fs.createWriteStream(dir + '/' + filename);
     file.pipe(fstream);
     fstream.on('close', function () {
@@ -61,7 +78,7 @@ router.post('/philosophy', function(req, res, next) {
     });
   });
   req.busboy.on('finish', function (fieldname, file, filename) {
-    res.status(201).json({file: philosophyPhotoStore});
+    res.status(201).json({file: temp});
   });
 });
 
@@ -133,12 +150,22 @@ router.get('/profile/:file', function(req, res, next) {
 });
 
 //Get Philosophy Photo
-router.get('/philosophy/:file', function(req, res, next) {
+router.get('/philosophy/:type/:file', function(req, res, next) {
   if(!req.params.file){
     res.status(422).json({'message' : 'file not provided'})
     return;
   }
-  var filename = process.env.FILE_STORE  + '/philosophyPhoto/'+ req.params.file;
+
+  //type = photo , video , recording
+  if (req.params.type == 'photo') {
+    var filename = process.env.FILE_STORE  + '/philosophyPhoto/'+ req.params.file;
+  }
+  if (req.params.type == 'video') {
+    var filename = process.env.FILE_STORE  + '/philosophyVideo/'+ req.params.file;
+  }
+  if (req.params.type == 'recording') {
+    var filename = process.env.FILE_STORE  + '/philosophyRecording/'+ req.params.file;
+  }
 
   filename = decodeURI(filename);
   if (!fs.existsSync(filename)){
