@@ -25,8 +25,8 @@
         "$match": req.filter
       },{
         $lookup: {
-           from: "usersmapped",
-           foreignField: "userId",
+           from: "users",
+           foreignField: "_id",
            localField: 'userId',
            as: "users"
         }

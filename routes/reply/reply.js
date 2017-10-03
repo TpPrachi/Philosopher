@@ -106,8 +106,8 @@
         "$match": req.filter
       },{
         $lookup: {
-           from: "usersmapped",
-           foreignField: "userId",
+           from: "users",
+           foreignField: "_id",
            localField: 'userId',
            as: "users"
         }
@@ -146,11 +146,8 @@
   // GET API for getting all users who reply on philosophyId. We are used this in reply all functionality
   router.get('/users/:philosophyId', query.filter, function(req, res) {
     var select = {};
-    select["users._id"] = 1;
-    select["users.fullname"] = 1;
-    select["users.biolosophy"] = 1;
-    select["users.username"] = 1;
-    select["users.profilePhoto"] = 1;
+    select["users.password"] = 0;
+    select["users.tempPassword"] = 0;
 
     // special case added for add filter for getting users of specific philosophy.
     req.filter['philosophyId'] = db.ObjectID(req.params.philosophyId);
@@ -158,8 +155,8 @@
     // Build aggregate object for get users details based on operations with users information
     var aggregate = [{
         $lookup: {
-           from: "usersmapped",
-           foreignField: "userId",
+           from: "users",
+           foreignField: "_id",
            localField: 'userId',
            as: "users"
         }
@@ -215,76 +212,85 @@
       select['objections'] = 1;
       selectAfterUpdate['objections.count'] = 1;
     }
-
-    db['reply'].findOne({_id: db.ObjectID(req.params.id)}, select, function(err, reply) {
-      if(err) {
-        logger.error(err);
-        res.status(501).send({"success":false, "message":err});
-      }
-
-      if (req.params.operation == 1) { // For Like
-        if (req.params.flag == 'true') {
-          notification = 1;
-          reply.like.count = reply.like.count + 1;
-          reply.like.info.push({
-            _id : req.body.userId,
-            date : new Date()
-          });
-        } else {
-          var removeIds = _.remove(reply.like.info, {_id:req.body.userId});
-          reply.like.count = reply.like.count - removeIds.length >= 0 ? reply.like.count - removeIds.length : 0;
-        }
-      } else if (req.params.operation == 2) { // For Dislike
-        if (req.params.flag == 'true') {
-          notification = 2;
-          reply.dislike.count = reply.dislike.count + 1;
-          reply.dislike.info.push({
-            _id : req.body.userId,
-            date : new Date()
-          });
-        } else {
-          var removeIds = _.remove(reply.dislike.info, {_id:req.body.userId});
-          reply.dislike.count = reply.dislike.count - removeIds.length >= 0 ? reply.dislike.count - removeIds.length : 0;
-        }
-      } else if (req.params.operation == 3) { // For Objections
-        if (req.params.flag == 'true') {
-          notification = 3;
-          reply.objections.count = reply.objections.count + 1;
-          reply.objections.info.push({
-            _id : req.body.userId,
-            date : new Date()
-          });
-        } else {
-          var removeIds = _.remove(reply.objections.info, {_id:req.body.userId});
-          reply.objections.count = reply.objections.count - removeIds.length >= 0 ? reply.objections.count - removeIds.length : 0;
-        }
-      } else {
-        logger.error('Operation does not match');
-        res.status(501).send({"success":false, "message":'Operation does not match'});
-      }
-
-      db['reply'].findAndModify(
-        {_id: db.ObjectID(req.params.id)}, {}, {$set: reply},
-        {new: true, fields: selectAfterUpdate }, function(err, updatedReply) {
+    if(_.size(select) > 2) {
+      db['reply'].findOne({_id: db.ObjectID(req.params.id)}, select, function(err, reply) {
         if(err) {
           logger.error(err);
           res.status(501).send({"success":false, "message":err});
         }
-
-        // Code for add information to notification collection based on user action like,dislike or objection
-        if(notification >= 1 && notification <= 3 && !_.isUndefined(reply)) {
-          notify.addNotification([{
-            'notifyTo': reply.userId,
-            'notifyBy': req.body.userId,
-            'notifyType': (notification == 1 ? "2" : (notification == 2 ? '3' : '4')),
-            'philosophyId': reply.philosophyId,
-            'replyId': db.ObjectID(req.params.id)
-          }]);
+        if(reply == null) {
+          logger.error(err);
+          res.status(501).send({"success":false, "message":"Please provide valid reply id."});
+        } else {
+        if (req.params.operation == 1) { // For Like
+          if (req.params.flag == 'true') {
+            notification = 1;
+            reply.like.count = reply.like.count + 1;
+            reply.like.info.push({
+              _id : req.body.userId,
+              date : new Date()
+            });
+          } else {
+            var removeIds = _.remove(reply.like.info, {_id:req.body.userId});
+            reply.like.count = reply.like.count - removeIds.length >= 0 ? reply.like.count - removeIds.length : 0;
+          }
+        } else if (req.params.operation == 2) { // For Dislike
+          if (req.params.flag == 'true') {
+            notification = 2;
+            reply.dislike.count = reply.dislike.count + 1;
+            reply.dislike.info.push({
+              _id : req.body.userId,
+              date : new Date()
+            });
+          } else {
+            var removeIds = _.remove(reply.dislike.info, {_id:req.body.userId});
+            reply.dislike.count = reply.dislike.count - removeIds.length >= 0 ? reply.dislike.count - removeIds.length : 0;
+          }
+        } else if (req.params.operation == 3) { // For Objections
+          if (req.params.flag == 'true') {
+            notification = 3;
+            reply.objections.count = reply.objections.count + 1;
+            reply.objections.info.push({
+              _id : req.body.userId,
+              date : new Date()
+            });
+          } else {
+            var removeIds = _.remove(reply.objections.info, {_id:req.body.userId});
+            reply.objections.count = reply.objections.count - removeIds.length >= 0 ? reply.objections.count - removeIds.length : 0;
+          }
+        } else {
+          logger.error('Operation does not match');
+          res.status(501).send({"success":false, "message":'Operation does not match'});
         }
 
-        res.status(200).json({"success":true, "data":updatedReply.value});
+        db['reply'].findAndModify(
+          {_id: db.ObjectID(req.params.id)}, {}, {$set: reply},
+          {new: true, fields: selectAfterUpdate }, function(err, updatedReply) {
+          if(err) {
+            logger.error(err);
+            res.status(501).send({"success":false, "message":err});
+          }
+
+          // Code for add information to notification collection based on user action like,dislike or objection
+          if(notification >= 1 && notification <= 3 && !_.isUndefined(reply)) {
+            notify.addNotification([{
+              'notifyTo': reply.userId,
+              'notifyBy': req.body.userId,
+              'notifyType': (notification == 1 ? "2" : (notification == 2 ? '3' : '4')),
+              'philosophyId': reply.philosophyId,
+              'replyId': db.ObjectID(req.params.id)
+            }]);
+          }
+
+          res.status(200).json({"success":true, "data":updatedReply.value});
+        });
+      }
       });
-    });
+    } else {
+      logger.error('Operation does not match');
+      res.status(501).send({"success":false, "message":'Please provide valid information.'});
+    }
+
   });
 
   // GET for getting all users information who like, dislike or objection on reply
@@ -300,10 +306,8 @@
     } else {
       res.status(501).send({"success":false, "message": "Please provide valid data for information."});
     }
-    select["users.userId"] = 1;
-    select["users.fullname"] = 1;
-    select["users.biolosophy"] = 1;
-    select["users.username"] = 1;
+    select["users"] = 1;
+    //select["users.tempPassword"] = 0;
 
     // Build aggregate object for get users details based on operations with information
     var aggregate = [{
@@ -312,9 +316,9 @@
         "$unwind": (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")))
       },{
         $lookup:{
-           from: "usersmapped",
+           from: "users",
            localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
-           foreignField: "userId",
+           foreignField: "_id",
            as: "users"
         }
       },{

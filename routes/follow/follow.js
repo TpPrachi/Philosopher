@@ -21,9 +21,9 @@
         "$match": { followingUser: db.ObjectID(req.params.id)}
       },{
         $lookup: {
-           from: "usersmapped",
+           from: "users",
+           foreignField: "_id",
            localField: 'followedUser',
-           foreignField: "userId",
            as: "users"
         }
       },{

@@ -41,8 +41,8 @@
           "$match": req.filter
         },{
           $lookup: {
-             from: "usersmapped",
-             foreignField: "userId",
+             from: "users",
+             foreignField: "_id",
              localField: 'userId',
              as: "users"
           }
@@ -53,10 +53,10 @@
         },{
           $limit:req.options['limit']
         },{
-          $project:projections
+         $project:projections
         }
       ];
-      
+
       db['philosophies'].aggregate(aggregate, function(err, information) {
         if(err) {
           logger.error(err);
@@ -91,8 +91,8 @@
           "$match": req.filter
         },{
           $lookup: {
-             from: "usersmapped",
-             foreignField: "userId",
+             from: "users",
+             foreignField: "_id",
              localField: 'userId',
              as: "users"
           }
@@ -103,7 +103,7 @@
         },{
           $limit:req.options['limit']
         },{
-          $project:projections
+         $project:projections
         }
       ];
 
@@ -375,10 +375,8 @@
     } else {
       res.status(501).send({"success":false, "message": "Please provide valid data for information."});
     }
-    select["users.userId"] = 1;
-    select["users.fullname"] = 1;
-    select["users.biolosophy"] = 1;
-    select["users.username"] = 1;
+    select["users"] = 1;
+    //select["users.tempPassword"] = 0;
 
     // Build aggregate object for get users details based on operations with information
     var aggregate = [{
@@ -387,8 +385,8 @@
         "$unwind": (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")))
       },{
         $lookup: {
-           from: "usersmapped",
-           foreignField: "userId",
+           from: "users",
+           foreignField: "_id",
            localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
            as: "users"
         }

@@ -21,9 +21,9 @@
   router.get('/users', query.filter, function(req, res, next) {
     var aggregate = [{
         $lookup: {
-           from: "usersmapped",
+           from: "users",
+           foreignField: "_id",
            localField: 'followedUser',
-           foreignField: "userId",
            as: "users"
         }
       },{
@@ -89,9 +89,9 @@ router.get('/:id', function(req, res, next) {
       $unwind : "$groupMembers"
     },{
       $lookup: {
-         from: "usersmapped",
+         from: "users",
+         foreignField: "_id",
          localField: "groupMembers",
-         foreignField: "userId",
          as: "users"
       }
     }
