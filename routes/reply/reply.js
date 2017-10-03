@@ -106,8 +106,8 @@
         "$match": req.filter
       },{
         $lookup: {
-           from: "users",
-           foreignField: "_id",
+           from: "usersmapped",
+           foreignField: "userId",
            localField: 'userId',
            as: "users"
         }
@@ -155,8 +155,8 @@
     // Build aggregate object for get users details based on operations with users information
     var aggregate = [{
         $lookup: {
-           from: "users",
-           foreignField: "_id",
+           from: "usersmapped",
+           foreignField: "userId",
            localField: 'userId',
            as: "users"
         }
@@ -316,9 +316,9 @@
         "$unwind": (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")))
       },{
         $lookup:{
-           from: "users",
+           from: "usersmapped",
            localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
-           foreignField: "_id",
+           foreignField: "userId",
            as: "users"
         }
       },{

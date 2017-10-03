@@ -41,8 +41,8 @@
           "$match": req.filter
         },{
           $lookup: {
-             from: "users",
-             foreignField: "_id",
+             from: "usersmapped",
+             foreignField: "userId",
              localField: 'userId',
              as: "users"
           }
@@ -91,8 +91,8 @@
           "$match": req.filter
         },{
           $lookup: {
-             from: "users",
-             foreignField: "_id",
+             from: "usersmapped",
+             foreignField: "userId",
              localField: 'userId',
              as: "users"
           }
@@ -385,8 +385,8 @@
         "$unwind": (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")))
       },{
         $lookup: {
-           from: "users",
-           foreignField: "_id",
+           from: "usersmapped",
+           foreignField: "userId",
            localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
            as: "users"
         }
