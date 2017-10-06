@@ -150,9 +150,9 @@
     //req.body["userId"] = req.body.userId;
 
     req.body["trends"] = [];
-    req.body["images"] = [];
-    req.body["video"] = "";
-    req.body["recording"] = "";
+    req.body["images"] = req.body["images"] || [];
+    req.body["video"] = req.body["video"] || [];
+    req.body["recording"] = req.body["recording"] || [];
     req.body["replyCount"] = 0;
     req.body['like'] = {
       count:0,
