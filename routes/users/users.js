@@ -171,7 +171,7 @@
           logger.error(err);
           res.status(501).send({"success":false, "message":err});
         }
-        var select = _.pick(data.value, ['email', 'fullname', 'biolosophy']);
+        var select = _.pick(data.value, ['email', 'fullname', 'biolosophy','location', 'username', 'profilePicture', 'communityCount', 'email']);
         db['usersmapped'].update({userId: db.ObjectID(req.params.id)}, {$set: select}, {returnOriginal: false}, function(err, usersmappedData) {
           //res.status(200).send({"success":true, "message":usersmappedData.value});
           if(err) {
