@@ -111,20 +111,12 @@
     });
   });
 
-<<<<<<< HEAD
   // /* GET API for provide list of users for suggestion */
   router.get('/suggestion', query.filter, function(req, res, next) {
     db['follow'].find({followingUser:db.ObjectID(req.body.userId)}, {followedUser:1}).toArray(function(err, followed) {
       if(err) {
-        logger.error(err);
-        res.status(501).send({"success":false, "message":err});
-=======
-  /* GET API for provide list of users for suggestion */
-  router.get('/suggestion', query.filter, function(req, res, next) {
-    db['follow'].find({followingUser:db.ObjectID(req.body.userId)}, {followedUser:1}).toArray(function(err, followed) {
-      if(err) {
         logger.error("Error while fetching following information :: " + err);
->>>>>>> 01e41b0d8cac84bb53889c5886fb167126e91960
+        res.status(501).send({"success":false, "message":err});
       }
       // Prepare array of all users that logged in user followed.
       req.filter['_id'] = {};
@@ -133,11 +125,6 @@
         return c;
       }, [db.ObjectID(req.body.userId)]);
 
-<<<<<<< HEAD
-=======
-      logger.info("req.filter :: " + JSON.stringify(req.filter));
-
->>>>>>> 01e41b0d8cac84bb53889c5886fb167126e91960
       db['users'].find(req.filter, req.options.select || {password:0, tempPassword:0, oldPasssword:0}, req.options).toArray(function(err, users) {
         if(err) {
           logger.error(err);
@@ -146,10 +133,6 @@
         res.status(200).json({"success":true, "data":users});
       });
     });
-<<<<<<< HEAD
-=======
-
->>>>>>> 01e41b0d8cac84bb53889c5886fb167126e91960
   });
 
   /* GET API for selected record from collection. */
