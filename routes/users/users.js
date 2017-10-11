@@ -142,7 +142,21 @@
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
-      res.status(200).json({"success":true, "data":user});
+      // If no user found then return invalid data.
+      if(user == null) {
+        res.status(501).json({"success":false, "message": "Please provide valid infomation."});
+      } else {
+        // if user found then add isFollow property after checking in follow collection
+        db['follow'].find({followingUser:db.ObjectID(req.body.userId), followedUser: db.ObjectID(req.params.id)}).toArray(function(err, followed) {
+          if(followed.length > 0) { // if follow information found then return true else false
+            user['isFollow'] = true;
+          } else {
+            user['isFollow'] = false;
+          }
+          res.status(200).json({"success":true, "data":user});
+        });
+      }
+
     });
   });
 
