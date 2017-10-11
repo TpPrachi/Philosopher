@@ -138,7 +138,7 @@ router.get('/profile/:file', function(req, res, next) {
     return;
   }
 
-  var filename = process.env.FILE_STORE  + '/profilePhoto' + req.params.file;
+  var filename = process.env.FILE_STORE  + '/profilePhoto/' + req.params.file;
 
   filename = decodeURI(filename);
   if (!fs.existsSync(filename)){
