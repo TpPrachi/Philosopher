@@ -133,11 +133,32 @@
 
   /* GET API for selected record from collection. */
   router.get('/:id', function(req, res, next) {
-    db['philosophies'].find({_id: db.ObjectID(req.params.id)}).toArray(function(err, philosophy) {
+    var aggregate = [{
+      "$match": { _id: db.ObjectID(req.params.id)}
+    },{
+      $lookup: {
+        from: "usersmapped",
+        foreignField: "userId",
+        localField: 'userId',
+        as: "users"
+      }
+    }];
+    db['philosophies'].aggregate(aggregate, function(err, philosophy) {
       if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
       }
+      philosophy = _.reduce(philosophy, function(d, p) {
+        // special case written for check current user is liked or dislike or objection on returned philosophies
+        p.isLike = _.findIndex(p.like.info, { _id: req.body.userId }) != -1 ? true : false;
+        p.isDislike = _.findIndex(p.dislike.info, { _id: req.body.userId }) != -1 ? true : false;
+        p.isObjections = _.findIndex(p.objections.info, { _id: req.body.userId }) != -1 ? true : false;
+        delete p.like.info;
+        delete p.dislike.info;
+        delete p.objections.info;
+        d.push(p);
+        return d;
+      }, []);
       res.status(200).json({"success":true, "data":philosophy});
     });
   });
