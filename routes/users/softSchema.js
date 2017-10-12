@@ -23,7 +23,8 @@ var schema = {
   langauge : string.label('Langauge'),
   isDeleted : bool.label('Is Deleted'),
   isEmailVerified : bool.label('Is Email Verified'),
-  communityCount: number.label('community Count of User')
+  communityCount: number.label('community Count of User'),
+  profilePicture :string.label('Profile Picture Name'),
   // .regex(/^[a-zA-Z0-9)\(._]+$/g),
   // password : ,
   // profilePicture : ,

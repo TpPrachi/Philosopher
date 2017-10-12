@@ -14,7 +14,7 @@
 
 
   router.delete('/', function(req, res, next) {
-    db['tokenmapped'].findOneAndDelete({'uuid': req.headers['authorization']}, function(err, deleted) {
+    db['tokenmapped'].findOneAndDelete({'token': req.headers['authorization']}, function(err, deleted) {
       if(err) {
         res.status(501).send({success:false, message:"Error while removing mapping from token mapped collection."});
       }

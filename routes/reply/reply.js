@@ -145,13 +145,8 @@
 
   // GET API for getting all users who reply on philosophyId. We are used this in reply all functionality
   router.get('/users/:philosophyId', query.filter, function(req, res) {
-    var select = {};
-    select["users.password"] = 0;
-    select["users.tempPassword"] = 0;
-
     // special case added for add filter for getting users of specific philosophy.
     req.filter['philosophyId'] = db.ObjectID(req.params.philosophyId);
-
     // Build aggregate object for get users details based on operations with users information
     var aggregate = [{
         $lookup: {
@@ -166,8 +161,6 @@
         $skip:req.options['skip']
       },{
         $limit:req.options['limit']
-      },{
-        $project: select
       }
     ];
 
