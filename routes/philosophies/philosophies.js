@@ -56,7 +56,8 @@
       //   },{
       //    $project:projections
       //   }];
-      var aggregate = aggregation.getPhilosophies(req, 'allPhilosophies');
+      req.projections = projections;
+      var aggregate = aggregation.getPhilosophies(req);
 
       db['philosophies'].aggregate(aggregate, function(err, information) {
         if(err) {
@@ -106,8 +107,8 @@
       //   },{
       //    $project:projections
       //   }];
-
-      var aggregate = aggregation.getPhilosophies(req, 'allPhilosophies');
+      req.projections = projections;
+      var aggregate = aggregation.getPhilosophies(req);
 
       db['philosophies'].aggregate(aggregate, function(err, information) {
         logger.info("information :: " + information.length);
@@ -134,7 +135,7 @@
   });
 
   /* GET API for selected record from collection. */
-  router.get('/:id', function(req, res, next) {
+  router.get('/:id', query.filter, function(req, res, next) {
     // var aggregate = [{
     //   "$match": { _id: db.ObjectID(req.params.id)}
     // },{
@@ -147,7 +148,7 @@
     // }];
     req.filter = req.filter || {};
     req.filter['_id'] = db.ObjectID(req.params.id);
-    var aggregate = aggregation.getPhilosophies(req, 'philosophy');
+    var aggregate = aggregation.getPhilosophies(req);
 
     db['philosophies'].aggregate(aggregate, function(err, philosophy) {
       if(err) {
@@ -389,7 +390,7 @@
     });
   });
 
-  router.get('/:id/:operation/' ,function(req, res, next) {
+  router.get('/:id/:operation/', query.filter,function(req, res, next) {
 
     var select = {};
     // build select cluase for selected fields to send to response
@@ -424,7 +425,8 @@
     //   }];
     req.filter = req.filter || {};
     req.filter['_id'] = db.ObjectID(req.params.id);
-    var aggregate = aggregation.getPhilosophyOperations(req,select);
+    req['select'] = select;
+    var aggregate = aggregation.getPhilosophies(req);
 
     db['philosophies'].aggregate(aggregate, function(err, information) {
       if(err) {
