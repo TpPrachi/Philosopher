@@ -19,6 +19,7 @@
   var util = require('./util');
   var notify = require('../../lib/notification');
   var query = require('../../lib/query');
+  var aggregation = require("../../lib/aggregate");
 
   /* GET API for ALL records from collection. */
   router.post('/:philosophyId', function(req, res, next) {
@@ -102,24 +103,27 @@
     req.filter['philosophyId'] = db.ObjectID(req.params.philosophyId);
 
     // Build aggregate object for get users details based on operations with information
-    var aggregate = [{
-        "$match": req.filter
-      },{
-        $lookup: {
-           from: "usersmapped",
-           foreignField: "userId",
-           localField: 'userId',
-           as: "users"
-        }
-      },{
-        $sort: {'CreatedDate':-1}
-      },{
-        $skip:req.options['skip']
-      },{
-        $limit:req.options['limit']
-      } // Need to projection for require fields
-    ];
-    //
+    // var aggregate = [{
+    //     "$match": req.filter
+    //   },{
+    //     $lookup: {
+    //        from: "usersmapped",
+    //        foreignField: "userId",
+    //        localField: 'userId',
+    //        as: "users"
+    //     }
+    //   },{
+    //     $sort: {'CreatedDate':-1}
+    //   },{
+    //     $skip:req.options['skip']
+    //   },{
+    //     $limit:req.options['limit']
+    //   } // Need to projection for require fields
+    // ];
+
+    req['sort'] = {'CreatedDate':-1};
+    var aggregate = aggregation.getQuery(req);
+
     db['reply'].aggregate(aggregate, function(err, information) {
       if(err) {
         logger.error(err);
@@ -303,26 +307,34 @@
     //select["users.tempPassword"] = 0;
 
     // Build aggregate object for get users details based on operations with information
-    var aggregate = [{
-        "$match": { _id: db.ObjectID(req.params.id)}
-      },{
-        "$unwind": (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")))
-      },{
-        $lookup:{
-           from: "usersmapped",
-           localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
-           foreignField: "userId",
-           as: "users"
-        }
-      },{
-        $skip:req.options['skip']
-      },{
-        $limit:req.options['limit']
-      },{
-        $project: select
-      }
-    ];
-    //
+    // var aggregate = [{
+    //     "$match": { _id: db.ObjectID(req.params.id)}
+    //   },{
+    //     "$unwind": (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")))
+    //   },{
+    //     $lookup:{
+    //        from: "usersmapped",
+    //        localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
+    //        foreignField: "userId",
+    //        as: "users"
+    //     }
+    //   },{
+    //     $skip:req.options['skip']
+    //   },{
+    //     $limit:req.options['limit']
+    //   },{
+    //     $project: select
+    //   }
+    // ];
+
+    req.filter = req.filter || {};
+    req.filter['_id'] = db.ObjectID(req.params.id);
+    req['projections'] = select;
+    req['unwind'] = (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")));
+    req['localField'] = (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : "")));
+    req['sort'] = {'CreatedDate':-1};
+    var aggregate = aggregation.getQuery(req);
+
     db['reply'].aggregate(aggregate, function(err, information) {
       if(err) {
         logger.error("Error while returning reply information :: " + err);

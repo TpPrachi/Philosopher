@@ -16,6 +16,7 @@
   var validate = require('../../lib/validator');
   var schema = require('./schema');
   var softSchema = require('./softSchema');
+  var aggregation = require("../../lib/aggregate");
 
   //http://localhost:3009/groups/followedUsers
   router.get('/users', query.filter, function(req, res, next) {
@@ -83,19 +84,25 @@ router.get('/', query.filter, function(req, res, next) {
 
 
 router.get('/:id', function(req, res, next) {
-  var aggregate = [{
-      "$match": { _id: db.ObjectID(req.params.id)}
-    },{
-      $unwind : "$groupMembers"
-    },{
-      $lookup: {
-         from: "usersmapped",
-         foreignField: "userId",
-         localField: "groupMembers",
-         as: "users"
-      }
-    }
-  ];
+  // var aggregate = [{
+  //     "$match": { _id: db.ObjectID(req.params.id)}
+  //   },{
+  //     $unwind : "$groupMembers"
+  //   },{
+  //     $lookup: {
+  //        from: "usersmapped",
+  //        foreignField: "userId",
+  //        localField: "groupMembers",
+  //        as: "users"
+  //     }
+  //   }
+  // ];
+
+  req.filter = req.filter || {};
+  req.filter['_id'] = db.ObjectID(req.params.id);
+  req['unwind'] = "$groupMembers";
+  req['localField'] = "groupMembers";
+  var aggregate = aggregation.getQuery(req);
 
   db['groups'].aggregate(aggregate, function(err, group) {
     if(err) {

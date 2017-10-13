@@ -12,6 +12,7 @@
   var db = require('../../lib/db');
   var logger = require('../../lib/logger')(__filename);
   var query = require('../../lib/query');
+  var aggregation = require("../../lib/aggregate");
 
   /* GET API for ALL records from collection. */
   router.get('/:id/:key', query.filter, function(req, res) {
@@ -21,24 +22,26 @@
     req.filter['pollAnswer'] = req.params.key;
 
     // Build aggregate object for get users details based on following information
-    var aggregate = [{
-        "$match": req.filter
-      },{
-        $lookup: {
-           from: "usersmapped",
-           foreignField: "userId",
-           localField: 'userId',
-           as: "users"
-        }
-      },{
-        $sort: {"users.username" : 1}
-      }, {
-        $skip: req.options.skip
-      }, {
-        $limit: req.options.limit
-      }
-    ];
-    //
+    // var aggregate = [{
+    //     "$match": req.filter
+    //   },{
+    //     $lookup: {
+    //        from: "usersmapped",
+    //        foreignField: "userId",
+    //        localField: 'userId',
+    //        as: "users"
+    //     }
+    //   },{
+    //     $sort: {"users.username" : 1}
+    //   }, {
+    //     $skip: req.options.skip
+    //   }, {
+    //     $limit: req.options.limit
+    //   }
+    // ];
+    req['sort'] = {"users.username" : 1};
+    var aggregate = aggregation.getQuery(req);
+    
     db['polls'].aggregate(aggregate, function(err, information) {
       if(err) {
         logger.error(err);

@@ -20,7 +20,7 @@
   var projections = require("../../lib/projections/philosophies");
   var util = require('./util');
   var notify = require('../../lib/notification');
-  var aggregation = require("../../lib/aggregate/philosophies");
+  var aggregation = require("../../lib/aggregate");
 
   /* GET API for ALL philosophies from collection. */
   router.get('/', query.filter, function(req, res, next) {
@@ -56,8 +56,9 @@
       //   },{
       //    $project:projections
       //   }];
-      req.projections = projections;
-      var aggregate = aggregation.getPhilosophies(req);
+      req['projections'] = projections;
+      req['sort'] = {'CreatedDate':-1};
+      var aggregate = aggregation.getQuery(req);
 
       db['philosophies'].aggregate(aggregate, function(err, information) {
         if(err) {
@@ -107,8 +108,9 @@
       //   },{
       //    $project:projections
       //   }];
-      req.projections = projections;
-      var aggregate = aggregation.getPhilosophies(req);
+      req['projections'] = projections;
+      req['sort'] = {'CreatedDate':-1};
+      var aggregate = aggregation.getQuery(req);
 
       db['philosophies'].aggregate(aggregate, function(err, information) {
         logger.info("information :: " + information.length);
@@ -148,7 +150,7 @@
     // }];
     req.filter = req.filter || {};
     req.filter['_id'] = db.ObjectID(req.params.id);
-    var aggregate = aggregation.getPhilosophies(req);
+    var aggregate = aggregation.getQuery(req);
 
     db['philosophies'].aggregate(aggregate, function(err, philosophy) {
       if(err) {
@@ -426,7 +428,10 @@
     req.filter = req.filter || {};
     req.filter['_id'] = db.ObjectID(req.params.id);
     req['projections'] = select;
-    var aggregate = aggregation.getPhilosophies(req);
+    req['unwind'] = (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")));
+    req['localField'] = (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : "")));
+    req['sort'] = {'CreatedDate':-1}; // || {username: 1} Need to verify
+    var aggregate = aggregation.getQuery(req);
 
     db['philosophies'].aggregate(aggregate, function(err, information) {
       if(err) {

@@ -13,28 +13,34 @@
   var logger = require('../../lib/logger')(__filename);
   var notify = require('../../lib/notification');
   var query = require('../../lib/query');
+  var aggregation = require("../../lib/aggregate");
 
   /* GET API for ALL records from collection. */
   router.get('/:id', query.filter, function(req, res, next) {
     // Build aggregate object for get users details based on following information
-    var aggregate = [{
-        "$match": { followingUser: db.ObjectID(req.params.id)}
-      },{
-        $lookup: {
-           from: "usersmapped",
-           foreignField: "userId",
-           localField: 'followedUser',
-           as: "users"
-        }
-      },{
-        $sort: {"users.username" : 1}
-      }, {
-        $skip: req.options.skip
-      }, {
-        $limit: req.options.limit
-      }
-    ];
-    //
+    // var aggregate = [{
+    //     "$match": { followingUser: db.ObjectID(req.params.id)}
+    //   },{
+    //     $lookup: {
+    //        from: "usersmapped",
+    //        foreignField: "userId",
+    //        localField: 'followedUser',
+    //        as: "users"
+    //     }
+    //   },{
+    //     $sort: {"users.username" : 1}
+    //   }, {
+    //     $skip: req.options.skip
+    //   }, {
+    //     $limit: req.options.limit
+    //   }
+    // ];
+
+    req.filter = req.filter || {};
+    req.filter['followingUser'] = db.ObjectID(req.params.id);
+    req['localField'] = 'followedUser';
+    req['sort'] = {"users.username" : 1};
+    var aggregate = aggregation.getQuery(req);
     db['follow'].aggregate(aggregate, function(err, information) {
       if(err) {
         logger.error(err);

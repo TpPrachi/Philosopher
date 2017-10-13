@@ -15,37 +15,49 @@
   var projections = require("../../lib/projections/notification");
   var _ = require('lodash');
   var query = require('../../lib/query');
+  var aggregation = require("../../lib/aggregate");
 
   // GET api for getting notification based on filter data provided in query string
   // We also need to provide information about users as well as philosophy for display with notification tab
   router.get('/', query.filter, function(req, res, next) {
     // Build aggregate object for get users and philosophy details based on operations
-    var aggregate = [{
-        "$match": req.filter
-      },{
-        $lookup: {
-           from: "usersmapped",
-           foreignField: "userId",
-           localField: 'notifyBy',
-           as: "users"
-        }
-      },{
-        $lookup: {
-           from: "philosophies",
-           foreignField: "_id",
-           localField: 'philosophyId',
-           as: "philosophy"
-        }
-      },{
-        $sort: {'UpdatedDate':-1}
-      },{
-        $skip:req.options['skip']
-      },{
-        $limit:req.options['limit']
-      },{
-        $project:projections
-      }
-    ];
+    // var aggregate = [{
+    //     "$match": req.filter
+    //   },{
+    //     $lookup: {
+    //        from: "usersmapped",
+    //        foreignField: "userId",
+    //        localField: 'notifyBy',
+    //        as: "users"
+    //     }
+    //   },{
+    //     $lookup: {
+    //        from: "philosophies",
+    //        foreignField: "_id",
+    //        localField: 'philosophyId',
+    //        as: "philosophy"
+    //     }
+    //   },{
+    //     $sort: {'UpdatedDate':-1}
+    //   },{
+    //     $skip:req.options['skip']
+    //   },{
+    //     $limit:req.options['limit']
+    //   },{
+    //     $project:projections
+    //   }
+    // ];
+
+    req['philosophyLookup'] = {
+       from: "philosophies",
+       foreignField: "_id",
+       localField: 'philosophyId',
+       as: "philosophy"
+    };
+    req['projections'] = projections;
+    req['localField'] = 'notifyBy';
+    req['sort'] = {'UpdatedDate':-1};
+    var aggregate = aggregation.getQuery(req);
 
     db['notification'].aggregate(aggregate, function(err, information) {
       if(err) {
