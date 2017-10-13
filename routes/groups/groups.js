@@ -20,23 +20,29 @@
 
   //http://localhost:3009/groups/followedUsers
   router.get('/users', query.filter, function(req, res, next) {
-    var aggregate = [{
-        $lookup: {
-           from: "usersmapped",
-           foreignField: "userId",
-           localField: 'followedUser',
-           as: "users"
-        }
-      },{
-          "$match": { followingUser: db.ObjectID(req.body.userId)}
-      },{
-        $sort: {"users.username" : 1}
-      },{
-        $skip: req.options.skip
-      },{
-        $limit: req.options.limit
-      }
-    ];
+    // var aggregate = [{
+    //     $lookup: {
+    //        from: "usersmapped",
+    //        foreignField: "userId",
+    //        localField: 'followedUser',
+    //        as: "users"
+    //     }
+    //   },{
+    //       "$match": { followingUser: db.ObjectID(req.body.userId)}
+    //   },{
+    //     $sort: {"users.username" : 1}
+    //   },{
+    //     $skip: req.options.skip
+    //   },{
+    //     $limit: req.options.limit
+    //   }
+    // ];
+
+    req.filter = req.filter || {};
+    req.filter['followingUser'] = db.ObjectID(req.body.userId);
+    req['sort'] = {"users.username" : 1};
+    req['localField'] = 'followedUser';
+    var aggregate = aggregation.getReverseQuery(req);
 
     db['follow'].aggregate(aggregate, function(err, users) {
       if(err) {

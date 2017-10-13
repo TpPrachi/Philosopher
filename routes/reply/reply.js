@@ -152,21 +152,23 @@
     // special case added for add filter for getting users of specific philosophy.
     req.filter['philosophyId'] = db.ObjectID(req.params.philosophyId);
     // Build aggregate object for get users details based on operations with users information
-    var aggregate = [{
-        $lookup: {
-           from: "usersmapped",
-           foreignField: "userId",
-           localField: 'userId',
-           as: "users"
-        }
-      },{
-          "$match": req.filter
-      },{
-        $skip:req.options['skip']
-      },{
-        $limit:req.options['limit']
-      }
-    ];
+    // var aggregate = [{
+    //     $lookup: {
+    //        from: "usersmapped",
+    //        foreignField: "userId",
+    //        localField: 'userId',
+    //        as: "users"
+    //     }
+    //   },{
+    //       "$match": req.filter
+    //   },{
+    //     $skip:req.options['skip']
+    //   },{
+    //     $limit:req.options['limit']
+    //   }
+    // ];
+
+    var aggregate = aggregation.getReverseQuery(req);
 
     db['reply'].aggregate(aggregate, function(err, information) {
       if(err) {
