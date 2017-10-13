@@ -20,6 +20,7 @@
   var projections = require("../../lib/projections/philosophies");
   var util = require('./util');
   var notify = require('../../lib/notification');
+  var aggregation = require("../../lib/aggregate/philosophies");
 
   /* GET API for ALL philosophies from collection. */
   router.get('/', query.filter, function(req, res, next) {
@@ -37,25 +38,25 @@
       }, [{'userId': db.ObjectID(req.body.userId)}]);
 
       // Build aggregate object for get users details based on operations with information
-      var aggregate = [{
-          "$match": req.filter
-        },{
-          $lookup: {
-             from: "usersmapped",
-             foreignField: "userId",
-             localField: 'userId',
-             as: "users"
-          }
-        },{
-          $sort: {'CreatedDate':-1}
-        },{
-          $skip:req.options['skip']
-        },{
-          $limit:req.options['limit']
-        },{
-         $project:projections
-        }
-      ];
+      // var aggregate = [{
+      //     "$match": req.filter
+      //   },{
+      //     $lookup: {
+      //        from: "usersmapped",
+      //        foreignField: "userId",
+      //        localField: 'userId',
+      //        as: "users"
+      //     }
+      //   },{
+      //     $sort: {'CreatedDate':-1}
+      //   },{
+      //     $skip:req.options['skip']
+      //   },{
+      //     $limit:req.options['limit']
+      //   },{
+      //    $project:projections
+      //   }];
+      var aggregate = aggregation.getPhilosophies(req, 'allPhilosophies');
 
       db['philosophies'].aggregate(aggregate, function(err, information) {
         if(err) {
@@ -87,25 +88,26 @@
       req.filter['userId'] = db.ObjectID(req.params.user);
 
       // Build aggregate object for get users details based on operations with information
-      var aggregate = [{
-          "$match": req.filter
-        },{
-          $lookup: {
-             from: "usersmapped",
-             foreignField: "userId",
-             localField: 'userId',
-             as: "users"
-          }
-        },{
-          $sort: {'CreatedDate':-1}
-        },{
-          $skip:req.options['skip']
-        },{
-          $limit:req.options['limit']
-        },{
-         $project:projections
-        }
-      ];
+      // var aggregate = [{
+      //     "$match": req.filter
+      //   },{
+      //     $lookup: {
+      //        from: "usersmapped",
+      //        foreignField: "userId",
+      //        localField: 'userId',
+      //        as: "users"
+      //     }
+      //   },{
+      //     $sort: {'CreatedDate':-1}
+      //   },{
+      //     $skip:req.options['skip']
+      //   },{
+      //     $limit:req.options['limit']
+      //   },{
+      //    $project:projections
+      //   }];
+
+      var aggregate = aggregation.getPhilosophies(req, 'allPhilosophies');
 
       db['philosophies'].aggregate(aggregate, function(err, information) {
         logger.info("information :: " + information.length);
@@ -133,16 +135,20 @@
 
   /* GET API for selected record from collection. */
   router.get('/:id', function(req, res, next) {
-    var aggregate = [{
-      "$match": { _id: db.ObjectID(req.params.id)}
-    },{
-      $lookup: {
-        from: "usersmapped",
-        foreignField: "userId",
-        localField: 'userId',
-        as: "users"
-      }
-    }];
+    // var aggregate = [{
+    //   "$match": { _id: db.ObjectID(req.params.id)}
+    // },{
+    //   $lookup: {
+    //     from: "usersmapped",
+    //     foreignField: "userId",
+    //     localField: 'userId',
+    //     as: "users"
+    //   }
+    // }];
+    req.filter = req.filter || {};
+    req.filter['_id'] = db.ObjectID(req.params.id);
+    var aggregate = aggregation.getPhilosophies(req, 'philosophy');
+
     db['philosophies'].aggregate(aggregate, function(err, philosophy) {
       if(err) {
         logger.error(err);
@@ -400,23 +406,25 @@
     //select["users.tempPassword"] = 0;
 
     // Build aggregate object for get users details based on operations with information
-    var aggregate = [{
-        "$match": { _id: db.ObjectID(req.params.id)}
-      },{
-        "$unwind": (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")))
-      },{
-        $lookup: {
-           from: "usersmapped",
-           foreignField: "userId",
-           localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
-           as: "users"
-        }
-      },{
-        $project: select
-      },{
-        $sort: {username: 1}
-      }
-    ];
+    // var aggregate = [{
+    //     "$match": { _id: db.ObjectID(req.params.id)}
+    //   },{
+    //     "$unwind": (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")))
+    //   },{
+    //     $lookup: {
+    //        from: "usersmapped",
+    //        foreignField: "userId",
+    //        localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
+    //        as: "users"
+    //     }
+    //   },{
+    //     $project: select
+    //   },{
+    //     $sort: {username: 1}
+    //   }];
+    req.filter = req.filter || {};
+    req.filter['_id'] = db.ObjectID(req.params.id);
+    var aggregate = aggregation.getPhilosophyOperations(req,select);
 
     db['philosophies'].aggregate(aggregate, function(err, information) {
       if(err) {
