@@ -425,7 +425,7 @@
     //   }];
     req.filter = req.filter || {};
     req.filter['_id'] = db.ObjectID(req.params.id);
-    req['select'] = select;
+    req['projections'] = select;
     var aggregate = aggregation.getPhilosophies(req);
 
     db['philosophies'].aggregate(aggregate, function(err, information) {
