@@ -48,7 +48,7 @@
     //   }
     // ];
 
-    req['philosophyLookup'] = {
+    req['extraLookup'] = {
        from: "philosophies",
        foreignField: "_id",
        localField: 'philosophyId',
