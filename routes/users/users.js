@@ -160,44 +160,51 @@
     });
   });
 
+  function doUserOperations(patch,req,res) {
+    db['users'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, data) {
+      if(err) {
+        logger.error(err);
+        res.status(501).send({"success":false, "message":err});
+      }
+      var select = _.pick(data.value, ['email', 'fullname', 'biolosophy','location', 'username', 'profilePicture', 'communityCount', 'email']);
+      db['usersmapped'].update({userId: db.ObjectID(req.params.id)}, {$set: select}, {returnOriginal: false}, function(err, usersmappedData) {
+        //res.status(200).send({"success":true, "message":usersmappedData.value});
+        if(err) {
+          logger.error(err);
+          res.status(501).send({"success":false, "message":err});
+        }
+        delete data.value.password;
+        delete data.value.tempPassword;
+        delete data.value.oldPassword;
+        res.status(200).send({"success":true, "data":data.value});
+      });
+    });
+  }
 
   /* PATCH API for update entity values. */
   router.patch('/:id', validate(softSchema) ,function(req, res, next) {
     var patch = req.body;
     patch["UpdatedDate"] = new Date();
-
-    db['users'].findOne({_id: db.ObjectID(req.params.id)}, function(err, users) {
-      if(err){
-        logger.error(err);
-        res.status(501).send({"success":false, "message":err});
-      }
-
-      if (users && users && users.email) {
-        if (patch && patch.email && patch.email ===  users.email) {
-          res.status(501).send({"success":false, "message": "Patching the same email, Please provide valid data for perform operation."});
-        }
-      }
-
-      db['users'].findOneAndUpdate({_id: db.ObjectID(req.params.id)}, {$set: patch}, {returnOriginal: false}, function(err, data) {
-        if(err) {
-          logger.error(err);
-          res.status(501).send({"success":false, "message":err});
-        }
-        var select = _.pick(data.value, ['email', 'fullname', 'biolosophy','location', 'username', 'profilePicture', 'communityCount', 'email']);
-        db['usersmapped'].update({userId: db.ObjectID(req.params.id)}, {$set: select}, {returnOriginal: false}, function(err, usersmappedData) {
-          //res.status(200).send({"success":true, "message":usersmappedData.value});
-          if(err) {
-            logger.error(err);
-            res.status(501).send({"success":false, "message":err});
+    if (patch.email || patch.username) {
+      db['users'].findOne({$or : [{email : patch.email}, {username : patch.username}]}, function(err, getUser) {
+        if (!getUser) {
+          doUserOperations(patch,req,res);
+        }else {
+          if (getUser.username == patch.username) {
+            logger.error("Username must be unique.");
+            res.status(500).send({"success":false, "message":"Username must be unique."});
+          }else if (getUser.email == patch.email) {
+            logger.error("Email Id must be unique.");
+            res.status(500).send({"success":false, "message":"Email Id must be unique."});
+          }else {
+            logger.error("Please provide valid information for signup user.");
+            res.status(500).send({"success":false, "message":"Please provide valid information for signup user."});
           }
-          delete data.value.password;
-          delete data.value.tempPassword;
-          delete data.value.oldPassword;
-          res.status(200).send({"success":true, "data":data.value});
-        });
+        }
       });
-    });
-
+    }else {
+      doUserOperations(patch,req,res);
+    }
   });
 
   module.exports = router;
