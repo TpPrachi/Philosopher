@@ -18,6 +18,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 app.use(busboy());
 
+
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(bodyParser.json({limit: '100mb'}));
@@ -32,12 +33,16 @@ app.use(function (req, res, next) {
     next();
 });
 
+// For access public folder
+app.use('/public', express.static(path.join(__dirname, 'public')));
+
 // initialize passport for authentication and route security
 app.use(passport.initialize());
 require('./lib/oauth')(passport);
 
 // configure only authorization routes for bypass authentication (login && signup)
 app.use('/', require('./lib/oauth/authorization'));
+
 
 // get jwt token from store collection based on authorization headers
 app.use('/', function(req, res, next) {
@@ -57,8 +62,8 @@ app.use('/', function(req, res, next) {
       next();
     });
   } else {
-    logger.error('No token provided.');
-    return res.status(403).send({success: false, message: 'No token provided.'});
+   logger.error('No token provided.');
+   return res.status(403).send({success: false, message: 'No token provided.'});
   }
 
 });
