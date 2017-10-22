@@ -74,7 +74,7 @@
             if(req.body.notifyUsers && _.size(req.body.notifyUsers) > 0) {
               notify.addNotification(_.reduce(req.body.notifyUsers, function(n, users) {
                 n.push({
-                  'notifyTo':db.ObjectID(users.id),
+                  'notifyTo':db.ObjectID(users.userId),
                   'notifyBy':req.body.userId,
                   'notifyType':'6',
                   'philosophyId':philosophy._id,
