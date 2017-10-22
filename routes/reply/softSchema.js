@@ -12,14 +12,14 @@ var rExtraLargeString = types.rExtraLargeString;
 var extraLargeString = types.extraLargeString;
 var optionalArray = types.optionalArray;
 var object = types.object.bind(types);
-
+var any = types.any;
 
 var schema = {
   userId: id.label('User Id'),
   reply:rString.label("Reply Content"),
   philosophyId: id.label('philosophy Id'),
   replyType: string.label("Reply Type"),
-  notifyUsers: optionalArray,
+  notifyUsers: any,
   like:object({
     count: number.label('Like Count'),
     info: array(object({
