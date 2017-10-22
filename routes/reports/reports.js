@@ -24,7 +24,7 @@
   router.post('/:reportUserId/:reportId', function(req, res, next) {
     db['reportUser'].findOne({_id:db.ObjectID(req.params.reportId)}, function(err, reportData) {
       var postReport = {};
-      if (reportData.length > 0) {
+      if (reportData != null) {
         postReport['reportedUserId'] = db.ObjectID(req.params.reportUserId); //User against whom I have to report
         postReport['reportId'] = db.ObjectID(req.params.reportId); //report user collection : which report content user have to report(collection : reportUser get that id)
         postReport['userId'] = db.ObjectID(req.body.userId); //My Id

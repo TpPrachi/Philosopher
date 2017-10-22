@@ -48,6 +48,7 @@
     //   }
     // ];
 
+    req.filter['notifyTo'] = req.filter['notifyTo'] || db.ObjectID(req.body.userId);
     req['extraLookup'] = {
        from: "philosophies",
        foreignField: "_id",
