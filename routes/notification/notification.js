@@ -80,6 +80,17 @@
     });
   });
 
+  // For remove notification
+  router.patch('/:id' ,function(req, res, next) {
+    db['notification'].findOneAndUpdate({_id : db.ObjectID(req.params.id)}, {$set : req.body}, function(err, d){
+      if(err) {
+        logger.error("Error while removing notification :: " + err);
+        res.status(501).send({"success":false, "message":err});
+      }
+      res.status(200).send({"success":true, "message":"Notification updated successfully."});
+    });
+  });
+
   module.exports = router;
 
 })();
