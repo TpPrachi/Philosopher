@@ -22,7 +22,7 @@
   var aggregation = require("../../lib/aggregate");
 
   /* GET API for ALL records from collection. */
-  router.post('/:philosophyId', function(req, res, next) {
+  router.post('/:philosophyId', validate(schema), function(req, res, next) {
     db['philosophies'].findOne({_id: db.ObjectID(req.params.philosophyId)}, {userId:1}, function(err, philosophy) {
       if(err) {
         logger.error("Error while getting philosophy in reply :: " + err);
