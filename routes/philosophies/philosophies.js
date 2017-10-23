@@ -442,6 +442,30 @@
     });
   });
 
+  //http://localhost:3009/philosophies/59ee218a3b9cfd437d788665/likeCount
+
+  router.get('/:id/count/:type',function(req, res, next) {
+    //type : like - 1, dislike - 2, objection - 3, reply - 4
+    db['philosophies'].findOne({_id: db.ObjectID(req.params.id)}, function(err, philosophy) {      
+      if(err) {
+        logger.error(err);
+        res.status(501).send({"success":false, "message":err});
+      }
+      if (req.params.type == 'like') {
+        res.status(200).send({"success":true, "count":philosophy.like.count});
+      }
+      if (req.params.type == 'dislike') {
+        res.status(200).send({"success":true, "count":philosophy.dislike.count});
+      }
+      if (req.params.type == 'objection') {
+        res.status(200).send({"success":true, "count":philosophy.objections.count});
+      }
+      if (req.params.type == 'reply') {
+        res.status(200).send({"success":true, "count":philosophy.replyCount});
+      }
+    });
+  });
+
   module.exports = router;
 
 })();
