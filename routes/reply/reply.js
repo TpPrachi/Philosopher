@@ -78,7 +78,8 @@
                   'notifyBy':req.body.userId,
                   'notifyType':'6',
                   'philosophyId':philosophy._id,
-                  'replyId':replies.insertedIds[0]
+                  'replyId':replies.insertedIds[0],
+                  'replyUserCount': req.body.notifyUsers.length
                 });
                 return n;
               }, []));

@@ -57,6 +57,12 @@
     };
     req['projections'] = projections;
     req['localField'] = 'notifyBy';
+    req['notifyTo'] = {
+      from: "usersmapped",
+      foreignField: "userId",
+      localField: 'notifyTo',
+      as: "users"
+    };
     req['sort'] = {'UpdatedDate':-1};
     var aggregate = aggregation.getQuery(req);
 
