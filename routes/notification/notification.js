@@ -61,7 +61,7 @@
       from: "usersmapped",
       foreignField: "userId",
       localField: 'notifyTo',
-      as: "users"
+      as: "notifyToUsers" // Changes by JD
     };
     req['sort'] = {'UpdatedDate':-1};
     var aggregate = aggregation.getQuery(req);
