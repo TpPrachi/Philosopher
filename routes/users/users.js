@@ -153,7 +153,17 @@
           } else {
             user['isFollow'] = false;
           }
-          res.status(200).json({"success":true, "data":user});
+
+          db['block'].findOne({blockTo:db.ObjectID(req.params.id), userId:db.ObjectID(req.body.userId)}, function(err, blocked){
+            if(blocked == null) {
+              user['isBlocked'] = false;
+            } else {
+              user['isBlocked'] = true;
+            }
+
+            res.status(200).json({"success":true, "data":user});
+          });
+
         });
       }
 
