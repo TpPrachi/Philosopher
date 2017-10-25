@@ -20,6 +20,7 @@ var _configure = function(app) {
   var reports = require('./reports');
   var groups = require('./groups');
   var polls = require('./polls');
+  var block = require('./block');
 
   app.use('/upload', upload);
   app.use('/sample', sample);
@@ -34,6 +35,7 @@ var _configure = function(app) {
   app.use('/reports', reports);
   app.use('/groups', groups);
   app.use('/polls', polls);
+  app.use('/block', block);
 
 };
 

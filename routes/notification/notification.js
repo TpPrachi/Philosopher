@@ -97,6 +97,27 @@
     });
   });
 
+  // For getting count of all notifications using single api
+  router.get('/count' ,function(req, res, next) {
+    db['notification'].find({notifyTo : db.ObjectID(req.body.userId), isRead: false, isDeleted: false}, {notifyType:1}).toArray(function(err, notifications){
+      if(err) {
+        logger.error("Error while getting list of notifications :: " + err);
+        res.status(501).send({"success":false, "message":err});
+      }
+
+      // Prepare object with count of each notification.
+      var countStatus  = {};
+      countStatus['follow'] = (_.remove(notifications, {notifyType: '1'}) || []).length;
+      countStatus['like'] = (_.remove(notifications, {notifyType: '2'}) || []).length;
+      countStatus['dislike'] = (_.remove(notifications, {notifyType: '3'}) || []).length;
+      countStatus['objections'] = (_.remove(notifications, {notifyType: '4'}) || []).length;
+      countStatus['reply'] = (_.remove(notifications, {notifyType: '5'}) || []).length;
+      countStatus['replyAll'] = (_.remove(notifications, {notifyType: '6'}) || []).length;
+
+      res.status(200).send({"success":true, "data":countStatus});
+    });
+  });
+
   module.exports = router;
 
 })();
