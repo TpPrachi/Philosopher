@@ -34,7 +34,18 @@ app.use(function (req, res, next) {
 });
 
 // Route for access public folder resources
-app.use('/public', express.static(path.join(__dirname, 'public')));
+//app.use('/public', express.static(path.join(__dirname, 'public')));
+
+// Route for access public folder resources
+app.use('/public', function(req, res, next){ // Middleware for check file is existing or not
+  if (fs.existsSync(path.join(__dirname, 'public', req.path))) {
+      next(); // file exists go with normal flow
+  } else {
+    // if file not found that return 404 file not found.
+    return res.status(404).send({success: false, message: "Resource you looking is not found."});
+  }
+}, express.static(path.join(__dirname, 'public')));
+
 
 // initialize passport for authentication and route security
 app.use(passport.initialize());
