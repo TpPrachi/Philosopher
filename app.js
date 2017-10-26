@@ -87,8 +87,8 @@ routes.configure(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  logger.error("Not Found. Accessing route - " + req.path);
-  res.status(404).send({"success": false, "message":"Not Found. Accessing route - " + req.path});
+  logger.error("Not Found. Accessing route - " + req.path + " For " + req.method);
+  res.status(404).send({"success": false, "message":"Not Found. Accessing route - " + req.path + " For " + req.method});
 });
 
 // development error handler
