@@ -9,7 +9,7 @@ var passport = require('passport');
 var db = require('./lib/db');
 var logger = require('./lib/logger')(__filename);
 var busboy = require('connect-busboy');
-
+var fs = require('fs');
 
 // ZmEzNDc0NDAtY2RkZS00NjE3LWFkZjMtMTZlOWIyYzc5Yzdh - oneSignle
 
@@ -33,8 +33,15 @@ app.use(function (req, res, next) {
     next();
 });
 
-// For access public folder
-app.use('/public', express.static(path.join(__dirname, 'public')));
+// Route for access public folder resources
+app.use('/public', function(req, res, next){ // Middleware for check file is existing or not
+  if (fs.existsSync(path.join(__dirname, 'public', req.path))) {
+      next(); // file exists go with normal flow
+  } else {
+    // if file not found that return 404 file not found.
+    return res.status(404).send({success: false, message: "Resource you looking is not found."});
+  }
+}, express.static(path.join(__dirname, 'public')));
 
 // initialize passport for authentication and route security
 app.use(passport.initialize());
@@ -42,7 +49,6 @@ require('./lib/oauth')(passport);
 
 // configure only authorization routes for bypass authentication (login && signup)
 app.use('/', require('./lib/oauth/authorization'));
-
 
 // get jwt token from store collection based on authorization headers
 app.use('/', function(req, res, next) {
