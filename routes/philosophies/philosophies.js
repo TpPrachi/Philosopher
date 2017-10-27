@@ -24,90 +24,55 @@
 
   /* GET API for ALL philosophies from collection. */
   router.get('/', query.filter, function(req, res, next) {
-
-    db['follow'].find({followingUser:db.ObjectID(req.body.userId)}, {followedUser:1}).toArray(function(err, followed) {
-      if(err) {
-        // If we find any error still allow to execute query
-        logger.error("Error while getting following information of users for filtering.");
-        next();
-      }
-      // Prepare array of all users that logged in user followed.
-      req.filter['$or'] = _.reduce(followed, function(c, f) {
-        c.push({'userId': db.ObjectID(f.followedUser)});
-        return c;
-      }, [{'userId': db.ObjectID(req.body.userId)}]);
-
-      // Build aggregate object for get users details based on operations with information
-      // var aggregate = [{
-      //     "$match": req.filter
-      //   },{
-      //     $lookup: {
-      //        from: "usersmapped",
-      //        foreignField: "userId",
-      //        localField: 'userId',
-      //        as: "users"
-      //     }
-      //   },{
-      //     $sort: {'CreatedDate':-1}
-      //   },{
-      //     $skip:req.options['skip']
-      //   },{
-      //     $limit:req.options['limit']
-      //   },{
-      //    $project:projections
-      //   }];
-      req['projections'] = projections;
-      req['sort'] = {'CreatedDate':-1};
-      var aggregate = aggregation.getQuery(req);
-
-      db['philosophies'].aggregate(aggregate, function(err, information) {
+    db['block'].find({userId: db.ObjectID(req.body.userId)}).toArray(function(err, getBlockData) {
+      db['follow'].find({followingUser:db.ObjectID(req.body.userId)}, {followedUser:1}).toArray(function(err, followed) {
         if(err) {
-          logger.error(err);
-          res.status(501).send({"success":false, "message":err});
+          // If we find any error still allow to execute query
+          logger.error("Error while getting following information of users for filtering.");
+          next();
         }
-        information = _.reduce(information, function(d, philosophy) {
-          // special case written for check current user is liked or dislike or objection on returned philosophies
-          philosophy.isLike = _.findIndex(philosophy.like.info, { _id: req.body.userId }) != -1 ? true : false;
-          philosophy.isDislike = _.findIndex(philosophy.dislike.info, { _id: req.body.userId }) != -1 ? true : false;
-          philosophy.isObjections = _.findIndex(philosophy.objections.info, { _id: req.body.userId }) != -1 ? true : false;
+        // Prepare array of all users that logged in user followed.
+        req.filter['$or'] = _.reduce(followed, function(c, f) {
+          var data = _.find(getBlockData, {blockTo: f.followedUser});
+          if (!data) {
+            c.push({'userId': db.ObjectID(f.followedUser)});
+          }
+          return c;
+        }, [{'userId': db.ObjectID(req.body.userId)}]);
+        // Build aggregate object for get users details based on operations with information
+        req['projections'] = projections;
+        req['sort'] = {'CreatedDate':-1};
+        var aggregate = aggregation.getQuery(req);
 
-          delete philosophy.like.info;
-          delete philosophy.dislike.info;
-          delete philosophy.objections.info;
+        db['philosophies'].aggregate(aggregate, function(err, information) {
+          if(err) {
+            logger.error(err);
+            res.status(501).send({"success":false, "message":err});
+          }
+          information = _.reduce(information, function(d, philosophy) {
+            // special case written for check current user is liked or dislike or objection on returned philosophies
+            philosophy.isLike = _.findIndex(philosophy.like.info, { _id: req.body.userId }) != -1 ? true : false;
+            philosophy.isDislike = _.findIndex(philosophy.dislike.info, { _id: req.body.userId }) != -1 ? true : false;
+            philosophy.isObjections = _.findIndex(philosophy.objections.info, { _id: req.body.userId }) != -1 ? true : false;
 
-          d.push(philosophy);
-          return d;
-        }, []);
+            delete philosophy.like.info;
+            delete philosophy.dislike.info;
+            delete philosophy.objections.info;
 
-        res.status(201).json({"success":true, "data":information});
+            d.push(philosophy);
+            return d;
+          }, []);
+
+          res.status(201).json({"success":true, "data":information});
+        });
       });
     });
-
   });
 
   // Get users specific philosophies based on user id.
   router.get('/user/:user', query.filter, function(req, res, next) {
       req.filter['userId'] = db.ObjectID(req.params.user);
-
       // Build aggregate object for get users details based on operations with information
-      // var aggregate = [{
-      //     "$match": req.filter
-      //   },{
-      //     $lookup: {
-      //        from: "usersmapped",
-      //        foreignField: "userId",
-      //        localField: 'userId',
-      //        as: "users"
-      //     }
-      //   },{
-      //     $sort: {'CreatedDate':-1}
-      //   },{
-      //     $skip:req.options['skip']
-      //   },{
-      //     $limit:req.options['limit']
-      //   },{
-      //    $project:projections
-      //   }];
       req['projections'] = projections;
       req['sort'] = {'CreatedDate':-1};
       var aggregate = aggregation.getQuery(req);
@@ -138,37 +103,32 @@
 
   /* GET API for selected record from collection. */
   router.get('/:id', query.filter, function(req, res, next) {
-    // var aggregate = [{
-    //   "$match": { _id: db.ObjectID(req.params.id)}
-    // },{
-    //   $lookup: {
-    //     from: "usersmapped",
-    //     foreignField: "userId",
-    //     localField: 'userId',
-    //     as: "users"
-    //   }
-    // }];
     req.filter = req.filter || {};
     req.filter['_id'] = db.ObjectID(req.params.id);
     var aggregate = aggregation.getQuery(req);
-
     db['philosophies'].aggregate(aggregate, function(err, philosophy) {
-      if(err) {
-        logger.error(err);
-        res.status(501).send({"success":false, "message":err});
-      }
-      philosophy = _.reduce(philosophy, function(d, p) {
-        // special case written for check current user is liked or dislike or objection on returned philosophies
-        p.isLike = _.findIndex(p.like.info, { _id: req.body.userId }) != -1 ? true : false;
-        p.isDislike = _.findIndex(p.dislike.info, { _id: req.body.userId }) != -1 ? true : false;
-        p.isObjections = _.findIndex(p.objections.info, { _id: req.body.userId }) != -1 ? true : false;
-        delete p.like.info;
-        delete p.dislike.info;
-        delete p.objections.info;
-        d.push(p);
-        return d;
-      }, []);
-      res.status(200).json({"success":true, "data":philosophy});
+      db['block'].findOne({blockTo: db.ObjectID(philosophy[0].userId)}, function(err, getBlockData) {
+        if(err) {
+          logger.error(err);
+          res.status(501).send({"success":false, "message":err});
+        }
+        if (!getBlockData) {
+          philosophy = _.reduce(philosophy, function(d, p) {
+            // special case written for check current user is liked or dislike or objection on returned philosophies
+            p.isLike = _.findIndex(p.like.info, { _id: req.body.userId }) != -1 ? true : false;
+            p.isDislike = _.findIndex(p.dislike.info, { _id: req.body.userId }) != -1 ? true : false;
+            p.isObjections = _.findIndex(p.objections.info, { _id: req.body.userId }) != -1 ? true : false;
+            delete p.like.info;
+            delete p.dislike.info;
+            delete p.objections.info;
+            d.push(p);
+            return d;
+          }, []);
+          res.status(200).json({"success":true, "data":philosophy});
+        }else {
+          res.status(501).send({"success":false, "message": "Blocked."});
+        }
+      });
     });
   });
 
@@ -177,7 +137,6 @@
     var post = req.body;
     req.body["CreatedDate"] = new Date();
     req.body["UpdatedDate"] = new Date();
-    //req.body["userId"] = req.body.userId;
 
     req.body["trends"] = [];
     req.body["images"] = req.body["images"] || [];
@@ -406,25 +365,8 @@
       res.status(501).send({"success":false, "message": "Please provide valid data for information."});
     }
     select["users"] = 1;
-    //select["users.tempPassword"] = 0;
 
     // Build aggregate object for get users details based on operations with information
-    // var aggregate = [{
-    //     "$match": { _id: db.ObjectID(req.params.id)}
-    //   },{
-    //     "$unwind": (req.params.operation == 1 ? "$like.info" : (req.params.operation == 2 ? "$dislike.info" : (req.params.operation == 3 ? "$objections.info" : "")))
-    //   },{
-    //     $lookup: {
-    //        from: "usersmapped",
-    //        foreignField: "userId",
-    //        localField: (req.params.operation == 1 ? "like.info._id" : (req.params.operation == 2 ? "dislike.info._id" : (req.params.operation == 3 ? "objections.info._id" : ""))),
-    //        as: "users"
-    //     }
-    //   },{
-    //     $project: select
-    //   },{
-    //     $sort: {username: 1}
-    //   }];
     req.filter = req.filter || {};
     req.filter['_id'] = db.ObjectID(req.params.id);
     req['projections'] = select;
@@ -446,7 +388,7 @@
 
   router.get('/:id/count/:type',function(req, res, next) {
     //type : like - 1, dislike - 2, objection - 3, reply - 4
-    db['philosophies'].findOne({_id: db.ObjectID(req.params.id)}, function(err, philosophy) {      
+    db['philosophies'].findOne({_id: db.ObjectID(req.params.id)}, function(err, philosophy) {
       if(err) {
         logger.error(err);
         res.status(501).send({"success":false, "message":err});
