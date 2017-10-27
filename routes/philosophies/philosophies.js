@@ -110,12 +110,12 @@
     var aggregate = aggregation.getQuery(req);
     db['philosophies'].aggregate(aggregate, function(err, philosophy) {
       if(philosophy[0]) {
-        db['block'].findOne({blockTo: db.ObjectID(philosophy[0].userId), userId: db.ObjectID(req.body.userId)}, function(err, getBlockData) {
+        db['block'].findOne({blockTo: db.ObjectID(philosophy[0].userId), userId: db.ObjectID(req.body.userId)}, function(err, blockUser) {
           if(err) {
             logger.error(err);
             res.status(501).send({"success":false, "message":err});
           }
-          if (!getBlockData) {
+          if (!blockUser) {
             philosophy = _.reduce(philosophy, function(d, p) {
               // special case written for check current user is liked or dislike or objection on returned philosophies
               p.isLike = _.findIndex(p.like.info, { _id: req.body.userId }) != -1 ? true : false;
