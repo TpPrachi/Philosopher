@@ -24,21 +24,23 @@
 
   /* GET API for ALL philosophies from collection. */
   router.get('/', query.filter, function(req, res, next) {
-    db['block'].find({userId: db.ObjectID(req.body.userId)}).toArray(function(err, getBlockData) {
+    db['block'].find({userId: db.ObjectID(req.body.userId)}, {blockTo: 1}).toArray(function(err, blokedusers) {
       db['follow'].find({followingUser:db.ObjectID(req.body.userId)}, {followedUser:1}).toArray(function(err, followed) {
         if(err) {
           // If we find any error still allow to execute query
           logger.error("Error while getting following information of users for filtering.");
           next();
         }
+
         // Prepare array of all users that logged in user followed.
         req.filter['$or'] = _.reduce(followed, function(c, f) {
-          var data = _.find(getBlockData, {blockTo: f.followedUser});
-          if (!data) {
+          // Filter users who blocked by logged in user
+          if (!_.find(blokedusers, {blockTo: f.followedUser})) {
             c.push({'userId': db.ObjectID(f.followedUser)});
           }
           return c;
         }, [{'userId': db.ObjectID(req.body.userId)}]);
+
         // Build aggregate object for get users details based on operations with information
         req['projections'] = projections;
         req['sort'] = {'CreatedDate':-1};
@@ -107,28 +109,33 @@
     req.filter['_id'] = db.ObjectID(req.params.id);
     var aggregate = aggregation.getQuery(req);
     db['philosophies'].aggregate(aggregate, function(err, philosophy) {
-      db['block'].findOne({blockTo: db.ObjectID(philosophy[0].userId)}, function(err, getBlockData) {
-        if(err) {
-          logger.error(err);
-          res.status(501).send({"success":false, "message":err});
-        }
-        if (!getBlockData) {
-          philosophy = _.reduce(philosophy, function(d, p) {
-            // special case written for check current user is liked or dislike or objection on returned philosophies
-            p.isLike = _.findIndex(p.like.info, { _id: req.body.userId }) != -1 ? true : false;
-            p.isDislike = _.findIndex(p.dislike.info, { _id: req.body.userId }) != -1 ? true : false;
-            p.isObjections = _.findIndex(p.objections.info, { _id: req.body.userId }) != -1 ? true : false;
-            delete p.like.info;
-            delete p.dislike.info;
-            delete p.objections.info;
-            d.push(p);
-            return d;
-          }, []);
-          res.status(200).json({"success":true, "data":philosophy});
-        }else {
-          res.status(501).send({"success":false, "message": "Blocked."});
-        }
-      });
+      if(philosophy[0]) {
+        db['block'].findOne({blockTo: db.ObjectID(philosophy[0].userId), userId: db.ObjectID(req.body.userId)}, function(err, getBlockData) {
+          if(err) {
+            logger.error(err);
+            res.status(501).send({"success":false, "message":err});
+          }
+          if (!getBlockData) {
+            philosophy = _.reduce(philosophy, function(d, p) {
+              // special case written for check current user is liked or dislike or objection on returned philosophies
+              p.isLike = _.findIndex(p.like.info, { _id: req.body.userId }) != -1 ? true : false;
+              p.isDislike = _.findIndex(p.dislike.info, { _id: req.body.userId }) != -1 ? true : false;
+              p.isObjections = _.findIndex(p.objections.info, { _id: req.body.userId }) != -1 ? true : false;
+              delete p.like.info;
+              delete p.dislike.info;
+              delete p.objections.info;
+              d.push(p);
+              return d;
+            }, []);
+            res.status(200).json({"success":true, "data":philosophy});
+          }else {
+            res.status(501).send({"success":false, "message": "User is block by loggedin user."});
+          }
+        });
+      } else {
+        res.status(501).send({"success":false, "message": "Please provide valid information."});
+      }
+
     });
   });
 
