@@ -105,10 +105,9 @@
                 }
             );
           } else {
-            // Return updated information with isAnswerGiven flag
+            // There is no poll type philosophy so return norma information
             res.status(201).json({"success":true, "data":information});
           }
-
 
         });
       });
@@ -143,7 +142,49 @@
           return d;
         }, []);
 
-        res.status(201).json({"success":true, "data":information});
+        // Start - For checking poll type philosophy's answer is given by logged in user or not
+        var pollPhilosophies = _.chain(information)
+        .filter(function (item) {
+          return item.philosophyType == 'poll';
+        }).value();
+
+        // prepare array with object id for filtering.
+        pollPhilosophies = _.reduce(pollPhilosophies, function(d, philosophy){
+          d.push(db.ObjectID(philosophy._id));
+          return d;
+        }, []);
+
+
+        if(pollPhilosophies.length > 0) {
+          // implement aggregate for find count of answer given by logged in user
+          db['polls'].aggregate(
+              {$match: {'userId':db.ObjectID(req.body.userId), 'philosophyId':{$in:pollPhilosophies}}},
+              {$group: {'_id' : "$philosophyId", total : { $sum : 1 }}},
+              function(err, data) {
+                if(err) {
+                  // if found error then return previous inforrmation
+                  res.status(201).json({"success":true, "data":information});
+                }
+
+                // Here for add isAnswerGiven flag for each philosophy with type poll
+                information = _.reduce(information, function(d, philosophy) {
+                  if(philosophy.philosophyType == 'poll') {
+                    philosophy.isAnswerGiven = _.find(data, {_id: philosophy._id}) ? true : false;
+                    d.push(philosophy);
+                  } else {
+                    d.push(philosophy);
+                  }
+                  return d;
+                }, []);
+
+                // Return updated information with isAnswerGiven flag
+                res.status(201).json({"success":true, "data":information});
+              }
+          );
+        } else {
+          // There is no poll type philosophy so return norma information
+          res.status(201).json({"success":true, "data":information});
+        }
       });
   });
 
@@ -171,7 +212,35 @@
               d.push(p);
               return d;
             }, []);
-            res.status(200).json({"success":true, "data":philosophy});
+
+            // check for poll type philosophy
+            if(philosophy[0].philosophyType == 'poll') {
+              // implement aggregate for find count of answer given by logged in user
+              db['polls'].aggregate(
+                  {$match: {'userId':db.ObjectID(req.body.userId), 'philosophyId':{$in:[philosophy[0]._id]}}},
+                  {$group: {'_id' : "$philosophyId", total : { $sum : 1 }}},
+                  function(err, data) {
+                    if(err) {
+                      // if found error then return previous information
+                      res.status(201).json({"success":true, "data":philosophy});
+                    }
+
+                    // Here for add isAnswerGiven flag for each philosophy with type poll
+                    philosophy = _.reduce(philosophy, function(d, philosophy) {
+                      if(philosophy.philosophyType == 'poll') {
+                        philosophy.isAnswerGiven = _.find(data, {_id: philosophy._id}) ? true : false;
+                        d.push(philosophy);
+                      } else {
+                        d.push(philosophy);
+                      }
+                      return d;
+                    }, []);
+                    // Return updated information with isAnswerGiven flag
+                    res.status(201).json({"success":true, "data":philosophy});
+                  });
+            } else {
+              res.status(200).json({"success":true, "data":philosophy});
+            }
           }else {
             res.status(501).send({"success":false, "message": "User is block by loggedin user."});
           }
