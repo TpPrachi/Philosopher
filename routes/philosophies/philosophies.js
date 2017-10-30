@@ -78,31 +78,37 @@
             return d;
           }, []);
 
-          // implement aggregate for find count of answer given by logged in user
-          db['polls'].aggregate(
-              {$match: {'userId':db.ObjectID(req.body.userId), 'philosophyId':{$in:pollPhilosophies}}},
-              {$group: {'_id' : "$philosophyId", total : { $sum : 1 }}},
-              function(err, data) {
-                if(err) {
-                  // if found error then return previous inforrmation
+          if(pollPhilosophies.length > 0) {
+            // implement aggregate for find count of answer given by logged in user
+            db['polls'].aggregate(
+                {$match: {'userId':db.ObjectID(req.body.userId), 'philosophyId':{$in:pollPhilosophies}}},
+                {$group: {'_id' : "$philosophyId", total : { $sum : 1 }}},
+                function(err, data) {
+                  if(err) {
+                    // if found error then return previous inforrmation
+                    res.status(201).json({"success":true, "data":information});
+                  }
+
+                  // Here for add isAnswerGiven flag for each philosophy with type poll
+                  information = _.reduce(information, function(d, philosophy) {
+                    if(philosophy.philosophyType == 'poll') {
+                      philosophy.isAnswerGiven = _.find(data, {_id: philosophy._id}) ? true : false;
+                      d.push(philosophy);
+                    } else {
+                      d.push(philosophy);
+                    }
+                    return d;
+                  }, []);
+
+                  // Return updated information with isAnswerGiven flag
                   res.status(201).json({"success":true, "data":information});
                 }
+            );
+          } else {
+            // Return updated information with isAnswerGiven flag
+            res.status(201).json({"success":true, "data":information});
+          }
 
-                // Here for add isAnswerGiven flag for each philosophy with type poll
-                information = _.reduce(information, function(d, philosophy) {
-                  if(philosophy.philosophyType == 'poll') {
-                    philosophy.isAnswerGiven = _.find(data, {_id: philosophy._id}) ? true : false;
-                    d.push(philosophy);
-                  } else {
-                    d.push(philosophy);
-                  }
-                  return d;
-                }, []);
-
-                // Return updated information with isAnswerGiven flag
-                res.status(201).json({"success":true, "data":information});
-              }
-          );
 
         });
       });
