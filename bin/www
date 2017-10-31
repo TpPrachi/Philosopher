@@ -40,9 +40,6 @@ io.sockets.on('connection', function (socket) {
 //If process.env.NODE_UNIQUE_ID is undefined, then isMaster is true.
 if (cluster.isMaster) {
   var numCPUs = require('os').cpus().length;
-  for (var i = 0; i < numCPUs; i++) {
-    cluster.fork();
-  }
   //https://nodejs.org/api/cluster.html - reference url
   console.log("numCPUs :: " + numCPUs);
   for(var i = 0; i < numCPUs; i++) {
@@ -60,10 +57,6 @@ if (cluster.isMaster) {
     console.log('Starting a new worker');
     cluster.fork();
   });
-
-  cluster.on('exit', function(worker, code, signal) {
-    console.log('worker ' + worker.process.pid + ' died');
-  });
 }else if (cluster.isWorker) {
   //A reference to the current worker object. Not available in the master process.
   console.log(`I am worker #${cluster.worker.id}`);
@@ -71,6 +64,15 @@ if (cluster.isMaster) {
   //change this line to Your Node.js app entry point.
   // require('app');
   //I don't know what to do here
+
+  // Workers can share any TCP connection
+  // In this case it is an HTTP server
+  http.createServer((req, res) => {
+    res.writeHead(200);
+    res.end('hello world\n');
+  }).listen(3009);
+
+  console.log(`Worker ${process.pid} started`);
 }
 
 /**
