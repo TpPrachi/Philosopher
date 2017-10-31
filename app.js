@@ -18,9 +18,9 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 app.use(busboy());
 
-app.listen(3009,function(){
-  logger.info("Running at PORT 3009 :: Have a look for cluster");
-});
+// app.listen(3009,function(){
+//   logger.info("Running at PORT 3009 :: Have a look for cluster");
+// });
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));

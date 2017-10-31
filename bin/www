@@ -1,58 +1,89 @@
 #!/usr/bin/env node
 
 /**
- * Module dependencies.
- */
+* Module dependencies.
+*/
 
 var app = require('../app');
 var debug = require('debug')('RowDesign:server');
 var http = require('http');
 var socket = require('socket.io');
-
+var cluster = require('cluster');
 /**
- * Get port from environment and store in Express.
- */
+* Get port from environment and store in Express.
+*/
 
 var port = normalizePort(process.env.PORT || '3009');
 app.set('port', port);
 
 /**
- * Create HTTP server.
- */
+* Create HTTP server.
+*/
 
 var server = http.createServer(app);
+// Loading socket.io
+var io = socket.listen(server);
+// When a client connects, we note it in the console
+io.sockets.on('connection', function (socket) {
+  console.log('Socket is Ready...');
+  console.log('A client is connected!');
+  //socket.emit('message', { message: 'welcome to the chat' });
+  socket.emit('init', { message: 'welcome to the chat' });
+  socket.on('message', function (msg) {
+    console.log('Message Received: ', msg);
+    socket.broadcast.emit('message', msg);
+  });
+});
 
+//Move cluster.js data in www, run ./serve
+//True if the process is a master. This is determined by the process.env.NODE_UNIQUE_ID.
+//If process.env.NODE_UNIQUE_ID is undefined, then isMaster is true.
+if (cluster.isMaster) {
+  var numCPUs = require('os').cpus().length;
+  for (var i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+  //https://nodejs.org/api/cluster.html - reference url
+  console.log("numCPUs :: " + numCPUs);
+  for(var i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
 
+  cluster.on('online', function(worker) {
+    console.log('Worker ' + worker.process.pid + ' is online');
+  });
+
+  cluster.on('exit', function(worker, code, signal) {
+    console.log('Worker ' + worker.process.pid + ' died');
+    console.log('code : ' + code);
+    console.log('signal : ' + signal);
+    console.log('Starting a new worker');
+    cluster.fork();
+  });
+
+  cluster.on('exit', function(worker, code, signal) {
+    console.log('worker ' + worker.process.pid + ' died');
+  });
+}else if (cluster.isWorker) {
+  //A reference to the current worker object. Not available in the master process.
+  console.log(`I am worker #${cluster.worker.id}`);
+}else {
+  //change this line to Your Node.js app entry point.
+  // require('app');
+  //I don't know what to do here
+}
 
 /**
- * Listen on provided port, on all network interfaces.
- */
+* Listen on provided port, on all network interfaces.
+*/
 
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
-
-// Loading socket.io
-var io = socket.listen(server);
-// When a client connects, we note it in the console
-
-
-
-io.sockets.on('connection', function (socket) {
-  console.log('Socket is Ready...');
-    console.log('A client is connected!');
-    //socket.emit('message', { message: 'welcome to the chat' });
-    socket.emit('init', { message: 'welcome to the chat' });
-    socket.on('message', function (msg) {
-        console.log('Message Received: ', msg);
-        socket.broadcast.emit('message', msg);
-    });
-});
-
 /**
- * Normalize a port into a number, string, or false.
- */
+* Normalize a port into a number, string, or false.
+*/
 
 function normalizePort(val) {
   var port = parseInt(val, 10);
@@ -71,8 +102,20 @@ function normalizePort(val) {
 }
 
 /**
- * Event listener for HTTP server "error" event.
- */
+* Event listener for HTTP server "listening" event.
+*/
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string'
+  ? 'pipe ' + addr
+  : 'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
+
+/**
+* Event listener for HTTP server "error" event.
+*/
 
 function onError(error) {
   if (error.syscall !== 'listen') {
@@ -80,32 +123,20 @@ function onError(error) {
   }
 
   var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+  ? 'Pipe ' + port
+  : 'Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
+    console.error(bind + ' requires elevated privileges');
+    process.exit(1);
+    break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
+    console.error(bind + ' is already in use');
+    process.exit(1);
+    break;
     default:
-      throw error;
+    throw error;
   }
-}
-
-/**
- * Event listener for HTTP server "listening" event.
- */
-
-function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
 }
