@@ -3,7 +3,6 @@
 /**
 * Module dependencies.
 */
-
 var app = require('../app');
 var debug = require('debug')('RowDesign:server');
 var http = require('http');
@@ -12,18 +11,8 @@ var cluster = require('cluster');
 /**
 * Get port from environment and store in Express.
 */
-
 var port = normalizePort(process.env.PORT || '3009');
 app.set('port', port);
-
-/**
-* Create HTTP server.
-*/
-
-//var server = http.createServer(app);
-// Loading socket.io
-// When a client connects, we note it in the console
-
 //Move cluster.js data in www, run ./serve
 //True if the process is a master. This is determined by the process.env.NODE_UNIQUE_ID.
 //If process.env.NODE_UNIQUE_ID is undefined, then isMaster is true.
@@ -41,17 +30,14 @@ if (cluster.isMaster) {
 
   cluster.on('exit', function(worker, code, signal) {
     console.log('Worker ' + worker.process.pid + ' died');
-    console.log('code : ' + code);
-    console.log('signal : ' + signal);
-    console.log('Starting a new worker');
-    //cluster.fork();
   });
 } else {
-  //change this line to Your Node.js app entry point.
-  // require('app');
-  //I don't know what to do here
-
+  // Loading socket.io
+  // When a client connects, we note it in the console
   // Workers can share any TCP connection
+  /**
+  * Create HTTP server.
+  */
   var server = http.createServer(app);
   // Loading socket.io
   var io = socket.listen(server);
@@ -59,7 +45,6 @@ if (cluster.isMaster) {
   io.sockets.on('connection', function (socket) {
     console.log('Socket is Ready...');
     console.log('A client is connected!');
-    //socket.emit('message', { message: 'welcome to the chat' });
     socket.emit('init', { message: 'welcome to the chat' });
     socket.on('message', function (msg) {
       console.log('Message Received: ', msg);
@@ -78,27 +63,21 @@ if (cluster.isMaster) {
 /**
 * Normalize a port into a number, string, or false.
 */
-
 function normalizePort(val) {
   var port = parseInt(val, 10);
-
   if (isNaN(port)) {
     // named pipe
     return val;
   }
-
   if (port >= 0) {
     // port number
     return port;
   }
-
   return false;
 }
-
 /**
 * Event listener for HTTP server "listening" event.
 */
-
 function onListening() {
   var addr = server.address();
   var bind = typeof addr === 'string'
@@ -106,20 +85,16 @@ function onListening() {
   : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
-
 /**
 * Event listener for HTTP server "error" event.
 */
-
 function onError(error) {
   if (error.syscall !== 'listen') {
     throw error;
   }
-
   var bind = typeof port === 'string'
   ? 'Pipe ' + port
   : 'Port ' + port;
-
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
