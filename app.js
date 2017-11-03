@@ -10,6 +10,7 @@ var db = require('./lib/db');
 var logger = require('./lib/logger')(__filename);
 var busboy = require('connect-busboy');
 var fs = require('fs');
+var forceSSL = require('express-force-ssl');
 
 // ZmEzNDc0NDAtY2RkZS00NjE3LWFkZjMtMTZlOWIyYzc5Yzdh - oneSignle
 
@@ -17,7 +18,9 @@ var fs = require('fs');
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 app.use(busboy());
-
+app.set('forceSSLOptions', {
+  httpsPort: 3009
+});
 // app.listen(3009,function(){
 //   logger.info("Running at PORT 3009 :: Have a look for cluster");
 // });
@@ -38,7 +41,7 @@ app.use(function (req, res, next) {
 
 // Route for access public folder resources
 //app.use('/public', express.static(path.join(__dirname, 'public')));
-
+app.get('/', forceSSL);
 // Route for access public folder resources
 app.use('/public', function(req, res, next){ // Middleware for check file is existing or not
   if (fs.existsSync(path.join(__dirname, 'public', req.path))) {

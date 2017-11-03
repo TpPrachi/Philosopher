@@ -6,11 +6,20 @@
 var app = require('../app');
 var debug = require('debug')('RowDesign:server');
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
 var socket = require('socket.io');
 var cluster = require('cluster');
+
 /**
 * Get port from environment and store in Express.
 */
+
+var ssl_options = {
+  key: fs.readFileSync('./key.pem', 'utf8'),
+  cert: fs.readFileSync('./server.crt', 'utf8')
+};
+
 var port = normalizePort(process.env.PORT || '3009');
 app.set('port', port);
 //Move cluster.js data in www, run ./serve
@@ -38,25 +47,26 @@ if (cluster.isMaster) {
   /**
   * Create HTTP server.
   */
-  var server = http.createServer(app);
+  //var server = http.createServer(app);
+  var secureServer = https.createServer(ssl_options, app);
   // Loading socket.io
-  var io = socket.listen(server);
+  var io = socket.listen(secureServer);
   // When a client connects, we note it in the console
-  io.sockets.on('connection', function (socket) {
-    console.log('Socket is Ready...');
-    console.log('A client is connected!');
-    socket.emit('init', { message: 'welcome to the chat' });
-    socket.on('message', function (msg) {
-      console.log('Message Received: ', msg);
-      socket.broadcast.emit('message', msg);
-    });
-  });
+  // io.sockets.on('connection', function (socket) {
+  //   console.log('Socket is Ready...');
+  //   console.log('A client is connected!');
+  //   socket.emit('init', { message: 'welcome to the chat' });
+  //   socket.on('message', function (msg) {
+  //     console.log('Message Received: ', msg);
+  //     socket.broadcast.emit('message', msg);
+  //   });
+  // });
   /**
   * Listen on provided port, on all network interfaces.
   */
-  server.listen(port);
-  server.on('error', onError);
-  server.on('listening', onListening);
+  secureServer.listen(port);
+  secureServer.on('error', onError);
+  secureServer.on('listening', onListening);
   console.log(`Worker ${process.pid} started`);
 }
 
@@ -79,7 +89,7 @@ function normalizePort(val) {
 * Event listener for HTTP server "listening" event.
 */
 function onListening() {
-  var addr = server.address();
+  var addr = secureServer.address();
   var bind = typeof addr === 'string'
   ? 'pipe ' + addr
   : 'port ' + addr.port;
