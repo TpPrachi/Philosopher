@@ -3,6 +3,24 @@
 (() => {
   const _ = require('lodash');
 
+  const dns = require('dns');
+
+  dns.resolve4('52.36.93.246', (err, addresses) => {
+    if (err) throw err;
+
+    console.log(`addresses: ${JSON.stringify(addresses)}`);
+
+    addresses.forEach((a) => {
+      dns.reverse(a, (err, hostnames) => {
+        if (err) {
+          throw err;
+        }
+        console.log(`reverse for ${a}: ${JSON.stringify(hostnames)}`);
+      });
+    });
+  });
+
+
 //   var email = "test@test.com";
 //
 // for(var i=0; i<500;i++) {
