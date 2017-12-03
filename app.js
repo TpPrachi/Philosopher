@@ -52,6 +52,10 @@ app.use('/public', function(req, res, next){ // Middleware for check file is exi
   }
 }, express.static(path.join(__dirname, 'public')));
 
+app.use('/jay', function(req, res, next){ // Middleware for check file is existing or not
+    return res.status(200).send({success: true, message: "SSL Implementation."});
+});
+
 
 // initialize passport for authentication and route security
 app.use(passport.initialize());
