@@ -19,7 +19,7 @@ var userSignUp = {
   isDeleted : bool.label('Is Deleted'),
   isEmailVerified : bool.label('Is Email Verified'),
   password : string.label('Password'),
-  profilePicture :string.label('Profile Picture Name'),
+  profilePhoto :string.label('Profile Picture Name'),
   communityCount: number.label('community Count of User')
 };
 

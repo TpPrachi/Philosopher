@@ -72,7 +72,7 @@ var _trendMappingOnPatch = function(philosophy, philosophyId) {
             logger.info("Removed Trend :: " + trend);
             philosophyTrend.trends = _.without(philosophyTrend.trends, trend); // remove trend from philosophy
             // decrement trend used counter
-            db['trends'].findOneAndUpdate({name:new RegExp(["^", trend, "$"].join(""), "i")}, {$set: {'UpdatedDate': new Date()}, $inc: { count: -1}});
+            db['trends'].findOneAndUpdate({name:new RegExp(["^", trend, "$"].join(""), "i"), count: {$gt : 0}}, {$set: {'UpdatedDate': new Date()}, $inc: { count: -1}});
         });
 
         // Find trends which are in new philosophy but not in saved one

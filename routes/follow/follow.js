@@ -94,7 +94,7 @@
       // remove user from community
       db['follow'].remove({followedUser:db.ObjectID(req.params.id),followingUser:db.ObjectID(req.body.userId)});
       // For decrement count of community
-      db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.userId)}, {$inc: { communityCount: -1}});
+      db['users'].findOneAndUpdate({_id: db.ObjectID(req.body.userId), communityCoun: {$gt : 0}}, {$inc: { communityCount: -1}});
       res.status(201).send({"success":true, "message": 'Removed - Unfollow'});
     } else {
       res.status(501).send({"success":true, "message": 'Please provide valid information.'});
