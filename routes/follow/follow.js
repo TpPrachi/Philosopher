@@ -73,8 +73,8 @@
 
             // Prepare object for add data in notification table
             var prepareObject = {};
-            prepareObject["notifyTo"] = post['followingUser'];
-            prepareObject["notifyBy"] = post['followedUser'];
+            prepareObject["notifyTo"] = post['followedUser'];
+            prepareObject["notifyBy"] = post['followingUser'];
             prepareObject["notifyType"] = "1";
 
             //  update notification for add user in community
