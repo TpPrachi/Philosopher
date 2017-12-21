@@ -35,14 +35,14 @@
   router.delete('/:id' ,function(req, res, next) {
     db['block'].findOneAndDelete({blockTo: db.ObjectID(req.params.id), userId: db.ObjectID(req.body.userId)}, function(err, d) {
       if(err) {
-        logger.error("Error while removing notification :: " + err);
+        logger.error("Error while unblock user :: " + err);
         res.status(501).send({"success":false, "message":err});
       }
       if(d.value == null) {
         logger.error("Please provide valid information for unblock user.");
         res.status(501).send({"success":false, "message":"Please provide valid information for unblock user."});
       } else {
-        res.status(200).send({"success":true, "message":"Notification deleted successfully."});
+        res.status(200).send({"success":true, "message":"User unblocked successfully."});
       }
     });
   });
