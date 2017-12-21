@@ -49,12 +49,20 @@
     // ];
 
     req.filter['notifyTo'] = req.filter['notifyTo'] || db.ObjectID(req.body.userId);
-    req['extraLookup'] = {
+    req['extraLookup'] = [
+      {
        from: "philosophies",
        foreignField: "_id",
        localField: 'philosophyId',
        as: "philosophy"
-    };
+     },
+     {
+        from: "reply",
+        foreignField: "_id",
+        localField: 'replyId',
+        as: "reply"
+     }
+    ];
     req['projections'] = projections;
     req['localField'] = 'notifyBy';
     req['notifyTo'] = {
@@ -65,7 +73,6 @@
     };
     req['sort'] = {'UpdatedDate':-1};
     var aggregate = aggregation.getQuery(req);
-
     db['notification'].aggregate(aggregate, function(err, information) {
       if(err) {
         logger.error(err);
