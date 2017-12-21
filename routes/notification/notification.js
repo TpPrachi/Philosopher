@@ -72,6 +72,8 @@
       as: "notifyToUsers" // Changes by JD
     };
     req['sort'] = {'UpdatedDate':-1};
+    
+    // Prepare object of aggregate through common method
     var aggregate = aggregation.getQuery(req);
     db['notification'].aggregate(aggregate, function(err, information) {
       if(err) {
