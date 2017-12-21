@@ -155,7 +155,7 @@
           }
 
           db['block'].findOne({blockTo:db.ObjectID(req.params.id), userId:db.ObjectID(req.body.userId)}, function(err, blocked){
-            if(blocked == null) {
+            if(blocked == null) { // if block information found then return true else false
               user['isBlocked'] = false;
             } else {
               user['isBlocked'] = true;
@@ -199,14 +199,14 @@
       db['users'].findOne({$or : [{email : patch.email}, {username : patch.username}]}, function(err, getUser) {
         if (!getUser) {
           doUserOperations(patch,req,res);
-        }else {
+        } else {
           if (getUser.username == patch.username) {
             logger.error("Username must be unique.");
             res.status(500).send({"success":false, "message":"Username must be unique."});
-          }else if (getUser.email == patch.email) {
+          } else if (getUser.email == patch.email) {
             logger.error("Email Id must be unique.");
             res.status(500).send({"success":false, "message":"Email Id must be unique."});
-          }else {
+          } else {
             logger.error("Please provide valid information for signup user.");
             res.status(500).send({"success":false, "message":"Please provide valid information for signup user."});
           }
