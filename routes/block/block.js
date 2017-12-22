@@ -22,12 +22,20 @@
     req.body["UpdatedDate"] = new Date();
     req.body["CreatedDate"] = new Date();
 
-    db['block'].insert(req.body, function(err, d) {
-      if(err) {
-        logger.error("Error while removing notification :: " + err);
-        res.status(501).send({"success":false, "message":err});
+    // check if user already blocked or not. If user blocked then reply 501 with already blocked info.
+    db['block'].findOne({'userId': db.ObjectID(req.body.userId), 'blockTo': db.ObjectID(req.body.blockTo)}, {blockTo: 1}, function(err, blocked){
+      if(blocked) { // If found data then user already block else go with normal flow
+        logger.info("User already blocked.");
+        res.status(501).send({"success":false, "message": "User already blocked."});
+      } else {
+        db['block'].insert(req.body, function(err, d) {
+          if(err) {
+            logger.error("Error while removing notification :: " + err);
+            res.status(501).send({"success":false, "message":err});
+          }
+          res.status(200).send({"success":true, "message":"User blocked successfully."});
+        });
       }
-      res.status(200).send({"success":true, "message":"User blocked successfully."});
     });
   });
 
