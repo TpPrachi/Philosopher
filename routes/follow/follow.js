@@ -15,32 +15,14 @@
   var query = require('../../lib/query');
   var aggregation = require("../../lib/aggregate");
 
-  /* GET API for ALL records from collection. */
+  /* Get api for getting followed users based on id */
   router.get('/:id', query.filter, function(req, res, next) {
-    // Build aggregate object for get users details based on following information
-    // var aggregate = [{
-    //     "$match": { followingUser: db.ObjectID(req.params.id)}
-    //   },{
-    //     $lookup: {
-    //        from: "usersmapped",
-    //        foreignField: "userId",
-    //        localField: 'followedUser',
-    //        as: "users"
-    //     }
-    //   },{
-    //     $sort: {"users.username" : 1}
-    //   }, {
-    //     $skip: req.options.skip
-    //   }, {
-    //     $limit: req.options.limit
-    //   }
-    // ];
-
     req.filter = req.filter || {};
     req.filter['followingUser'] = db.ObjectID(req.params.id);
     req['localField'] = 'followedUser';
     req['sort'] = {"users.username" : 1};
     var aggregate = aggregation.getQuery(req);
+
     db['follow'].aggregate(aggregate, function(err, information) {
       if(err) {
         logger.error(err);
@@ -50,9 +32,7 @@
     });
   });
 
-  /* POST API for insert record in collection. */
-  //validate(schema) , No need to validate schema because we are passing data after calling post - Prachi
-
+  /* POST API  Follow or Unfollow users based in request params */
   router.post('/:id/:status', function(req, res, next) {
     var post = {};
     //req.params.id : Whom I am going to follow (followedUser)

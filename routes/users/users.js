@@ -111,26 +111,36 @@
     });
   });
 
-  // /* GET API for provide list of users for suggestion */
+  // GET API for provide list of users for suggestion
   router.get('/suggestion', query.filter, function(req, res, next) {
-    db['follow'].find({followingUser:db.ObjectID(req.body.userId)}, {followedUser:1}).toArray(function(err, followed) {
-      if(err) {
-        logger.error("Error while fetching following information :: " + err);
-        res.status(501).send({"success":false, "message":err});
-      }
-      // Prepare array of all users that logged in user followed.
-      req.filter['_id'] = {};
-      req.filter['_id']['$nin'] = _.reduce(followed, function(c, f) {
-        c.push(db.ObjectID(f.followedUser));
-        return c;
-      }, [db.ObjectID(req.body.userId)]);
-
-      db['users'].find(req.filter, req.options.select || {password:0, tempPassword:0, oldPasssword:0}, req.options).toArray(function(err, users) {
+    db['block'].find({userId: db.ObjectID(req.body.userId)}, {blockTo: 1}).toArray(function(err, bloked) {
+      db['follow'].find({followingUser:db.ObjectID(req.body.userId)}, {followedUser:1}).toArray(function(err, followed) {
         if(err) {
-          logger.error(err);
+          logger.error("Error while fetching following information :: " + err);
           res.status(501).send({"success":false, "message":err});
         }
-        res.status(200).json({"success":true, "data":users});
+
+        // prepare object of all users that logged in user blocked
+        var blockedUsers = _.reduce(bloked, function(a,user) {
+          a.push(db.ObjectID(user.blockTo));
+          return a;
+        }, [db.ObjectID(req.body.userId)]);
+
+        // Prepare array of all users that logged in user followed.
+        // Return array with blocked users and followed users for $NIN query
+        req.filter['_id'] = {};
+        req.filter['_id']['$nin'] = _.reduce(followed, function(c, f) {
+          c.push(db.ObjectID(f.followedUser));
+          return c;
+        }, blockedUsers);
+
+        db['users'].find(req.filter, req.options.select || {password:0, tempPassword:0, oldPasssword:0}, req.options).toArray(function(err, users) {
+          if(err) {
+            logger.error(err);
+            res.status(501).send({"success":false, "message":err});
+          }
+          res.status(200).json({"success":true, "data":users});
+        });
       });
     });
   });

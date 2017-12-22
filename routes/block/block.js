@@ -16,7 +16,7 @@
   var logger = require('../../lib/logger')(__filename);
   var _ = require('lodash');
 
-  // For block user based on id
+  // Post api for block user based on request body information
   router.post('/', validate(schema), function(req, res, next) {
     req.body["blockTo"] = db.ObjectID(req.body.blockTo);
     req.body["UpdatedDate"] = new Date();
