@@ -1,6 +1,6 @@
 /**
 * @name routes/users/users.js
-* @author Prachi Thakkar <prachi281194@gmail.com>
+* @author Jaydipsinh Vaghela <jaydip.vaghela@gmail.com>
 *
 * @version 0.0.0
 */
