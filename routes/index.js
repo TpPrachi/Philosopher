@@ -1,7 +1,7 @@
 'use strict'
 /**
 * @name routes/index.js
-* @author Jaydipsinh Vaghela <jaydip.vaghela@gmail.com>
+* @author Prachi Thakkar <prachi281194@gmail.com>
 *
 * @version 0.0.0
 */
